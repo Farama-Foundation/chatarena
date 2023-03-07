@@ -129,7 +129,7 @@ with gr.Blocks(css=css) as demo:
                                     placeholder=f"Enter the role description for the Moderator",
                                     value=Moderator.get_default_role(num_players))
         rotary_speaker = gr.Checkbox(label="Rotary Speaker", value=True, visible=True)
-        auto_terminate = gr.Checkbox(label="Auto-terminate Conversation", value=False, visible=True)
+        auto_terminate = gr.Checkbox(label="Auto-terminate Conversation", value=True, visible=True)
 
     with gr.Row():
         player_roles = []
@@ -152,7 +152,7 @@ with gr.Blocks(css=css) as demo:
                     player_temperatures.append(temperature)
                     player_max_tokens.append(max_tokens)
 
-        max_turns = gr.Slider(minimum=1, maximum=12, value=8, step=1, interactive=True,
+        max_turns = gr.Slider(minimum=4, maximum=20, value=8, step=1, interactive=True,
                               label="Max turns per game")
 
     with gr.Row():
