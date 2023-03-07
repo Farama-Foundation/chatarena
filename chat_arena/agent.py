@@ -8,7 +8,7 @@ logger.setLevel(logging.INFO)
 
 
 def role_template(context, role_desc):
-    return f"You are playing a role-play game. Here is the scenario or game rules: {context}\n" + role_desc
+    return f"You are playing a game. Here is the scenario or game rules: {context}\n Here's your role description: {role_desc}."
 
 
 class Agent:
@@ -107,7 +107,7 @@ class Moderator(Agent):
             # Ask the moderator to decide who speaks next
             res = self.get_response(
                 f"Who should speaks next, Player {', '.join([str(i + 1) for i in range(self.num_players - 1)])} or {str(self.num_players)}?",
-                temperature=0.5, max_tokens=5)
+                temperature=0.0, max_tokens=5)
             try:
                 # find the first number in the response and convert it to int
                 res = re.search(r"\d+", res).group()
@@ -123,7 +123,7 @@ class Moderator(Agent):
         if self.turn >= self.max_turns:
             return True
         else:
-            res = self.get_response("Are players happy to end the conversation? Yes or No", temperature=0.7, max_tokens=2)
+            res = self.get_response("Should the game be terminated? Yes or No", temperature=0.0, max_tokens=2)
             if re.match(r"yes|y|yea|yeah|yep|yup|sure|ok|okay|alright", res, re.IGNORECASE):
                 logger.warning(f"Decision: {res}. Conversation is ended by moderator after {self.turn} turns.")
                 return True
