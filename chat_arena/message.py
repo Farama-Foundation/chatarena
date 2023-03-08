@@ -1,7 +1,14 @@
 from collections import namedtuple
 from typing import List
+from dataclasses import dataclass
 
-Message = namedtuple('Message', ['turn', 'role', 'content'])
+
+@dataclass
+class Message:
+    turn: int
+    role: str
+    content: str
+
 
 class MessagePool:
     """
@@ -14,13 +21,14 @@ class MessagePool:
     1) before the current turn, and
     2) visible to the current role
     """
+
     def __init__(self):
         self._pool = []
 
     def get_pool(self) -> List[Message]:
         return self._pool
 
-    def append_message(self, message:str, role:str, increase_turn:bool):
+    def append_message(self, message: str, role: str, increase_turn: bool):
         if len(self._pool) == 0:
             last_turn = 0
         else:
@@ -32,7 +40,7 @@ class MessagePool:
     def reset(self):
         self._pool = []
 
-    def get_visible_messages(self, self_role:str, env_roles:List[str], turn:int):
+    def get_visible_messages(self, self_role: str, env_roles: List[str], turn: int):
         """
         Get the visible messages to the current role.
 
@@ -48,15 +56,3 @@ class MessagePool:
                 elif message.role in env_roles:
                     visible_messages.append({"role": "user", "content": message.content})
         return visible_messages
-
-
-# Test case
-if __name__ == "__main__":
-    message_pool = MessagePool()
-    p1_message = "I'm player 1"
-    p2_message = "I'm player 2"
-    message_pool.append_message(p1_message, "player1", True)
-    message_pool.append_message(p2_message, "player2", True)
-    api_inputs = message_pool.get_visible_messages("player1", ["player2"], 2)
-    print(f"api_inputs for player1 is: {api_inputs}")
-

@@ -80,9 +80,9 @@ def play_game(*args):
             # moderator.add_message(f"[{next_player.name}]: {player_msg}")
             moderator.add_message(player_msg)
 
-            # moderator_msg = moderator.get_response(temperature=0.0, max_tokens=30)
-            # log_message(moderator_msg, moderator.name, "moderator_msg", index=0, include_role_in_ui=True)
-            # yield chatbot_output, get_empty_state()  # Update the chatbot UI output
+            moderator_msg = moderator.get_response(temperature=0.0, max_tokens=30)
+            log_message(moderator_msg, moderator.name, "moderator_msg", index=0, include_role_in_ui=True)
+            yield chatbot_output, get_empty_state()  # Update the chatbot UI output
 
             sleep(1.0)
 
