@@ -1,13 +1,13 @@
 from unittest import TestCase
 
-from chat_arena.message import Conversation
+from chat_arena.message import MessagePool
 
 # Write a test case for the message pool
 class TestMessagePool(TestCase):
 
     # Test the append message function
     def test_append_message_1(self):
-        message_pool = Conversation()
+        message_pool = MessagePool()
         message_pool.append_message("hello", "user", True)
         self.assertEqual(message_pool.pool()[0].content, "hello")
         self.assertEqual(message_pool.pool()[0].role, "user")
@@ -22,7 +22,7 @@ class TestMessagePool(TestCase):
         self.assertEqual(message_pool.pool()[2].turn, 2)
 
     def test_append_message_2(self):
-        message_pool = Conversation()
+        message_pool = MessagePool()
         p1_message = "I'm player 1"
         p2_message = "I'm player 2"
         message_pool.append_message(p1_message, "player1", True)

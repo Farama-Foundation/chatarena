@@ -41,7 +41,7 @@ class Message:
         return _hash(f"msg: {self.content}\ntimestamp: {str(self.timestamp)}\nrole: {self.role.name}")
 
 
-class Conversation:
+class MessagePool:
     """
     A message pool to manage the messages. This allows a unified treatment of the visibility of the messages.
     Draft design:
