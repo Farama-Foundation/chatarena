@@ -21,6 +21,10 @@ class Agent:
         self.max_tokens = max_tokens
         self.history = []
 
+    @property
+    def name(self):
+        raise NotImplementedError
+
     def get_response(self, message=None, temperature=None, max_tokens=None):
         if message is not None:
             self.history.append({"role": "user", "content": message})
