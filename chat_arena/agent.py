@@ -3,58 +3,13 @@ import logging
 import re
 import gradio as gr
 
+from .base import Agent
+from .message import Message
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-
-def sys_role_template(system_desc, role_desc):
-    return f"{system_desc}\n{role_desc}"
-
-
-class Agent:
-    """Agent class that models general chatbot behavior"""
-
-    def __init__(self, role, system_desc, temperature, max_tokens):
-        self.role = role
-        self.sys_prompt = [{"role": "system", "content": sys_role_template(system_desc, role)}]
-        self.temperature = temperature
-        self.max_tokens = max_tokens
-        self.history = []
-
-    @property
-    def name(self):
-        raise NotImplementedError
-
-    def get_response(self, message=None, temperature=None, max_tokens=None):
-        if message is not None:
-            self.history.append({"role": "user", "content": message})
-        if temperature is None:
-            temperature = self.temperature
-        if max_tokens is None:
-            max_tokens = self.max_tokens
-
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=self.sys_prompt + self.history,
-            temperature=temperature, max_tokens=max_tokens)
-
-        response = completion.choices[0]['message']['content']
-        self.history.append({"role": "assistant", "content": response})
-        return response
-
-    def add_message(self, message, role="user"):
-        self.history.append({"role": role, "content": message})
-
-    def reset(self):
-        self.history = []
-
-    @staticmethod
-    def get_components(*args):
-        pass
-
-    @staticmethod
-    def parse_components(components, name, start_idx):
-        pass
+EOS = ("<EOS>", "_EOS_", "#EOS", "(EOS)")  # End of sentence token
 
 
 class Player(Agent):
@@ -68,15 +23,36 @@ class Player(Agent):
     def name(self):
         return self._name
 
+    def get_response(self, history, temperature=None, max_tokens=None, stop=EOS):
+        if temperature is None:
+            temperature = self.temperature
+        if max_tokens is None:
+            max_tokens = self.max_tokens
+
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=self.sys_prompt + history,
+            temperature=temperature, max_tokens=max_tokens,
+            stop=stop)
+
+        response = completion.choices[0]['message']['content'].strip()
+
+        # Seems like there is a bug with stop sequence. Remove trailing _ < # ( tokens
+        if response.endswith("_") or response.endswith("<") or response.endswith("#") or response.endswith("("):
+            response = response[:-1]
+
+        return response.strip()
+
     @staticmethod
     def get_components(name):
-        role = gr.Textbox(show_label=False, lines=3, visible=True,
-                          placeholder=f"Enter the role description for {name}")
-        with gr.Accordion(f"{name} Parameters", open=False):
-            temperature = gr.Slider(minimum=0, maximum=2.0, value=0.7, step=0.1, interactive=True,
-                                    label=f"{name} temperature")
-            max_tokens = gr.Slider(minimum=20, maximum=1000, value=300, step=10, interactive=True,
-                                   label=f"{name} max tokens per response")
+        with gr.Column():
+            role = gr.Textbox(show_label=False, lines=3, visible=True,
+                              placeholder=f"Enter the role description for {name}")
+            with gr.Accordion(f"{name} Parameters", open=False):
+                temperature = gr.Slider(minimum=0, maximum=2.0, value=0.7, step=0.1, interactive=True,
+                                        label=f"{name} temperature")
+                max_tokens = gr.Slider(minimum=10, maximum=500, value=100, step=10, interactive=True,
+                                       label=f"{name} max tokens per response")
 
         return role, temperature, max_tokens
 
@@ -89,10 +65,33 @@ class Player(Agent):
         new_player = Player(name, role, system_desc, temperature, max_tokens)
         return new_player, start_idx + 3
 
+    def step(self, arena, turn: int) -> Message:
+        # Get the visible history from arena
+        visible_history = arena.get_visible_history(self, turn=turn)
+
+        # Preprocess the visible history
+        for i, message in enumerate(visible_history):
+            if message.role == self:
+                visible_history[i] = {"role": "assistant", "content": message.content}
+            else:
+                if arena.num_players == 2:
+                    visible_history[i] = {"role": "user", "content": message.content}
+                else:
+                    # If there are more than 2 players, we need to distinguish between the players
+                    visible_history[i] = {"role": "user", "content": f"[{message.role.name}]: {message.content}"}
+
+        response = self.get_response(visible_history)
+        message = Message(self, response, turn=turn, visible_to="all")  # broadcast the response to all players
+        return message
+
 
 DEFAULT_MODERATOR_ROLE = "You are the moderator of the game. You can decide which player speaks next and when to end the conversation."
-DEFAULT_NEXT_PLAYER_STRATEGY = f"Which player speak next?"
+DEFAULT_NEXT_PLAYER_PROMPT = "Who speaks next?"
 DEFAULT_END_CRITERIA = "Are players happy to end the conversation? Answer yes or no"
+
+
+def next_player_func(prompt, players):
+    return f"{prompt} Choices: " + "\n".join([f"({i + 1}) {p.name}" for i, p in enumerate(players)])
 
 
 # Moderator: a special type of agent that moderates the conversation, manages who speaks next, and when to end the conversation
@@ -100,26 +99,17 @@ class Moderator(Agent):
     """Moderator class that models specific moderator behavior"""
 
     def __init__(self, role, system_desc, temperature, max_tokens, num_players=2,
-                 next_player_strategy=DEFAULT_NEXT_PLAYER_STRATEGY, end_criteria=DEFAULT_END_CRITERIA):
+                 next_player_prompt=DEFAULT_NEXT_PLAYER_PROMPT, end_criteria=DEFAULT_END_CRITERIA):
         super().__init__(role, system_desc, temperature, max_tokens)
         self.num_players = num_players
-        self.turn = 0
-        self.next_player_strategy = next_player_strategy
+        self.next_player_prompt = next_player_prompt
         self.end_criteria = end_criteria
 
     @property
     def name(self):
         return "Moderator"
 
-    # @staticmethod
-    # def get_default_role(num_players):
-    #     return DEFAULT_MODERATOR_ROLE + \
-    #         f" There are {str(num_players)} players in the game." \
-    #         f" Possible player IDs are {', '.join([str(i + 1) for i in range(num_players)])}."
-
-    def get_response(self, message=None, temperature=0.0, max_tokens=None):
-        if message is not None:
-            self.history.append({"role": "user", "content": message})
+    def get_response(self, history, temperature=None, max_tokens=None, stop=EOS):
         if temperature is None:
             temperature = self.temperature
         if max_tokens is None:
@@ -127,70 +117,104 @@ class Moderator(Agent):
 
         completion = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=self.sys_prompt + self.history,
-            temperature=temperature, max_tokens=max_tokens)
+            messages=self.sys_prompt + history,
+            temperature=temperature, max_tokens=max_tokens, stop=stop)
 
         response = completion.choices[0]['message']['content']
-        self.history.append({"role": "assistant", "content": response})
         return response
-
-    def get_next_player(self):
-        # Ask the moderator to decide who speaks next
-        try:
-            res = self.get_response(self.next_player_strategy, temperature=0.0, max_tokens=5)
-
-            # find the first number in the response and convert it to int
-            res = re.search(r"\d+", res).group()
-            next_player_idx = int(res.strip())
-        except:
-            next_player_idx = self.turn % self.num_players
-            logger.warning(f"Invalid speaker ID: {res}, resorting to rotary speaker: {next_player_idx}")
-
-        return next_player_idx
-
-    def is_game_end(self, max_turns=100):
-        if self.turn >= max_turns:
-            return True
-        else:
-            res = self.get_response(self.end_criteria, temperature=0.0, max_tokens=2)
-            if re.match(r"yes|y|yea|yeah|yep|yup|sure|ok|okay|alright", res, re.IGNORECASE):
-                logger.warning(f"Decision: {res}. Conversation is ended by moderator after {self.turn} turns.")
-                return True
-            else:
-                return False
-
-    def reset(self):
-        self.history = []
-        self.turn = 0
 
     @staticmethod
     def get_components():
         name = "Moderator"
         role = gr.Textbox(show_label=False, lines=2, visible=True,
-                          placeholder=f"Enter the role description for {name}")
+                          placeholder=f"Enter the role description for {name}",
+                          value=DEFAULT_MODERATOR_ROLE)
         with gr.Accordion(f"{name} Advanced Parameters", open=False):
-            next_player_strategy = gr.Textbox(show_label=False, lines=2, visible=True,
-                                              placeholder="Enter the strategy for deciding who speaks next")
+            next_player_prompt = gr.Textbox(show_label=False, lines=2, visible=True,
+                                            placeholder="Enter the strategy for deciding who speaks next",
+                                            value=DEFAULT_NEXT_PLAYER_PROMPT)
             end_criteria = gr.Textbox(show_label=False, lines=2, visible=True,
-                                      placeholder="Enter the end criteria for the conversation")
+                                      placeholder="Enter the end criteria for the conversation",
+                                      value=DEFAULT_END_CRITERIA)
 
-            temperature = gr.Slider(minimum=0, maximum=2.0, value=0.1, step=0.1, interactive=True,
+            temperature = gr.Slider(minimum=0, maximum=2.0, value=0.0, step=0.1, interactive=True,
                                     label=f"{name} temperature")
-            max_tokens = gr.Slider(minimum=20, maximum=1000, value=300, step=10, interactive=True,
+            max_tokens = gr.Slider(minimum=20, maximum=1000, value=20, step=10, interactive=True,
                                    label=f"{name} max tokens per response")
-        return role, next_player_strategy, end_criteria, temperature, max_tokens
+        return role, next_player_prompt, end_criteria, temperature, max_tokens
 
     @staticmethod
     def parse_components(components, name, start_idx):
         num_players = components[0]
         system_desc = components[1]
         role = components[start_idx]
-        next_player_strategy = components[start_idx + 1]
+        next_player_prompt = components[start_idx + 1]
         end_criteria = components[start_idx + 2]
         temperature = components[start_idx + 3]
         max_tokens = components[start_idx + 4]
 
         new_moderator = Moderator(role, system_desc, temperature=temperature, max_tokens=max_tokens,
-                                  num_players=num_players, next_player_strategy=next_player_strategy,
+                                  num_players=num_players, next_player_prompt=next_player_prompt,
                                   end_criteria=end_criteria)
         return new_moderator, start_idx + 5
+
+    def step(self, arena, turn: int) -> Message:
+        # Get the visible history from arena
+        visible_history = arena.get_visible_history(self, turn=turn)
+
+        # Preprocess the visible history
+        for i, message in enumerate(visible_history):
+            if message.role == self:
+                visible_history[i] = {"role": "assistant", "content": message.content}
+            else:
+                # Since there are more than one player, we need to distinguish between the players
+                visible_history[i] = {"role": "user", "content": f"[{message.role.name}]: {message.content}"}
+
+        response = self.get_response(visible_history)
+
+        message = Message(self, response, turn=turn, visible_to=None)  # Moderator does not broadcast the response
+        return message
+
+    def get_next_player(self, arena):
+        visible_history = arena.get_visible_history(self)  # turn=None means get the entire history
+        # Preprocess the visible history
+        for i, message in enumerate(visible_history):
+            if message.role == self:
+                visible_history[i] = {"role": "assistant", "content": message.content}
+            else:
+                # Since there are more than one player, we need to distinguish between the players
+                visible_history[i] = {"role": "user", "content": f"[{message.role.name}]: {message.content}"}
+
+        players = arena.players
+        query = {"role": "system", "content": next_player_func(self.next_player_prompt, players)}
+
+        # Ask the moderator to decide who speaks next
+        try:
+            res = self.get_response(visible_history + [query], temperature=0.0, max_tokens=5)
+            res = re.search(r"\d+", res).group()  # find the first number in the response and convert it to int
+            next_player_idx = int(res.strip()) - 1  # convert to 0-based index
+        except Exception as e:
+            print(e)
+            next_player_idx = None
+            logger.warning(f"Moderator failed to decide who speaks next.")
+
+        return next_player_idx
+
+    def is_terminal(self, arena):
+        visible_history = arena.get_visible_history(self)  # turn=None means get the entire history
+        # Preprocess the visible history
+        for i, message in enumerate(visible_history):
+            if message.role == self:
+                visible_history[i] = {"role": "assistant", "content": message.content}
+            else:
+                # Since there are more than one player, we need to distinguish between the players
+                visible_history[i] = {"role": "user", "content": f"[{message.role.name}]: {message.content}"}
+
+        query = {"role": "system", "content": self.end_criteria}
+
+        res = self.get_response(visible_history + [query], temperature=0.0, max_tokens=2)
+        if re.match(r"yes|y|yea|yeah|yep|yup|sure|ok|okay|alright", res, re.IGNORECASE):
+            logger.warning(f"Decision: {res}. Conversation is ended by moderator.")
+            return True
+        else:
+            return False

@@ -6,6 +6,7 @@ from time import sleep
 import re
 
 from chat_arena.agent import Player, Moderator
+from chat_arena.arena import Arena, NextSpeakerStrategy
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
@@ -27,9 +28,7 @@ def get_empty_state():
 
 
 def play_game(*args):
-    # return None, get_empty_state()
-    # assert len(args) == 3 * num_players + offset + 2
-    num_players, system_desc, rotary_speaker, auto_terminate, max_turns = args[:5]
+    num_players, system_desc, next_speaker_strategy, auto_terminate, max_turns = args[:5]
 
     offset = 5
     moderator, offset = Moderator.parse_components(args, "Moderator", start_idx=offset)
@@ -39,63 +38,36 @@ def play_game(*args):
         player, offset = Player.parse_components(args, f"Player {player_id}", start_idx=offset)
         all_players.append(player)
 
-    all_messages, chatbot_output = [], []
+    # Create the arena to manage the game environment
+    arena = Arena(all_players, moderator, next_speaker_strategy=next_speaker_strategy,
+                  max_turns=max_turns, auto_terminate=auto_terminate)
 
-    def log_message(msg, role, type, index=0, include_role_in_ui=False):
-        all_messages.append({"role": role, "content": msg, "type": type})
+    def _convert_to_chatbot_output(all_messages):
+        chatbot_output = []
+        for i, message in enumerate(all_messages):
+            role, msg = message.role, message.content
+            new_msg = re.sub(r'\n+', '<br>', msg.strip())  # Preprocess message for chatbot output
+            new_msg = f"[{role.name}]: {new_msg}"  # Add role to the message
 
-        # Preprocess message for chatbot output
-        msg = re.sub(r'\n+', '<br>', msg.strip())
+            if role == moderator:
+                chatbot_output.append((new_msg, None))
+            else:
+                chatbot_output.append((None, new_msg))
+        return chatbot_output
 
-        if include_role_in_ui:
-            msg = f"[{role}]: {msg}"
-
-        # Determine which side to display the message, 0 for left-sided bubble, 1 for right-sided bubble
-        if index == 0:
-            chatbot_tuple = (None, msg)
-        elif index == 1:
-            chatbot_tuple = (msg, None)
-        else:
-            raise ValueError("Index must be 0 or 1")
-
-        chatbot_output.append(chatbot_tuple)
-
+    # Main loop: Play the game
     for turn in range(max_turns):
         try:
-            if rotary_speaker:  # Get the next speaker in a round-robin fashion
-                next_player_idx = turn % num_players
-            else:  # Get the next speaker by asking the moderator
-                next_player_idx = moderator.get_next_player()
-
-            next_player = all_players[next_player_idx]
-            player_msg = next_player.get_response()
-            log_message(player_msg, next_player.name, "player_msg", index=0, include_role_in_ui=True)
+            arena.step()
+            all_messages = arena.get_visible_history(moderator)  # user sees what the moderator sees
+            chatbot_output = _convert_to_chatbot_output(all_messages)
             yield chatbot_output, get_empty_state()  # Update the chatbot UI output
-
-            # Broadcast message to other players
-            for other_player in all_players:
-                if other_player != next_player:
-                    other_player.add_message(player_msg)
-            # Moderator also gets to see the message
-            # moderator.add_message(f"[{next_player.name}]: {player_msg}")
-            moderator.add_message(player_msg)
-
-            moderator_msg = moderator.get_response(temperature=0.0, max_tokens=30)
-            log_message(moderator_msg, moderator.name, "moderator_msg", index=0, include_role_in_ui=True)
-            yield chatbot_output, get_empty_state()  # Update the chatbot UI output
-
             sleep(1.0)
 
-            if auto_terminate and moderator.is_game_end():
+            if arena.is_terminal():
                 break
-
         except Exception as e:
             print(e)
-
-    print(all_messages)
-
-
-# num_players = 2
 
 
 def clear_conversation():
@@ -125,21 +97,27 @@ with gr.Blocks(css=css) as demo:
 
     all_components = []  # keep track of all components so we can use them later
 
-    gr.Markdown("## Game Configuration")
-    num_players_component = gr.Slider(minimum=2, maximum=4, value=2, step=1, interactive=True,
+    # gr.Markdown("Configurations")
+    num_players_component = gr.Slider(minimum=2, maximum=6, value=2, step=1, interactive=True,
                                       label="Number of Players")
     num_players = num_players_component.value  # TODO: make this dynamic and update the UI when it change
-    # gr.Markdown("### Scenario/Rule Description")
+    gr.Markdown("Scenario/Rule Description")
     system_desc = gr.Textbox(show_label=False, lines=3,
                              label="System Description",
                              placeholder="Enter a description of a scenario or the game rules.",
                              visible=True)
-    rotary_speaker = gr.Checkbox(label="Rotary Speaker", value=True, visible=True)
-    auto_terminate = gr.Checkbox(label="Auto-terminate Conversation", value=True, visible=True)
-    max_turns = gr.Slider(minimum=4, maximum=32, value=8, step=1, interactive=True,
-                          label="Max turns per game")
+
+    with gr.Row():
+        next_speaker_strategy = gr.Radio(label="Next Speaker Strategy",
+                                         choices=NextSpeakerStrategy.options(),
+                                         value=NextSpeakerStrategy.ROTARY.value, visible=True)
+        with gr.Column():
+            auto_terminate = gr.Checkbox(label="Auto-terminate Conversation", value=False, visible=True)
+            max_turns = gr.Slider(minimum=4, maximum=32, value=8, step=1, interactive=True,
+                                  label="Max turns per game")
+
     # All game-level metadata
-    all_components += [num_players_component, system_desc, rotary_speaker, auto_terminate, max_turns]
+    all_components += [num_players_component, system_desc, next_speaker_strategy, auto_terminate, max_turns]
 
     with gr.Accordion("Moderator Configuration", open=False):
         moderator_components = Moderator.get_components()
@@ -148,7 +126,7 @@ with gr.Blocks(css=css) as demo:
     with gr.Row():
         for player_id in range(1, num_players + 1):
             with gr.Column():
-                gr.Markdown(f"### Player {player_id}")
+                gr.Markdown(f"Player {player_id}")
                 player_components = Player.get_components("Player " + str(player_id))
                 all_components.extend(player_components)
 

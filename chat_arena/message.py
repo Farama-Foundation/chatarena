@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from uuid import uuid1
 import time
 
-from .agent import Agent
+from .base import Agent
 
 import hashlib
 
@@ -19,11 +19,13 @@ class Message:
     content: str
     turn: int = None
     timestamp: int = time.time_ns()
-    visible_to: Union[str, List[Agent]] = "all"
+    visible_to: Union[None, str, List[Agent]] = "all"
 
     def get_receivers(self, all_agents: List[Agent]):
         receivers = []
-        if isinstance(self.visible_to, str):
+        if self.visible_to is None:
+            return []
+        elif isinstance(self.visible_to, str):
             if self.visible_to == "all":
                 receivers = all_agents
             else:
@@ -59,19 +61,7 @@ class MessagePool:
         self.message_pool: List[Message] = []
         self.conversation_id = str(uuid1())  # TODO: generate a UUID for the conversation
 
-    def append_message(self, message: Message, increment_turn: bool = True):
-        next_turn = self.last_turn + 1 if increment_turn else self.last_turn
-
-        if message.turn is None:
-            message.turn = next_turn
-        else:
-            if increment_turn:
-                assert message.turn == self.last_turn + 1, \
-                    "The turn number of the message should be the next turn number."
-            else:
-                assert message.turn == self.last_turn, \
-                    "The turn number of the message should be the current turn number."
-
+    def append_message(self, message: Message):
         self.message_pool.append(message)
 
     @property
@@ -97,10 +87,8 @@ class MessagePool:
 
         visible_messages = []
         for message in self.message_pool:
-            if message.turn <= turn:
-                if recv_agent == message.role:
-                    visible_messages.append({"role": "assistant", "content": message.content})
-                elif recv_agent in message.get_receivers(all_agents):
-                    visible_messages.append({"role": "user", "content": message.content})
+            if message.turn < turn:  # only messages before the current turn are visible (to avoid seeing parallel messages)
+                if recv_agent == message.role or recv_agent in message.get_receivers(all_agents):
+                    visible_messages.append(message)
 
         return visible_messages

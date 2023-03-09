@@ -8,7 +8,7 @@ with open("requirements.txt", "r") as f:
 
 setup(
     name="chat_arena",
-    version="0.1.0",
+    version="0.2.0",
     author="Yuxiang Wu",
     author_email="yuxiang.cs@gmail.com",
     description="",
