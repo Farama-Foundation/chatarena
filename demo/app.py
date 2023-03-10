@@ -174,11 +174,11 @@ with gr.Blocks(css=css) as demo:
         chatbot = gr.Chatbot(elem_id="chatbox", visible=False, label="Chat Arena")
 
     btn_play_2.click(partial(play_game, num_players=2), all_components + all_player_components_2,
-                     [chatbot, btn_play_2, state])
+                     [chatbot, btn_play_2, state], api_name="two_players_arena")
     btn_play_3.click(partial(play_game, num_players=3), all_components + all_player_components_3,
-                     [chatbot, btn_play_3, state])
+                     [chatbot, btn_play_3, state], api_name="three_players_arena")
     btn_play_4.click(partial(play_game, num_players=4), all_components + all_player_components_4,
-                     [chatbot, btn_play_4, state])
+                     [chatbot, btn_play_4, state], api_name="four_players_arena")
 
 # define queue - required for generators
 demo.queue()
