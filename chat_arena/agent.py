@@ -9,7 +9,7 @@ from .message import Message
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-EOS = ("<EOS>", "_EOS_", "#EOS", "(EOS)")  # End of sentence token
+EOS = ("<EOS>", "[EOS]", "(EOS)")  # End of sentence token
 
 
 class Player(Agent):
@@ -37,8 +37,8 @@ class Player(Agent):
 
         response = completion.choices[0]['message']['content'].strip()
 
-        # Seems like there is a bug with stop sequence. Remove trailing _ < # ( tokens
-        if response.endswith("_") or response.endswith("<") or response.endswith("#") or response.endswith("("):
+        # Seems like there is a bug with stop sequence. Remove trailing _ [ # ( tokens
+        if response.endswith("[") or response.endswith("<") or response.endswith("#") or response.endswith("("):
             response = response[:-1]
 
         return response.strip()
