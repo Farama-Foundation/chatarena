@@ -4,6 +4,7 @@ import os
 import openai
 from time import sleep
 import re
+from functools import partial
 
 from chat_arena.agent import Player, Moderator
 from chat_arena.arena import Arena, NextSpeakerStrategy
@@ -27,14 +28,13 @@ def get_empty_state():
 #     return gr.update(value=choices[0], choices=choices)
 
 
-def play_game(*args):
+def play_game(*args, num_players=2):
     # Clear the chatbot UI output and hide the other components
-    yield gr.update(value=[], visible=True), gr.update(value="Running...", interactive=False), gr.update(
-        open=False), get_empty_state()
+    yield gr.update(value=[], visible=True), gr.update(value="Running...", interactive=False), get_empty_state()
 
-    num_players, system_desc, next_speaker_strategy, auto_terminate, max_turns = args[:5]
+    system_desc, next_speaker_strategy, auto_terminate, max_turns = args[:4]
 
-    offset = 5
+    offset = 4
     moderator, offset = Moderator.parse_components(args, "Moderator", start_idx=offset)
 
     all_players = []
@@ -66,7 +66,7 @@ def play_game(*args):
             all_messages = arena.get_visible_history(moderator)  # user sees what the moderator sees
             chatbot_output = _convert_to_chatbot_output(all_messages)
             # Update the chatbot UI output
-            yield chatbot_output, gr.update(), gr.update(), get_empty_state()
+            yield chatbot_output, gr.update(), get_empty_state()
             sleep(1.0)
 
             if arena.is_terminal():
@@ -74,7 +74,7 @@ def play_game(*args):
         except Exception as e:
             print(e)
 
-    yield gr.update(), gr.update(value="Run", interactive=True), gr.update(), get_empty_state()
+    yield gr.update(), gr.update(value="Run", interactive=True), get_empty_state()
 
 
 css = """
@@ -95,18 +95,16 @@ with gr.Blocks(css=css) as demo:
     state = gr.State(get_empty_state())
 
     with gr.Column(elem_id="col-container"):
-        gr.Markdown("""# Chat Arena 🏟️ <br>
-        Prompt two chat-based AI agents to play a role-play game.""",
+        gr.Markdown("""# 🏟 Chat Arena️<br>
+        Prompting chat-based AI agents to play games in a language-driven Environment.""",
                     elem_id="header")
 
         all_components = []  # keep track of all components so we can use them later
 
-        with gr.Accordion("Arena Configuration", open=True) as config_accordion:
-            # gr.Markdown("Configurations")
-            num_players_component = gr.Slider(minimum=2, maximum=6, value=2, step=1, interactive=True,
-                                              label="Number of Players")
+        with gr.Accordion("Configuration", open=True) as config_accordion:
+            # num_players_component = gr.Slider(minimum=2, maximum=2, value=2, step=1, interactive=False,
+            #                                   label="Number of Players", visible=False)
 
-            num_players = num_players_component.value  # TODO: make this dynamic and update the UI when it change
             gr.Markdown("Scenario/Rule Description")
             system_desc = gr.Textbox(show_label=False, lines=3,
                                      label="System Description",
@@ -123,34 +121,63 @@ with gr.Blocks(css=css) as demo:
                                           label="Max turns per game")
 
             # All game-level metadata
-            all_components += [num_players_component, system_desc, next_speaker_strategy, auto_terminate, max_turns]
+            all_components += [system_desc, next_speaker_strategy, auto_terminate, max_turns]
 
             with gr.Accordion("Moderator Configuration", open=False):
                 moderator_components = Moderator.get_components()
                 all_components.extend(moderator_components)
 
-            with gr.Row():
-                for player_id in range(1, num_players + 1):
-                    with gr.Column():
-                        gr.Markdown(f"Player {player_id}")
-                        player_components = Player.get_components("Player " + str(player_id))
-                        all_components.extend(player_components)
+            with gr.Tab("Two Players"):
+                all_player_components_2 = []
+                with gr.Row():
+                    for player_id in range(1, 3):
+                        with gr.Column():
+                            gr.Markdown(f"Player {player_id}")
+                            player_components = Player.get_components("Player " + str(player_id))
+                            all_player_components_2.extend(player_components)
 
-        with gr.Row():
-            btn_play = gr.Button("Play")
-            # btn_clear_conversation = gr.Button("Restart")
+                with gr.Row():
+                    btn_play_2 = gr.Button("Play")
+
+            with gr.Tab("Three Players"):
+                all_player_components_3 = []
+                with gr.Row():
+                    for player_id in range(1, 4):
+                        with gr.Column():
+                            gr.Markdown(f"Player {player_id}")
+                            player_components = Player.get_components("Player " + str(player_id))
+                            all_player_components_3.extend(player_components)
+
+                with gr.Row():
+                    btn_play_3 = gr.Button("Play")
+
+            with gr.Tab("Four Players"):
+                all_player_components_4 = []
+                with gr.Row():
+                    for player_id in [1, 2]:
+                        with gr.Column():
+                            gr.Markdown(f"Player {player_id}")
+                            player_components = Player.get_components("Player " + str(player_id))
+                            all_player_components_4.extend(player_components)
+
+                with gr.Row():
+                    for player_id in [3, 4]:
+                        with gr.Column():
+                            gr.Markdown(f"Player {player_id}")
+                            player_components = Player.get_components("Player " + str(player_id))
+                            all_player_components_4.extend(player_components)
+
+                with gr.Row():
+                    btn_play_4 = gr.Button("Play")
 
         chatbot = gr.Chatbot(elem_id="chatbox", visible=False, label="Chat Arena")
 
-    btn_play.click(play_game,
-                   all_components,
-                   [chatbot, btn_play, config_accordion, state])
-
-    # def clear_conversation():
-    #     demo.load()
-    #     # yield gr.update(value=[]), get_empty_state()
-    #
-    # btn_clear_conversation.click(clear_conversation, [], [])
+    btn_play_2.click(partial(play_game, num_players=2), all_components + all_player_components_2,
+                     [chatbot, btn_play_2, state])
+    btn_play_3.click(partial(play_game, num_players=3), all_components + all_player_components_3,
+                     [chatbot, btn_play_3, state])
+    btn_play_4.click(partial(play_game, num_players=4), all_components + all_player_components_4,
+                     [chatbot, btn_play_4, state])
 
 # define queue - required for generators
 demo.queue()
