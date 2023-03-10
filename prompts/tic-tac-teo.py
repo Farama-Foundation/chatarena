@@ -94,21 +94,21 @@ If a player wins, the game ends immediately. Is the game ended? Answer yes or no
 
 PLAYER_RULES = {
     '1': '''
-    You play X.
-    You should only output X and the position of the move, for example: "X: (1, 3)<EOS>"
-    The position you put the mark on must be empty.
+You play X.
+You should only output X and the position of the move, for example: "X: (1, 3)<EOS>"
+The position you put the mark on must be empty.
 
-    You shouldn't act as a moderator.
-    Do not output "Moderator" and the board status.
-    Don't say anything besides mark position.
-    ''',
+You shouldn't act as a moderator.
+Do not output "Moderator" and the board status.
+Don't say anything besides mark position.
+''',
     '2': '''
-    You play O.
-    You should only output O and the position of the move, for example: "O: (2, 3)<EOS>"
-    The position you put the mark on must be empty.
+You play O.
+You should only output O and the position of the move, for example: "O: (2, 3)<EOS>"
+The position you put the mark on must be empty.
 
-    You shouldn't act as a moderator.
-    Do not output "Moderator" and the board status.
-    Don't say anything besides mark position.
-    '''
+You shouldn't act as a moderator.
+Do not output "Moderator" and the board status.
+Don't say anything besides mark position.
+'''
 }
