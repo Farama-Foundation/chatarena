@@ -170,6 +170,7 @@ class Moderator(Agent):
         response = self.get_response(visible_history)
 
         message = Message(self, response, turn=turn, visible_to=None)  # Moderator does not broadcast the response
+        print(f"Moderator: {message.content}")
         return message
 
     def get_next_player(self, arena):
