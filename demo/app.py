@@ -54,7 +54,8 @@ def play_game(*args, num_players=2):
             new_msg = f"[{role.name}]: {new_msg}"  # Add role to the message
 
             if role == moderator:
-                chatbot_output.append((new_msg, None))
+                # chatbot_output.append((new_msg, None))
+                pass  # Disable moderator output for now
             else:
                 chatbot_output.append((None, new_msg))
         return chatbot_output
