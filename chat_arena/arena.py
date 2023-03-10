@@ -129,7 +129,7 @@ class Arena:
 
             self.message_pool.append_message(player_msg)
 
-        moderator_msg = self.moderator.step(self, turn=self.turn_counter)  # Moderator takes an action
+        moderator_msg = self.moderator.step(self, turn=self.turn_counter+1)  # Moderator takes an action
         self.message_pool.append_message(moderator_msg)
 
         self.turn_counter += 1  # Increment the turn counter
