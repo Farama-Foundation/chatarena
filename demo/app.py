@@ -97,7 +97,7 @@ with gr.Blocks(css=css) as demo:
 
     with gr.Column(elem_id="col-container"):
         gr.Markdown("""# 🏟 Chat Arena️<br>
-        Prompting chat-based AI agents to play games in a language-driven Environment.""",
+        Prompting chat-based AI agents to play games in a language-driven environment.""",
                     elem_id="header")
 
         all_components = []  # keep track of all components so we can use them later
