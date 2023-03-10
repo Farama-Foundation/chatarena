@@ -57,8 +57,8 @@ class Player(Agent):
 
     @staticmethod
     def parse_components(components, name, start_idx):
+        system_desc = components[0]
         role = components[start_idx]
-        system_desc = components[1]
         temperature = components[start_idx + 1]
         max_tokens = components[start_idx + 2]
         new_player = Player(name, role, system_desc, temperature, max_tokens)
@@ -97,10 +97,9 @@ def next_player_func(prompt, players):
 class Moderator(Agent):
     """Moderator class that models specific moderator behavior"""
 
-    def __init__(self, role, system_desc, temperature, max_tokens, num_players=2,
+    def __init__(self, role, system_desc, temperature, max_tokens,
                  next_player_prompt=DEFAULT_NEXT_PLAYER_PROMPT, end_criteria=DEFAULT_END_CRITERIA):
         super().__init__(role, system_desc, temperature, max_tokens)
-        self.num_players = num_players
         self.next_player_prompt = next_player_prompt
         self.end_criteria = end_criteria
 
@@ -145,8 +144,7 @@ class Moderator(Agent):
 
     @staticmethod
     def parse_components(components, name, start_idx):
-        num_players = components[0]
-        system_desc = components[1]
+        system_desc = components[0]
         role = components[start_idx]
         next_player_prompt = components[start_idx + 1]
         end_criteria = components[start_idx + 2]
@@ -154,8 +152,7 @@ class Moderator(Agent):
         max_tokens = components[start_idx + 4]
 
         new_moderator = Moderator(role, system_desc, temperature=temperature, max_tokens=max_tokens,
-                                  num_players=num_players, next_player_prompt=next_player_prompt,
-                                  end_criteria=end_criteria)
+                                  next_player_prompt=next_player_prompt, end_criteria=end_criteria)
         return new_moderator, start_idx + 5
 
     def step(self, arena, turn: int) -> Message:
