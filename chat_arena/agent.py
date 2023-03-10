@@ -45,14 +45,13 @@ class Player(Agent):
 
     @staticmethod
     def get_components(name):
-        with gr.Column():
-            role = gr.Textbox(show_label=False, lines=3, visible=True,
-                              placeholder=f"Enter the role description for {name}")
-            with gr.Accordion(f"{name} Parameters", open=False):
-                temperature = gr.Slider(minimum=0, maximum=2.0, value=0.7, step=0.1, interactive=True,
-                                        label=f"{name} temperature")
-                max_tokens = gr.Slider(minimum=10, maximum=500, value=100, step=10, interactive=True,
-                                       label=f"{name} max tokens per response")
+        role = gr.Textbox(show_label=False, lines=3, visible=True,
+                          placeholder=f"Enter the role description for {name}")
+        with gr.Accordion(f"{name} Parameters", open=False):
+            temperature = gr.Slider(minimum=0, maximum=2.0, value=0.7, step=0.1, interactive=True,
+                                    label=f"{name} temperature")
+            max_tokens = gr.Slider(minimum=10, maximum=500, value=100, step=10, interactive=True,
+                                   label=f"{name} max tokens per response")
 
         return role, temperature, max_tokens
 
@@ -141,6 +140,7 @@ class Moderator(Agent):
                                     label=f"{name} temperature")
             max_tokens = gr.Slider(minimum=20, maximum=1000, value=20, step=10, interactive=True,
                                    label=f"{name} max tokens per response")
+
         return role, next_player_prompt, end_criteria, temperature, max_tokens
 
     @staticmethod
