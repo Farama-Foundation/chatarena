@@ -63,7 +63,7 @@ def play_game(*args, num_players=2):
     # Main loop: Play the game
     for turn in range(max_turns):
         try:
-            arena.step()
+            arena.step(action="")
             all_messages = arena.get_visible_history(moderator)  # user sees what the moderator sees
             chatbot_output = _convert_to_chatbot_output(all_messages)
             # Update the chatbot UI output
