@@ -74,7 +74,8 @@ class MessagePool:
     def reset(self):
         self.message_pool = []
 
-    def get_visible_messages(self, recv_agent: Agent, all_agents: List[Agent], turn: int = None):
+    def get_visible_messages(self, recv_agent: Agent, all_agents: List[Agent], turn: int = None,
+                             can_see_current_turn: bool = False):
         """
         Get the visible messages to the current role.
 
@@ -85,10 +86,15 @@ class MessagePool:
         if turn is None:
             turn = self.last_turn
 
+        # Get the messages before the current turn
+        if can_see_current_turn:
+            prev_messages = [message for message in self.message_pool if message.turn <= turn]
+        else:
+            prev_messages = [message for message in self.message_pool if message.turn < turn]
+
         visible_messages = []
-        for message in self.message_pool:
-            if message.turn < turn:  # only messages before the current turn are visible (to avoid seeing parallel messages)
-                if recv_agent == message.role or recv_agent in message.get_receivers(all_agents):
-                    visible_messages.append(message)
+        for message in prev_messages:
+            if recv_agent == message.role or recv_agent in message.get_receivers(all_agents):
+                visible_messages.append(message)
 
         return visible_messages

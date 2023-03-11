@@ -115,7 +115,12 @@ class Arena:
         """
         if turn is None:
             turn = self.turn_counter
-        return self.message_pool.get_visible_messages(agent, self.all_agents, turn)
+
+        if agent == self.moderator:
+            # Moderator can see current turn messages from other players
+            return self.message_pool.get_visible_messages(agent, self.all_agents, turn, can_see_current_turn=True)
+        else:
+            return self.message_pool.get_visible_messages(agent, self.all_agents, turn, can_see_current_turn=False)
 
     def step(self):
         """
@@ -129,8 +134,8 @@ class Arena:
 
             self.message_pool.append_message(player_msg)
 
-        moderator_msg = self.moderator.step(self, turn=self.turn_counter + 1)  # Moderator takes an action
+        moderator_msg = self.moderator.step(self, turn=self.turn_counter)  # Moderator takes an action
         # Note: the turn number is incremented by 1 because the moderator's message is appended after the players' messages
         self.message_pool.append_message(moderator_msg)
 
-        self.turn_counter += 2  # Increment the turn counter by 2 because both the players and the moderator stepped
+        self.turn_counter += 1  # Increment the turn counter by 2 because both the players and the moderator stepped
