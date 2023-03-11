@@ -54,7 +54,6 @@ For example, when the last player says: "X: (1, 2)"
 It means the X mark is put in the first row and the second column.
 You'll output:
 ```
-X: (1, 2)
 Board:
 |_|X|_|
 |_|_|_|
@@ -65,7 +64,6 @@ In the next step, another player says: "O: (3, 1)"
 It means the O mark is put in the third row and the first column.
 You'll output:
 ```
-O: (3, 1)
 Board:
 |_|_|X|
 |_|_|_|
@@ -73,14 +71,24 @@ Board:
 ```
 
 ## Termination condition
-If a player succeeds in placing three of their marks in a horizontal, vertical, or diagonal row, it wins. For example:
+If a player succeeds in placing three of their marks in a horizontal, vertical, or diagonal line, it wins. 
+The horizontal line means there are three same marks in the same row (n, 1) (n, 2) (n, 3), where n can be from 1 to 3.
+The vertical line means there are three same marks in the same column (1, m) (2, m) (3, m), where m can be from 1 to 3.
+The diagonal line means three same marks occupy one of the following position combinations: (1, 1) (2, 2) (3, 3) or (1, 3) (2, 2) (3, 1)
+
+You should declare the winner after displaying the board status if a player wins the game in the last move.
+For example, you should output the following:
 ```
 Board
 |O|_|X|
 |_|X|O|
 |X|X|O|
+
+Player 1 (X) wins!
 ```
-Three X marks form a diagonal row on the board, so the player who plays X is the winner. The game ends.
+because X marks form a diagonal line on the board, so the player who plays X is the winner. The game ends.
+
+
 
 ## Other instructions
 Don't write code.
