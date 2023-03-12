@@ -51,7 +51,7 @@ def play_game(*args, num_players=2):
         for i, message in enumerate(all_messages):
             role, msg = message.role, message.content
             new_msg = re.sub(r'\n+', '<br>', msg.strip())  # Preprocess message for chatbot output
-            new_msg = f"[{role.name}]: {new_msg}"  # Add role to the message
+            new_msg = f"**[{role.name}]**: {new_msg}"  # Add role to the message
 
             if role == moderator:
                 # chatbot_output.append((new_msg, None))
@@ -68,7 +68,7 @@ def play_game(*args, num_players=2):
             chatbot_output = _convert_to_chatbot_output(all_messages)
             # Update the chatbot UI output
             yield chatbot_output, gr.update(), get_empty_state()
-            sleep(1.0)
+            sleep(0.2)
 
             if arena.is_terminal():
                 break
@@ -81,13 +81,13 @@ def play_game(*args, num_players=2):
 css = """
       #col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
       #header {text-align: center;}
-      #col-chatbox {flex: 1; max-height: min(1000px, 100%); display: flex;}
-      #chatbox {height: min(1000px, 100%); display:flex;}
+      #col-chatbox {flex: 1; max-height: min(750px, 100%); display: flex;}
+      #chatbox {height: min(750px, 100%); display:flex;}
       #label {font-size: 2em; padding: 0.5em; margin: 0;}
       .message {font-size: 1.2em;}
       .wrap.svelte-18ha8kq {flex: 1}
-      .wrap.svelte-18ha8kq.svelte-18ha8kq {max-height: 100vh;}
-      .message-wrap {max-height: 100%;}
+      .wrap.svelte-18ha8kq.svelte-18ha8kq {max-height: min(700px, 100vh);}
+      .message-wrap {max-height: min(700px, 100vh);}
       """
 
 # auto-term-col {max-width: 33%;}
@@ -101,7 +101,8 @@ with gr.Blocks(css=css) as demo:
 
     with gr.Column(elem_id="col-container"):
         gr.Markdown("""# 🏟 Chat Arena️<br>
-        Prompting chat-based AI agents to play games in a language-driven environment.""",
+        Prompting chat-based AI agents to play games in a language-driven environment. 
+        [Arena Tutorial](https://example.com)""",
                     elem_id="header")
 
         with gr.Row():
@@ -109,9 +110,11 @@ with gr.Blocks(css=css) as demo:
                 chatbot = gr.Chatbot(elem_id="chatbox", visible=True, label="Chat Arena")
 
             with gr.Column(elem_id="col-config"):
-                all_components = []  # keep track of all components so we can use them later
+                example_template = gr.Dropdown(label="Select an example game environment.",
+                                               choices=["Tic-tac-toe", "Self-critic", "Negotiation"])
 
-                with gr.Accordion("Arena Configuration", open=True) as config_accordion:
+                all_components = []  # keep track of all components so we can use them later
+                with gr.Accordion("Game Configuration", open=False) as config_accordion:
                     # num_players_component = gr.Slider(minimum=2, maximum=2, value=2, step=1, interactive=False,
                     #                                   label="Number of Players", visible=False)
 
@@ -120,62 +123,50 @@ with gr.Blocks(css=css) as demo:
                                              label="System Description",
                                              placeholder="Enter a description of a scenario or the game rules.",
                                              visible=True)
+                    max_turns = gr.Slider(minimum=4, maximum=32, value=8, step=1, interactive=True,
+                                          label="Max turns per game")
 
-                    with gr.Row():
+                    with gr.Accordion("Advanced Configuration", open=False):
                         next_speaker_strategy = gr.Radio(label="Next Speaker Strategy",
                                                          choices=NextSpeakerStrategy.options(),
                                                          value=NextSpeakerStrategy.ROTARY.value, visible=True)
-                        with gr.Column(elem_id="auto-term-col"):
-                            auto_terminate = gr.Checkbox(label="Auto-terminate Conversation", value=False, visible=True)
-                            max_turns = gr.Slider(minimum=4, maximum=32, value=8, step=1, interactive=True,
-                                                  label="Max turns per game")
+                        auto_terminate = gr.Checkbox(label="Auto-terminate Conversation", value=False, visible=True)
+                        # All game-level metadata
+                        all_components += [system_desc, next_speaker_strategy, auto_terminate, max_turns]
 
-                    # All game-level metadata
-                    all_components += [system_desc, next_speaker_strategy, auto_terminate, max_turns]
-
-                    with gr.Accordion("Moderator Configuration", open=False):
-                        moderator_components = Moderator.get_components()
-                        all_components.extend(moderator_components)
+                        with gr.Accordion("Moderator Configuration", open=False):
+                            moderator_components = Moderator.get_components()
+                            all_components.extend(moderator_components)
 
                 with gr.Tab("Two Players"):
                     all_player_components_2 = []
-                    with gr.Row():
-                        for player_id in range(1, 3):
-                            with gr.Column():
-                                gr.Markdown(f"Player {player_id}")
-                                player_components = Player.get_components("Player " + str(player_id))
-                                all_player_components_2.extend(player_components)
+                    for player_id in [1, 2]:
+                        with gr.Accordion(f"Player {player_id}", open=True):
+                            # gr.Markdown(f"Player {player_id}")
+                            player_components = Player.get_components("Player " + str(player_id))
+                            all_player_components_2.extend(player_components)
 
                     with gr.Row():
                         btn_play_2 = gr.Button("Play")
 
                 with gr.Tab("Three Players"):
                     all_player_components_3 = []
-                    with gr.Row():
-                        for player_id in range(1, 4):
-                            with gr.Column():
-                                gr.Markdown(f"Player {player_id}")
-                                player_components = Player.get_components("Player " + str(player_id))
-                                all_player_components_3.extend(player_components)
+                    for player_id in [1, 2, 3]:
+                        with gr.Accordion(f"Player {player_id}", open=player_id == 1):
+                            # gr.Markdown(f"Player {player_id}")
+                            player_components = Player.get_components("Player " + str(player_id))
+                            all_player_components_3.extend(player_components)
 
                     with gr.Row():
                         btn_play_3 = gr.Button("Play")
 
                 with gr.Tab("Four Players"):
                     all_player_components_4 = []
-                    with gr.Row():
-                        for player_id in [1, 2]:
-                            with gr.Column():
-                                gr.Markdown(f"Player {player_id}")
-                                player_components = Player.get_components("Player " + str(player_id))
-                                all_player_components_4.extend(player_components)
-
-                    with gr.Row():
-                        for player_id in [3, 4]:
-                            with gr.Column():
-                                gr.Markdown(f"Player {player_id}")
-                                player_components = Player.get_components("Player " + str(player_id))
-                                all_player_components_4.extend(player_components)
+                    for player_id in [1, 2, 3, 4]:
+                        with gr.Accordion(f"Player {player_id}", open=player_id == 1):
+                            # gr.Markdown(f"Player {player_id}")
+                            player_components = Player.get_components("Player " + str(player_id))
+                            all_player_components_4.extend(player_components)
 
                     with gr.Row():
                         btn_play_4 = gr.Button("Play")

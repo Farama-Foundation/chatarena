@@ -191,6 +191,8 @@ class Moderator(Agent):
             res = self.get_response(visible_history + [query], temperature=0.0, max_tokens=5)
             res = re.search(r"\d+", res).group()  # find the first number in the response and convert it to int
             next_player_idx = int(res.strip()) - 1  # convert to 0-based index
+            if not 0 <= next_player_idx < len(players):
+                raise ValueError(f"Invalid next_player_idx: {res}")
         except Exception as e:
             print(e)
             next_player_idx = None
