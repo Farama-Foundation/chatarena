@@ -42,7 +42,7 @@ class Arena:
 
     def __init__(self, players: List[Player], moderator: Moderator = None,
                  next_speaker_strategy: str = NextSpeakerStrategy.ROTARY.value, max_turns: int = 10,
-                 auto_terminate: bool = False):
+                 auto_terminate: bool = False, bind_agent: Agent=None):
         self.message_pool = MessagePool()
         self.moderator = moderator
         self.players = players
@@ -50,6 +50,8 @@ class Arena:
         self.max_turns = max_turns
         self.auto_terminate = auto_terminate
         self.turn_counter = 0
+
+        self.bind_agent = bind_agent # The agent that is exposed to the user or a rl agent
 
     @property
     def num_players(self):
@@ -108,7 +110,7 @@ class Arena:
         else:
             return self.turn_counter >= self.max_turns
 
-    # Get the visible state of the conversation for a particular player
+
     def get_visible_history(self, agent: Agent, turn: int = None) -> dict:
         """
         Get the visible state of the conversation for a particular agent.
@@ -122,20 +124,28 @@ class Arena:
         else:
             return self.message_pool.get_visible_messages(agent, self.all_agents, turn, can_see_current_turn=False)
 
-    def step(self):
+
+    def step(self, action: str):
         """
         Take a step in the conversation.
+        args:
+            action: the action taken by the agent or user
         """
         # Get the next player to speak
         next_players = self.get_next_players()
+        # NOTE(zhengyao): it would be better to let the this get_next_player be get_next_agent, and let the moderator
+        # be handled by the same logic as other players
+
         for idx, player in enumerate(next_players):
             # Take a step in the conversation and get the player's message
-            player_msg = player.step(self, turn=self.turn_counter)  # assign turn number to the message
-
+            if player == self.bind_agent:
+                player_msg = action
+            else:
+                player_msg = player.step(self, turn=self.turn_counter)  # assign turn number to the message
             self.message_pool.append_message(player_msg)
 
         moderator_msg = self.moderator.step(self, turn=self.turn_counter)  # Moderator takes an action
         # Note: the turn number is incremented by 1 because the moderator's message is appended after the players' messages
         self.message_pool.append_message(moderator_msg)
 
-        self.turn_counter += 1  # Increment the turn counter by 2 because both the players and the moderator stepped
+        self.turn_counter += 1
