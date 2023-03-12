@@ -1,6 +1,6 @@
-def sys_role_template(system_desc, role_desc):
-    system_prompts = [{"role": "system", "content": system_desc},
-                      {"role": "system", "content": role_desc}]
+def sys_role_template(system_desc, role_desc, prompt_role="system"):
+    system_prompts = [{"role": prompt_role, "content": system_desc},
+                      {"role": prompt_role, "content": role_desc}]
     return system_prompts
 
 
@@ -10,7 +10,7 @@ class Agent:
 
     def __init__(self, role, system_desc, temperature, max_tokens):
         self.role = role
-        self.sys_prompt = sys_role_template(system_desc, role)
+        self.sys_prompt = sys_role_template(system_desc, role, prompt_role="system")
         self.temperature = temperature
         self.max_tokens = max_tokens
 
