@@ -1,15 +1,32 @@
 """Build a role-play game between two chatbots using OpenAI's GPT-3 API."""
+import glob
+
 import gradio as gr
 import os
 import openai
 from time import sleep
 import re
 from functools import partial
+import json
+import os
+import glob
 
 from chat_arena.agent import Player, Moderator
 from chat_arena.arena import Arena, NextSpeakerStrategy
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+
+def load_examples(example_dir):
+    # Load examples from the examples directory
+    examples = {}
+    for fn in glob.glob(f"{example_dir}/*.json"):
+        example = json.load(open(fn, "r"))
+        examples[example["name"]] = example
+    return examples
+
+
+all_examples = load_examples("examples")
 
 
 def get_empty_state():
@@ -82,7 +99,7 @@ css = """
       #col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
       #header {text-align: center;}
       #col-chatbox {flex: 1; max-height: min(750px, 100%); display: flex;}
-      #chatbox {height: min(750px, 100%); display:flex;}
+      #chatbox {height: min(750px, 100%); max-height: 750px; display:flex;}
       #label {font-size: 2em; padding: 0.5em; margin: 0;}
       .message {font-size: 1.2em;}
       .wrap.svelte-18ha8kq {flex: 1}
@@ -110,8 +127,8 @@ with gr.Blocks(css=css) as demo:
                 chatbot = gr.Chatbot(elem_id="chatbox", visible=True, label="Chat Arena")
 
             with gr.Column(elem_id="col-config"):
-                example_template = gr.Dropdown(label="Select an example game environment.",
-                                               choices=["Tic-tac-toe", "Self-critic", "Negotiation"])
+                example_selector = gr.Dropdown(label="Select an example game environment.",
+                                               choices=list(all_examples.keys()))
 
                 all_components = []  # keep track of all components so we can use them later
                 with gr.Accordion("Game Configuration", open=False) as config_accordion:
@@ -177,6 +194,15 @@ with gr.Blocks(css=css) as demo:
                      [chatbot, btn_play_3, state], api_name="three_players_arena")
     btn_play_4.click(partial(play_game, num_players=4), all_components + all_player_components_4,
                      [chatbot, btn_play_4, state], api_name="four_players_arena")
+
+
+    def on_example_change(example_selector):
+        example = all_examples[example_selector]
+        configs = example['config']
+        return list(configs.values())
+
+
+    example_selector.change(on_example_change, [example_selector], all_components + all_player_components_2)
 
 # define queue - required for generators
 demo.queue()
