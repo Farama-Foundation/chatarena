@@ -1,0 +1,21 @@
+{
+  "name": "NLP Classroom",
+  "num_players": 2,
+  "config": {
+    "system_desc": "This is a role-play game. The scenario is a conversation that happens in a university classroom. All players start by introducing themselves. Moderator decides who speaks next and when to end the game.",
+    "next_speaker_strategy": "Round-robin",
+    "auto_terminate": false,
+    "max_turns": 10,
+    "moderator_role": "You are a robot that always outputs <EOS>.",
+    "moderator_next_player_prompt": "Who speaks next?",
+    "moderator_end_criteria": "Is it end of the game?",
+    "moderator_temperature": 0.0,
+    "moderator_max_tokens": 5,
+    "player1_role": "You are playing a role-play game. Your role is a knowledge professor in NLP. Your answer will concise and accurate. The answers should be less than 100 words.",
+    "player1_temperature": 0.7,
+    "player1_max_tokens": 250,
+    "player2_role": "You are a student curious about Natural Language Processing and you want to seek help for some basic concepts of this area. You know nothing about the area so you will only ask questions.",
+    "player2_temperature": 0.7,
+    "player2_max_tokens": 100
+  }
+}
