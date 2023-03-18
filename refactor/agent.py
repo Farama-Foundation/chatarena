@@ -21,7 +21,7 @@ class Agent():
                                                   background_info=background_prompt,
                                                   visible_history=history,
                                                   request="")
-        return f"[{self.name}]: {response}"
+        return response
 
 
 class Player(Agent):
@@ -35,7 +35,7 @@ class Moderator(Agent):
                  private_prompt: str,
                  terminate_prompt: str,
                  ):
-        super(Moderator, self).__init__(name="moderator", intelligence_source=intelligence_source,
+        super(Moderator, self).__init__(name="Moderator", intelligence_source=intelligence_source,
                                         public_prompt=public_prompt, private_prompt=private_prompt)
         self.terminate_prompt = terminate_prompt
 

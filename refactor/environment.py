@@ -53,7 +53,9 @@ class Conversation(Environment):
                  parallel: bool,
                  max_turns: int,
                  auto_terminate: bool,
-                 players: List[Player]):
+                 players: List[Player],
+                 moderator_visibility:Union[str, List[str]]="all",
+                 ):
         self.parallel = parallel
         self.max_turns = max_turns
         self.auto_terminate = auto_terminate
@@ -61,6 +63,7 @@ class Conversation(Environment):
         self.message_pool = MessagePool()
         self._current_turn = 0
         self._next_player_idx = 0
+        self.moderator_visibility = moderator_visibility
         self.moderator = Moderator(moderator_intelligence_source,
                                    public_prompt=public_prompt,
                                    private_prompt=moderator_role_description,
@@ -104,23 +107,23 @@ class Conversation(Environment):
         moderator_visible_messages = self.message_pool.get_visible_messages(self.moderator.name, turn=self._current_turn+1)
         moderator_message = Message(self.moderator.name,
                                     self.moderator.decide(moderator_visible_messages),
-                                    turn=self._current_turn)
+                                    turn=self._current_turn,
+                                    visible_to=self.moderator_visibility)
         self.message_pool.append_message(moderator_message)
         terminal = self.moderator.is_terminal(moderator_visible_messages)
-        observation = self.get_next_player_observation()
-        timestep = Timestep(observation=observation, reward=0, terminal=terminal)
 
         # update counters
-
-        self._next_player_idx += 1
-
-        if self._next_player_idx == len(self.players):
-            self._current_player_idx = 0
-
         if self.parallel==False:
             self._current_turn += 1
         else:
             if self._next_player_idx == 0:
                 self._current_turn += 1
 
+        self._next_player_idx += 1
+
+        if self._next_player_idx == len(self.players):
+            self._next_player_idx = 0
+
+        observation = self.get_next_player_observation()
+        timestep = Timestep(observation=observation, reward=0, terminal=terminal)
         return timestep

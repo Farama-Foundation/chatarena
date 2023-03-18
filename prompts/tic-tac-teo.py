@@ -70,7 +70,7 @@ You'll output:
 ```
 Board:
 | _ | X | _ |
-| _ | X | _ |
+| _ | _ | _ |
 | _ | _ | _ |
 ```
 
@@ -79,7 +79,7 @@ It means the O mark is put in the third row and the first column.
 You'll output:
 ```
 Board:
-| _ | _ | X |
+| _ | X | _ |
 | _ | _ | _ |
 | O | _ | _ |
 ```
