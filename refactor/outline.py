@@ -5,14 +5,37 @@ class Arena():
     """
     central module that manages the game environment and players
     """
-    def __init__(self, players, moderator):
-        pass
+    def __init__(self, players: List[Player], environment: Environment):
+        self.players = players
+        self.environment = environment
+        self.message_pool = MessagePool()
+        self.current_timestep = self.environment.reset()
+
+    @property
+    def num_players(self):
+        return len(self.players)
+
+    @property
+    def all_agents(self) -> List[Agent]:
+        return self.players + [self.moderator]
 
     @staticmethod
     def create_from_config(config):
-        pass
+        raise NotImplementedError()
+
+    def next_step(self):
+        """
+        take the action and return the next step
+        """
+        player = self.environment.get_next_player()
+        action = player.decide(self.current_timestep.observation)
+        timestep = self.environment.step(action, player)
+        self.current_timestep = timestep
+        return timestep
 
 
+
+@abstract
 class Enviornment():
     """
     The environment that the agents interacts with.
@@ -21,14 +44,18 @@ class Enviornment():
     def __init__(self, moderator_intelligence_source: IntelligenceSource):
         self.moderator = Moderator("moderator", moderator_intelligence_source)
 
-    def step(self, action: str, player: Player) -> (bool, Timestep):
+    def get_next_player(self) -> Player:
         """
-        step function that is called by the agent
+        get the next player
+        """
+        pass
+
+    def step(self, action: str, player: Player) -> Timestep:
+        """
+        step function that is called by the arena
         Args:
             action: the action that the agent wants to take
         Returns:
-            (valid, timestep)
-            valid: whether the action is valid, if the action is not valid the envionment will not proceed
             timestep: the timestep that contains the observation, reward and done
         """
         pass
@@ -39,9 +66,25 @@ class Enviornment():
         """
         pass
 
+
+class Conversation(Enviornment):
+    """
+    Fully observable conversation environment.
+    Conversation can be either parallel or sequential
+    There is a moderator that decides weather the conversation is over according to the public prompts and moderator prompts.
+    """
+    def __init__(self, moderator_intelligence_source: IntelligenceSource, parallel: bool,
+                 max_turns: int, auto_terminate: bool):
+        super(Conversation, self).__init__(moderator_intelligence_source)
+        self.parallel = parallel
+        self.max_turns = max_turns
+        self.auto_terminate = auto_terminate
+
+
 class Agent():
     def __init__(self, name):
         self.name = name
+
 
 class Player(Agent):
     """
@@ -68,6 +111,7 @@ class IntelligenceSource():
     def query(self, context):
         """
         query the intelligence source given the context
+        context: the context of the query
         """
         pass
 
@@ -76,9 +120,9 @@ class Humand(IntelligenceSource):
     pass
 
 
-class LLM(IntelligenceSource):
+class ChatGPT(IntelligenceSource):
     """
-    Interface to the language model
+    Interface to the ChatGPT style model with system, user, assistant roles seperation
     """
     pass
 
@@ -121,6 +165,12 @@ class MessagePool():
 
     def append_message(self, message: Message):
         self.message_pool.append(message)
+
+    def get_visible_messages(self, agent: Agent, turn: int) -> List[Message]:
+        """
+        get the messages that are visible to the agent before the specified turn
+        """
+        pass
 
 """
 TODOs:
