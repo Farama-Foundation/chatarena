@@ -87,7 +87,7 @@ class Conversation(Environment):
         """
         get the next player's observation
         """
-        return self.message_pool.get_visible_messages(self.get_next_player(), turn=self._current_turn)
+        return self.message_pool.get_visible_messages(self.get_next_player().name, turn=self._current_turn)
 
     def step(self, action: str) -> Timestep:
         """
@@ -101,7 +101,7 @@ class Conversation(Environment):
         message = Message(player.name, action, turn=self._current_turn)
         self.message_pool.append_message(message)
 
-        moderator_visible_messages = self.message_pool.get_visible_messages(self.moderator, turn=self._current_turn+1)
+        moderator_visible_messages = self.message_pool.get_visible_messages(self.moderator.name, turn=self._current_turn+1)
         moderator_message = Message(self.moderator.name,
                                     self.moderator.decide(moderator_visible_messages),
                                     turn=self._current_turn)

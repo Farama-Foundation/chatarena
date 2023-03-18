@@ -14,7 +14,7 @@ class Message():
     content: str
     turn: int
     timestamp: int = time.time_ns()
-    visible_to: Union[str, List["Agent"]] = "all"
+    visible_to: Union[str, List[str]] = "all"
 
     @property
     def msg_id(self):
@@ -55,7 +55,7 @@ class MessagePool():
         else:
             return self._messages[-1].turn
 
-    def get_visible_messages(self, agent: "Agent", turn: int) -> List[Message]:
+    def get_visible_messages(self, agent_name, turn: int) -> List[Message]:
         """
         get the messages that are visible to the agent before the specified turn
         """
@@ -65,6 +65,6 @@ class MessagePool():
 
         visible_messages = []
         for message in prev_messages:
-            if message.visible_to == "all" or agent in message.visible_to:
+            if message.visible_to == "all" or agent_name in message.visible_to:
                 visible_messages.append(message)
         return visible_messages
