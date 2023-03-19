@@ -13,6 +13,7 @@ class Arena():
         self.players = players
         self.environment = environment
         self.current_timestep = self.environment.reset()
+        self._name2agent = {agent.name: agent for agent in self.all_agents}
 
     @property
     def num_players(self):
@@ -30,8 +31,9 @@ class Arena():
         """
         take the action and return the next step
         """
-        player = self.environment.get_next_player()
-        action = player.decide(self.current_timestep.observation)
+        player_name = self.environment.get_next_player()
+        player = self._name2agent[player_name]
+        action = player(self.current_timestep.observation)
         timestep = self.environment.step(action)
         self.current_timestep = timestep
         return timestep
@@ -200,7 +202,7 @@ Don't output "Moderator".
                               parallel=False,
                               max_turns=config["max_turns"],
                               auto_terminate=config["auto_terminate"],
-                              players=[player1, player2],
+                              players=[player1.name, player2.name],
                               )
 
     arena = Arena(players=[player1, player2], environment=environment)

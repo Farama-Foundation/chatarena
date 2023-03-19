@@ -52,7 +52,6 @@ class OpenAIChat(IntelligenceSource):
             request: the request for the chatGPT
         """
         conversations = []
-        prefix = f"[{agent_name}]: "
         for i, message in enumerate(visible_history):
             if message.agent_name == agent_name:
                 conversations.append({"role": "assistant", "content": message.content})
@@ -60,8 +59,6 @@ class OpenAIChat(IntelligenceSource):
                 # Since there are more than one player, we need to distinguish between the players
                 conversations.append({"role": "user", "content": f"[{message.agent_name}]: {message.content}"})
 
-        # remind the model that the next message is from the specified agent
-        conversations.append({"role": "assistant", "content": prefix})
 
         system_prompt = [{"role": "system", "content": background_info}]
         if request:
@@ -72,7 +69,6 @@ class OpenAIChat(IntelligenceSource):
         response = self.get_response(system_prompt+conversations+request_prompt,
                                      temperature=temperature,
                                      max_tokens=max_tokens)
-        if response.startswith(prefix):
-            response = response[len(prefix):]
-        return f"[{agent_name}]: {response}"
+
+        return response
 

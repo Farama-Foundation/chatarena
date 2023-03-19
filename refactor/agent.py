@@ -13,15 +13,23 @@ class Agent():
         self.public_prompt = public_prompt
         self.private_prompt = private_prompt
 
-    def decide(self, history: List[Message]) -> str:
+    def __call__(self, history: List[Message]) -> str:
         """
         """
         background_prompt = self.public_prompt + '\n' + self.private_prompt
+        # remind the model that the next message is from the specified agent
+        prefix = f"[{self.name}]: "
+        prefix_message = Message(self.name, prefix, turn=-1)
+
         response = self.intelligence_source.query(self.name,
                                                   background_info=background_prompt,
-                                                  visible_history=history,
+                                                  visible_history=history+[prefix_message],
                                                   request="")
-        return response
+
+        # remove the prefix the model added it incorrectly
+        if response.startswith(prefix):
+            response = response[len(prefix):]
+        return f"[{self.name}]: {response}"
 
 
 class Player(Agent):
