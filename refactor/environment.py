@@ -53,7 +53,7 @@ class Conversation(Environment):
                  parallel: bool,
                  max_turns: int,
                  auto_terminate: bool,
-                 players: List[Player],
+                 players: List[str],
                  moderator_visibility:Union[str, List[str]]="all",
                  ):
         self.parallel = parallel
@@ -80,7 +80,7 @@ class Conversation(Environment):
     def print_message_pool(self):
         self.message_pool.print()
 
-    def get_next_player(self) -> Player:
+    def get_next_player(self) -> str:
         """
         get the next player
         """
@@ -90,7 +90,7 @@ class Conversation(Environment):
         """
         get the next player's observation
         """
-        return self.message_pool.get_visible_messages(self.get_next_player().name, turn=self._current_turn)
+        return self.message_pool.get_visible_messages(self.get_next_player(), turn=self._current_turn)
 
     def step(self, action: str) -> Timestep:
         """
@@ -101,12 +101,12 @@ class Conversation(Environment):
             timestep: the timestep that contains the observation, reward and done
         """
         player = self.get_next_player()
-        message = Message(player.name, action, turn=self._current_turn)
+        message = Message(player, action, turn=self._current_turn)
         self.message_pool.append_message(message)
 
         moderator_visible_messages = self.message_pool.get_visible_messages(self.moderator.name, turn=self._current_turn+1)
         moderator_message = Message(self.moderator.name,
-                                    self.moderator.decide(moderator_visible_messages),
+                                    self.moderator(moderator_visible_messages),
                                     turn=self._current_turn,
                                     visible_to=self.moderator_visibility)
         self.message_pool.append_message(moderator_message)
