@@ -18,6 +18,10 @@ class Environment(ABC):
     The environment that the agents interacts with.
     """
 
+    def __init__(self, player_names: List[str], env_desc: str):
+        self.player_names = player_names
+        self.env_desc = env_desc
+
     def get_next_player(self) -> str:
         """
         get name of the next player
@@ -64,9 +68,8 @@ class Conversation(Environment):
     """
 
     def __init__(self, player_names: List[str], env_desc: str, parallel: bool = False):
-        self.player_names = player_names
+        super().__init__(player_names, env_desc)
         self.message_pool = MessagePool()
-        self.env_desc = env_desc
         self.parallel = parallel  # if True, all players speak at the same time
 
         self._current_turn = 0
