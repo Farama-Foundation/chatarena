@@ -38,7 +38,7 @@ class Player(Agent):
 
 class Moderator(Agent):
     """
-    A special type of agent that moderates the conversation.
+    A special type of agent that moderates the conversation (and is usually used as part of environment).
     """
 
     def __init__(self, role_desc: str = None, env_desc: str = None,
@@ -68,3 +68,15 @@ class Moderator(Agent):
             return True
         else:
             return False
+
+    def __call__(self, observation: List[Message]) -> str:
+        """
+        Call the moderator to generate an updated game state.
+        """
+        response = self.backend.query(
+            agent_name=self.name,
+            role_desc=self.role_desc,
+            env_desc=self.env_desc,
+            history_messages=observation,
+            request_msg=None)
+        return response

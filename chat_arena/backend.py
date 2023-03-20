@@ -80,7 +80,7 @@ class OpenAIChat(IntelligenceBackend):
             request_prompt = []
 
         # To make ChatGPT be aware of its own role, append a message with its own name
-        prefix = f"[{agent_name}]: "
+        prefix = f"[{agent_name}]:"
         # request_prompt.append({"role": "assistant", "content": prefix})
 
         response = self._get_response(system_prompt + conversations + request_prompt,
@@ -89,6 +89,6 @@ class OpenAIChat(IntelligenceBackend):
 
         # Remove the prefix if the response starts with it
         if response.strip().startswith(prefix):
-            response = response.strip()[len(prefix):]
+            response = response.strip()[len(prefix):].strip()
 
         return response

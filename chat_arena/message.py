@@ -70,6 +70,6 @@ class MessagePool():
 
         visible_messages = []
         for message in prev_messages:
-            if message.visible_to == "all" or agent_name in message.visible_to:
+            if message.visible_to == "all" or agent_name in message.visible_to or agent_name == "Moderator":
                 visible_messages.append(message)
         return visible_messages

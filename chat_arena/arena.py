@@ -1,8 +1,8 @@
 from typing import List
 
-from .agent import Player
+from .agent import Player, Moderator
 from .backend import OpenAIChat
-from .environment import Environment, Conversation, TimeStep
+from .environment import Environment, Conversation, TimeStep, ModeratedConversation
 
 
 class Arena():
@@ -31,11 +31,11 @@ class Arena():
         timestep = self.environment.step(player_name, action)  # update the environment
         return timestep
 
-    def run(self, num_turns: int = 100):
+    def run(self, num_steps: int = 1):
         """
         run the game for num_turns
         """
-        for i in range(num_turns):
+        for i in range(num_steps):
             timestep = self.step()
             if timestep.terminal:
                 break
@@ -58,11 +58,29 @@ class Arena():
             )
             players.append(player)
 
-        env = Conversation(
-            player_names=[player.name for player in players],
-            env_desc=env_config["env_desc"],
-            parallel=env_config["parallel"],
-        )
+        if env_config.get("moderator", None) is not None:
+            env = ModeratedConversation(
+                player_names=[player.name for player in players],
+                env_desc=env_config["env_desc"],
+                parallel=env_config["parallel"],
+                moderator=Moderator(
+                    role_desc=env_config["moderator"]["role_desc"],
+                    env_desc=env_config["env_desc"],
+                    backend=OpenAIChat(
+                        temperature=env_config["moderator"]["temperature"],
+                        max_tokens=env_config["moderator"]["max_tokens"],
+                        model_name=env_config["moderator"]["model_name"],
+                    ),
+                    terminal_condition=env_config["moderator"]["terminal_condition"],
+                ),
+                moderator_visibility=env_config["moderator"]["visibility"],
+            )
+        else:
+            env = Conversation(
+                player_names=[player.name for player in players],
+                env_desc=env_config["env_desc"],
+                parallel=env_config["parallel"],
+            )
         return Arena(players, env)
 
     @staticmethod

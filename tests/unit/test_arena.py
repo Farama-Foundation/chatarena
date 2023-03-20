@@ -23,7 +23,29 @@ class TestArena(TestCase):
         arena.step()
         arena.environment.print()
 
-        self.assertEqual(1, 1)
+        self.assertTrue(True)
+
+    def test_arena_2(self):
+        with open("examples/nlp-classroom.json", "r") as fp:
+            config = json.load(fp)
+        arena = Arena.from_config(config)
+
+        arena.run(num_steps=10)
+        arena.environment.print()
+
+        self.assertTrue(True)
+
+    def test_arena_3(self):
+        with open("examples/tic-tac-toe.json", "r") as fp:
+            config = json.load(fp)
+        arena = Arena.from_config(config)
+
+        for i in range(1, 10):
+            print(f"=== Step {i} ===")
+            arena.step()
+            arena.environment.print()
+
+        self.assertTrue(True)
 
 
 if __name__ == "__main__":

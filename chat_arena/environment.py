@@ -115,3 +115,46 @@ class Conversation(Environment):
 
         timestep = TimeStep(observation=self.get_observation(), reward=0, terminal=False)  # Return all the messages
         return timestep
+
+
+class ModeratedConversation(Conversation):
+    """
+    Turn-based fully observable conversation environment.
+    Next speaker order is either parallel or round-robin.
+    Moderator is a special agent that can see all messages and can decide whether the conversation is over.
+    """
+
+    def __init__(self, player_names: List[str], env_desc: str, parallel: bool = False,
+                 moderator: Moderator = None, moderator_visibility: Union[str, List[str]] = "all"):
+        super().__init__(player_names, env_desc, parallel)
+        self.moderator = moderator
+        self.moderator_visibility = moderator_visibility  # by default, all players can see the moderator's messages
+
+    def step(self, player_name: str, action: str) -> TimeStep:
+        """
+        step function that is called by the arena
+        Args:
+            player_name: the name of the player that takes the action
+            action: the action that the agents wants to take
+        """
+        message = Message(agent_name=player_name, content=action, turn=self._current_turn)
+        self.message_pool.append_message(message)
+
+        # Moderator's turn
+        moderator_history = self.message_pool.get_all_messages()
+        moderator_response = self.moderator(moderator_history)
+        moderator_message = Message(agent_name=self.moderator.name,
+                                    content=moderator_response,
+                                    turn=self._current_turn,
+                                    visible_to=self.moderator_visibility)
+        self.message_pool.append_message(moderator_message)
+
+        terminal = self.moderator.is_terminal(moderator_history)
+
+        # Update the counters
+        if not self.parallel or self._next_player_idx == 0:
+            self._current_turn += 1
+        self._next_player_idx = (self._next_player_idx + 1) % len(self.player_names)
+
+        timestep = TimeStep(observation=self.get_observation(), reward=0, terminal=terminal)  # Return all the messages
+        return timestep
