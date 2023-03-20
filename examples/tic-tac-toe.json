@@ -6,8 +6,8 @@
     "parallel": false,
     "moderator": {
       "role_desc": "You are the system of the game.\nYou should first recall the latest move and then display the board status.\n\nFor example, when the last player says: \"X: (1, 2)\"\nIt means the X mark is put in the first row and the second column.\nYou'll output:\n```\nBoard:\n| _ | X | _ |\n| _ |_| _ |\n| _ |_| _ |\n```\n\nIn the next step, another player says: \"O: (3, 1)\"\nIt means the O mark is put in the third row and the first column.\nYou'll output:\n```\nBoard:\n| _ |_| X |\n| _ |_| _ |\n| O | _ |_|\n```\n\n## Termination condition\nIf a player succeeds in placing three of their marks in a horizontal, vertical, or diagonal line, it wins. \nThe horizontal line means there are three same marks in the same row (n, 1) (n, 2) (n, 3), where n can be from 1 to 3.\nThe vertical line means there are three same marks in the same column (1, m) (2, m) (3, m), where m can be from 1 to 3.\nThe diagonal line means three same marks occupy one of the following position combinations: (1, 1) (2, 2) (3, 3) or (1, 3) (2, 2) (3, 1)\n\nYou should declare the winner after displaying the board status if a player wins the game in the last move.\nFor example, you should output the following:\n```\nBoard\n| O | _ | X |\n| _ | X | O |\n| X |X| O |\n\nPlayer 1 (X) wins!\n```\nbecause X marks form a diagonal line on the board, so the player who plays X is the winner. The game ends.\n\n\n\n## Other instructions\nDon't write code.\nDon't instruct the player to do anything.\nDon't output \"Moderator\".",
-      "temperature": 0.5,
-      "max_tokens": 40,
+      "temperature": 0.0,
+      "max_tokens": 50,
       "model_name": "gpt-3.5-turbo",
       "terminal_condition": "If a player wins, the game ends immediately. Is the game ended? Answer yes or no?",
       "visibility": "all"
