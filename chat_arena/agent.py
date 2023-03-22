@@ -4,7 +4,7 @@ from abc import ABC
 
 from .backend import IntelligenceBackend
 from .message import Message
-from .utils import load_backend
+# from .utils import load_backend
 
 
 class Agent(ABC):

@@ -4,7 +4,6 @@ from abc import ABC
 
 from .message import Message, MessagePool
 from .agent import Agent, Moderator
-from .utils import register_env
 
 
 @dataclass
@@ -69,7 +68,6 @@ class Environment(ABC):
         pass
 
 
-@register_env("conversation")
 class Conversation(Environment):
     """
     Turn-based fully observable conversation environment.
@@ -146,7 +144,6 @@ class Conversation(Environment):
         return timestep
 
 
-@register_env("moderated_conversation")
 class ModeratedConversation(Conversation):
     """
     Turn-based fully observable conversation environment.
@@ -213,3 +210,16 @@ class ModeratedConversation(Conversation):
 
         timestep = TimeStep(observation=self.get_observation(), reward=0, terminal=terminal)  # Return all the messages
         return timestep
+
+
+ENV_REGISTRY = {
+    "conversation": Conversation,
+    "moderated_conversation": ModeratedConversation,
+}
+
+# Load an environment from a config dictionary
+def load_environment(config):
+    env_config = config["environment"]
+    env_cls = ENV_REGISTRY[env_config["env_type"]]
+    env = env_cls.from_config(env_config)
+    return env

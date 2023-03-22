@@ -5,7 +5,8 @@ import cohere
 from abc import ABC
 
 from .message import Message
-from .utils import register_backend
+
+# from .utils import register_backend
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
@@ -26,7 +27,6 @@ class IntelligenceBackend(ABC):
         pass
 
 
-@register_backend("human")
 class Human(IntelligenceBackend):
 
     def query(self, agent_name: str, *args, **kwargs) -> str:
@@ -72,7 +72,6 @@ class RemoteAPI(IntelligenceBackend):
     #     return cls(temperature, max_tokens)
 
 
-@register_backend("openai-chat")
 class OpenAIChat(RemoteAPI):
     """
     Interface to the ChatGPT style model with system, user, assistant roles separation
@@ -157,7 +156,6 @@ class OpenAIChat(RemoteAPI):
         return response
 
 
-@register_backend("cohere-chat")
 class CohereChat(RemoteAPI):
     """
     Interface to the Cohere API
@@ -242,3 +240,18 @@ class CohereChat(RemoteAPI):
                                       max_tokens=kwargs.get("max_tokens", None))
 
         return response
+
+
+BACKEND_REGISTRY = {
+    "openai-chat": OpenAIChat,
+    "cohere-chat": CohereChat,
+    "human": Human,
+}
+
+
+# Load a backend from a config dictionary
+def load_backend(config):
+    backend_config = config["backend"]
+    backend_cls = BACKEND_REGISTRY[backend_config["backend_type"]]
+    backend = backend_cls.from_config(backend_config)
+    return backend
