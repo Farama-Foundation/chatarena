@@ -163,6 +163,10 @@ class ModeratedConversation(Conversation):
     @classmethod
     def from_config(cls, config: dict):
         assert config["env_type"] == "moderated_conversation"
+        # Add env_desc to the config of the moderator if it is not there
+        if "env_desc" not in config["moderator"]:
+            config["moderator"]["env_desc"] = config["env_desc"]
+
         return cls(
             player_names=config["player_names"],
             env_desc=config["env_desc"],

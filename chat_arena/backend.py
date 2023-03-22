@@ -1,5 +1,4 @@
 from typing import List
-from abc import abstractmethod
 import os
 import openai
 import cohere
@@ -52,7 +51,25 @@ class Human(IntelligenceBackend):
 
 
 class RemoteAPI(IntelligenceBackend):
-    pass
+
+    def __init__(self, temperature, max_tokens):
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+
+    # @staticmethod
+    # def get_components(config):
+    #     temperature = gr.Slider(minimum=0, maximum=2.0, step=0.1, interactive=True,
+    #                             label=f"temperature", value=config["temperature"])
+    #     max_tokens = gr.Slider(minimum=10, maximum=500, step=10, interactive=True,
+    #                            label=f"max tokens per response", value=config["max_tokens"])
+    #
+    #     return [temperature, max_tokens]
+    #
+    # @classmethod
+    # def parse_components(cls, components, start_idx):
+    #     temperature = components[start_idx]
+    #     max_tokens = components[start_idx + 1]
+    #     return cls(temperature, max_tokens)
 
 
 @register_backend("openai-chat")
@@ -63,8 +80,7 @@ class OpenAIChat(RemoteAPI):
     stateful = False
 
     def __init__(self, temperature, max_tokens, model_name="gpt-3.5-turbo"):
-        self.temperature = temperature
-        self.max_tokens = max_tokens
+        super().__init__(temperature, max_tokens)
         self.model = model_name
         self.stop = ("<EOS>", "[EOS]", "(EOS)")  # End of sentence token
 
@@ -150,8 +166,8 @@ class CohereChat(RemoteAPI):
     stateful = True
 
     def __init__(self, temperature, max_tokens):
-        self.temperature = temperature
-        self.max_tokens = max_tokens
+        super().__init__(temperature, max_tokens)
+
         self.api_key = os.environ.get('COHEREAI_API_KEY')
         self.client = cohere.Client(self.api_key)
 

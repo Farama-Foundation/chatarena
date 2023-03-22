@@ -47,6 +47,10 @@ class Arena():
         # Load the players
         players = []
         for player_config in config["players"]:
+            # Add env_desc to the player config if it is not there
+            if "env_desc" not in player_config:
+                player_config["env_desc"] = config["environment"]["env_desc"]
+
             player = Player.from_config(player_config)
             players.append(player)
 

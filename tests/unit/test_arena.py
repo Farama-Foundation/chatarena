@@ -51,7 +51,7 @@ class TestArena(TestCase):
         with open("examples/nlp-classroom.json", "r") as fp:
             config = json.load(fp)
         arena = Arena.from_config(config)
-        arena.launch_webapp()
+        arena.launch_gradio()
 
         self.assertTrue(True)
 
@@ -59,7 +59,7 @@ class TestArena(TestCase):
         with open("examples/tic-tac-toe.json", "r") as fp:
             config = json.load(fp)
         arena = Arena.from_config(config)
-        arena.launch_webapp()
+        arena.launch_gradio()
 
         self.assertTrue(True)
 
@@ -67,7 +67,7 @@ class TestArena(TestCase):
         with open("examples/nlp-classroom-gpt4.json", "r") as fp:
             config = json.load(fp)
         arena = Arena.from_config(config)
-        arena.launch_webapp()
+        arena.launch_gradio()
 
         self.assertTrue(True)
 
@@ -75,7 +75,7 @@ class TestArena(TestCase):
         with open("examples/tic-tac-toe-gpt4.json", "r") as fp:
             config = json.load(fp)
         arena = Arena.from_config(config)
-        arena.launch_webapp()
+        arena.launch_gradio()
 
         self.assertTrue(True)
 
@@ -83,7 +83,7 @@ class TestArena(TestCase):
         with open("examples/nlp-classroom-3players-gpt4.json", "r") as fp:
             config = json.load(fp)
         arena = Arena.from_config(config)
-        arena.launch_webapp()
+        arena.launch_gradio()
 
         self.assertTrue(True)
 
@@ -92,7 +92,7 @@ class TestArena(TestCase):
         with open("examples/rock-paper-scissors.json", "r") as fp:
             config = json.load(fp)
         arena = Arena.from_config(config)
-        arena.launch_webapp()
+        arena.launch_gradio()
 
         self.assertTrue(True)
 
