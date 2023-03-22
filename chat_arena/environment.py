@@ -4,6 +4,7 @@ from abc import ABC
 
 from .message import Message, MessagePool
 from .agent import Agent, Moderator
+from .utils import register_env
 
 
 @dataclass
@@ -21,6 +22,13 @@ class Environment(ABC):
     def __init__(self, player_names: List[str], env_desc: str):
         self.player_names = player_names
         self.env_desc = env_desc
+
+    @classmethod
+    def from_config(cls, config: dict):
+        pass
+
+    def to_config(self) -> dict:
+        pass
 
     def get_next_player(self) -> str:
         """
@@ -61,6 +69,7 @@ class Environment(ABC):
         pass
 
 
+@register_env("conversation")
 class Conversation(Environment):
     """
     Turn-based fully observable conversation environment.
@@ -74,6 +83,23 @@ class Conversation(Environment):
 
         self._current_turn = 0
         self._next_player_idx = 0
+
+    @classmethod
+    def from_config(cls, config: dict):
+        assert config["env_type"] == "conversation"
+        return cls(
+            player_names=config["player_names"],
+            env_desc=config["env_desc"],
+            parallel=config["parallel"],
+        )
+
+    def to_config(self) -> dict:
+        return {
+            "env_type": "conversation",
+            "player_names": self.player_names,
+            "env_desc": self.env_desc,
+            "parallel": self.parallel,
+        }
 
     def reset(self):
         self._current_turn = 0
@@ -120,6 +146,7 @@ class Conversation(Environment):
         return timestep
 
 
+@register_env("moderated_conversation")
 class ModeratedConversation(Conversation):
     """
     Turn-based fully observable conversation environment.
@@ -132,6 +159,27 @@ class ModeratedConversation(Conversation):
         super().__init__(player_names, env_desc, parallel)
         self.moderator = moderator
         self.moderator_visibility = moderator_visibility  # by default, all players can see the moderator's messages
+
+    @classmethod
+    def from_config(cls, config: dict):
+        assert config["env_type"] == "moderated_conversation"
+        return cls(
+            player_names=config["player_names"],
+            env_desc=config["env_desc"],
+            parallel=config["parallel"],
+            moderator=Moderator.from_config(config["moderator"]),
+            moderator_visibility=config["moderator_visibility"],
+        )
+
+    def to_config(self) -> dict:
+        return {
+            "env_type": "moderated_conversation",
+            "player_names": self.player_names,
+            "env_desc": self.env_desc,
+            "parallel": self.parallel,
+            "moderator": self.moderator.to_config(),
+            "moderator_visibility": self.moderator_visibility,
+        }
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """

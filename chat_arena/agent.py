@@ -5,6 +5,7 @@ import gradio as gr
 
 from .backend import IntelligenceBackend, OpenAIChat
 from .message import Message
+from .utils import load_backend
 
 
 class Agent(ABC):
@@ -23,6 +24,18 @@ class Player(Agent):
         self.role_desc = role_desc
         self.env_desc = env_desc
         self.backend = backend
+
+    @classmethod
+    def from_config(cls, config: dict):
+        name = config["name"]
+        role_desc = config["role_desc"]
+        env_desc = config["env_desc"]
+        backend = load_backend(config["backend"])
+        return cls(name=name, role_desc=role_desc, env_desc=env_desc, backend=backend)
+
+    def to_config(self) -> dict:
+        return {"name": self.name, "role_desc": self.role_desc, "env_desc": self.env_desc,
+                "backend": self.backend.to_config()}
 
     def __call__(self, observation: List[Message]) -> str:
         """
@@ -74,6 +87,20 @@ class Moderator(Agent):
         self.env_desc = env_desc
         self.backend = backend
         self.terminal_condition = terminal_condition
+
+    @classmethod
+    def from_config(cls, config: dict):
+        role_desc = config["role_desc"]
+        env_desc = config["env_desc"]
+        backend = load_backend(config["backend"])
+        terminal_condition = config["terminal_condition"]
+        return cls(role_desc=role_desc, env_desc=env_desc, backend=backend,
+                   terminal_condition=terminal_condition)
+
+    def to_config(self) -> dict:
+        return {"role_desc": self.role_desc, "env_desc": self.env_desc,
+                "backend": self.backend.to_config(),
+                "terminal_condition": self.terminal_condition}
 
     def is_terminal(self, history: List[Message], *args, **kwargs) -> bool:
         """
