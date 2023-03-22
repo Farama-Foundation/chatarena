@@ -4,7 +4,7 @@ from time import sleep
 
 from .agent import Player, Moderator
 from .backend import OpenAIChat
-from .environment import Environment, Conversation, TimeStep, ModeratedConversation
+from chat_arena.environments.environment import Environment, Conversation, TimeStep, ModeratedConversation
 
 css = """
 #col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
@@ -61,7 +61,7 @@ class Arena():
         players = []
         for player_idx, player_config in enumerate(config["players"]):
             player = Player(
-                name=f"Player {player_idx + 1}",
+                name=f"Player {player_idx + 1}" if "name" not in player_config else player_config["name"],
                 role_desc=player_config["role_desc"],
                 env_desc=env_config["env_desc"],
                 backend=OpenAIChat(

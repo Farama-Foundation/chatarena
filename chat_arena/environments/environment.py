@@ -2,14 +2,14 @@ from dataclasses import dataclass
 from typing import List, Union
 from abc import ABC
 
-from .message import Message, MessagePool
-from .agent import Agent, Moderator
+from chat_arena.message import Message, MessagePool
+from chat_arena.agent import Agent, Moderator
 
 
 @dataclass
 class TimeStep():
     observation: List[Message]
-    reward: float
+    reward: List[float]
     terminal: bool
 
 
@@ -60,6 +60,9 @@ class Environment(ABC):
         """
         pass
 
+    def get_zero_rewards(self):
+        return [0 for _ in self.player_names]
+
 
 class Conversation(Environment):
     """
@@ -80,7 +83,9 @@ class Conversation(Environment):
         self._next_player_idx = 0
         self.message_pool.reset()
 
-        init_timestep = TimeStep(observation=[], reward=0, terminal=False)
+        init_timestep = TimeStep(observation=[],
+                                 reward=self.get_zero_rewards(),
+                                 terminal=False)
         return init_timestep
 
     def print(self):
@@ -116,7 +121,9 @@ class Conversation(Environment):
             self._current_turn += 1
         self._next_player_idx = (self._next_player_idx + 1) % len(self.player_names)
 
-        timestep = TimeStep(observation=self.get_observation(), reward=0, terminal=False)  # Return all the messages
+        timestep = TimeStep(observation=self.get_observation(),
+                            reward=self.get_zero_rewards(),
+                            terminal=False)  # Return all the messages
         return timestep
 
 

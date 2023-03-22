@@ -48,7 +48,10 @@ class MessagePool():
 
     def print(self):
         for message in self._messages:
-            print(f"[{message.agent_name}]: {message.content}")
+            if message.visible_to == "all":
+                print(f"[{message.agent_name}]: {message.content}")
+            else:
+                print(f"[{message.agent_name}]: {message.content} (visible to {message.visible_to})")
 
     @property
     def last_turn(self):
