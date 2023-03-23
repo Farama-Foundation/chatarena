@@ -72,13 +72,16 @@ class RemoteAPI(IntelligenceBackend):
     #     return cls(temperature, max_tokens)
 
 
+DEFAULT_OPENAI_MODEL = "gpt-3.5-turbo"
+
+
 class OpenAIChat(RemoteAPI):
     """
     Interface to the ChatGPT style model with system, user, assistant roles separation
     """
     stateful = False
 
-    def __init__(self, temperature, max_tokens, model_name="gpt-3.5-turbo"):
+    def __init__(self, temperature, max_tokens, model_name=DEFAULT_OPENAI_MODEL):
         super().__init__(temperature, max_tokens)
         self.model = model_name
         self.stop = ("<EOS>", "[EOS]", "(EOS)")  # End of sentence token
@@ -86,7 +89,7 @@ class OpenAIChat(RemoteAPI):
     @classmethod
     def from_config(cls, config):
         assert config["backend_type"] == "openai-chat"
-        return cls(config["temperature"], config["max_tokens"], config["model"])
+        return cls(config["temperature"], config["max_tokens"], config.get("model", DEFAULT_OPENAI_MODEL))
 
     def to_config(self):
         return {
@@ -251,7 +254,6 @@ BACKEND_REGISTRY = {
 
 # Load a backend from a config dictionary
 def load_backend(config):
-    backend_config = config["backend"]
-    backend_cls = BACKEND_REGISTRY[backend_config["backend_type"]]
-    backend = backend_cls.from_config(backend_config)
+    backend_cls = BACKEND_REGISTRY[config["backend_type"]]
+    backend = backend_cls.from_config(config)
     return backend

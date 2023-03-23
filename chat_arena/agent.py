@@ -2,9 +2,8 @@ from typing import List
 import re
 from abc import ABC
 
-from .backend import IntelligenceBackend
+from .backend import IntelligenceBackend, load_backend
 from .message import Message
-# from .utils import load_backend
 
 
 class Agent(ABC):

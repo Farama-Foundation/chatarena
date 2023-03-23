@@ -1,8 +1,7 @@
+import re
 import gradio as gr
 
-# from chat_arena.agent import Player, Moderator
-# from chat_arena.arena import Arena
-# from chat_arena.environment import Environment, Conversation, TimeStep, ModeratedConversation
+from chat_arena.arena import Arena
 from chat_arena.backend import BACKEND_REGISTRY
 from chat_arena.environment import ENV_REGISTRY
 
@@ -18,26 +17,32 @@ css = """
 .message-wrap {max-height: min(700px, 100vh);}
 """
 
+DEBUG = False
+
 DEFAULT_BACKEND = "openai-chat"
+DEFAULT_ENV = "conversation"
 MAX_NUM_PLAYERS = 6
 DEFAULT_NUM_PLAYERS = 2
 
+# TODO: temporary hacky placeholder for examples
+EXAMPLE_REGISTRY = {}
 
-def get_moderator_components():
+
+def get_moderator_components(visible=True):
     name = "Moderator"
     with gr.Row():
         with gr.Column():
-            role_desc = gr.Textbox(label="Moderator role", lines=1, visible=False, interactive=True,
+            role_desc = gr.Textbox(label="Moderator role", lines=1, visible=visible, interactive=True,
                                    placeholder=f"Enter the role description for {name}")
-            terminal_condition = gr.Textbox(show_label=False, lines=1, visible=False, interactive=True,
+            terminal_condition = gr.Textbox(show_label=False, lines=1, visible=visible, interactive=True,
                                             placeholder="Enter the end criteria for the conversation")
         with gr.Column():
-            backend_type = gr.Dropdown(show_label=False, visible=False, interactive=True,
+            backend_type = gr.Dropdown(show_label=False, visible=visible, interactive=True,
                                        choices=list(BACKEND_REGISTRY.keys()), value=DEFAULT_BACKEND)
-            with gr.Accordion(f"{name} Parameters", open=False, visible=False) as accordion:
-                temperature = gr.Slider(minimum=0, maximum=2.0, step=0.1, interactive=True, visible=False,
+            with gr.Accordion(f"{name} Parameters", open=False, visible=visible) as accordion:
+                temperature = gr.Slider(minimum=0, maximum=2.0, step=0.1, interactive=True, visible=visible,
                                         label=f"temperature", value=0.7)
-                max_tokens = gr.Slider(minimum=10, maximum=500, step=10, interactive=True, visible=False,
+                max_tokens = gr.Slider(minimum=10, maximum=500, step=10, interactive=True, visible=visible,
                                        label=f"max tokens", value=200)
 
     return [role_desc, terminal_condition, backend_type, accordion, temperature, max_tokens]
@@ -60,10 +65,13 @@ def get_player_components(name, visible):
     return [role_desc, backend_type, accordion, temperature, max_tokens]
 
 
-"""Launch the gradio UI"""
+def get_empty_state():
+    return gr.State({"history": [], "arena": None})
+
 
 with gr.Blocks(css=css) as demo:
-    state = gr.State()
+    state = get_empty_state()
+    all_components = []
 
     with gr.Column(elem_id="col-container"):
         gr.Markdown("""# 🏟 Chat Arena️<br>
@@ -71,34 +79,29 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 [Arena Tutorial](https://chat.ai-arena.org/tutorial)""",
                     elem_id="header")
 
+        with gr.Row():
+            env_selector = gr.Dropdown(choices=list(ENV_REGISTRY.keys()), value=DEFAULT_ENV, interactive=True,
+                                       label="Environment Type", show_label=True)
+            example_selector = gr.Dropdown(choices=list(EXAMPLE_REGISTRY.keys()), interactive=True,
+                                           label="Select Example", show_label=True)
+
         # Environment configuration
-        with gr.Row():
-            gr.Markdown("Environment Configuration")
-            env_selector = gr.Dropdown(choices=list(ENV_REGISTRY.keys()), label="Environment Type", show_label=False)
-        env_desc = gr.Textbox(show_label=False, lines=2, visible=True, label="System Description",
-                              placeholder="Enter a description of a scenario or the game rules.")
-        with gr.Row():
-            parallel = gr.Checkbox(label="Parallel Actions", value=False, visible=True)
-            moderator_enabled = gr.Checkbox(label="Enable Moderator", value=False, visible=True)
+        env_desc_textbox = gr.Textbox(show_label=True, lines=2, visible=True, label="Environment Description",
+                                      placeholder="Enter a description of a scenario or the game rules.")
 
-        env_components = [env_desc, parallel]
-        with gr.Column():
-            moderator_components = get_moderator_components()
-
-
-        # Update the visibility of moderator components based on the moderator_enabled checkbox
-        def _update_moderator_components(enabled):
-            return {comp: gr.update(visible=enabled) for comp in moderator_components}
-
-
-        moderator_enabled.change(_update_moderator_components, moderator_enabled, moderator_components)
+        all_components += [env_selector, example_selector, env_desc_textbox]
 
         with gr.Row():
             with gr.Column(elem_id="col-chatbox"):
                 chatbot = gr.Chatbot(elem_id="chatbox", visible=True, label="Chat Arena")
+                all_components += [chatbot]
 
             with gr.Column(elem_id="col-config"):  # Player Configuration
                 # gr.Markdown("Player Configuration")
+                parallel_checkbox = gr.Checkbox(label="Parallel Actions", value=False, visible=True)
+                with gr.Accordion("Moderator", open=False, visible=True):
+                    moderator_components = get_moderator_components(True)
+                all_components += [parallel_checkbox, *moderator_components]
 
                 all_players_components, players_idx2comp = [], {}
                 with gr.Blocks():
@@ -111,6 +114,8 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
                         players_idx2comp[i] = player_comps + [tab]
                         all_players_components += player_comps + [tab]
+
+                all_components += [num_player_slider] + all_players_components
 
 
                 def variable_players(k):
@@ -128,86 +133,131 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
                 num_player_slider.change(variable_players, num_player_slider, all_players_components)
 
-                # for player_idx in range(len(config["players"])):
-                #     with gr.Accordion(f"Player {player_idx + 1}", open=True):
-                #         player_config = config["players"][player_idx]
-                #         player_components = Player.get_components(player_config)
-                #         all_components.extend(player_components)
-
-                human_input = gr.Textbox(show_label=False, lines=1, visible=True,
-                                         placeholder="Human Player Input: ")
+                human_input = gr.Textbox(show_label=True, label="Human Input", lines=1, visible=True,
+                                         interactive=False)
                 with gr.Row():
                     btn_step = gr.Button("Step")
-                    btn_restart = gr.Button("Restart")
+                    btn_restart = gr.Button("Start")
 
-    # def play_game(*args):
-    #     # Clear the chatbot UI output and hide the other components
-    #     yield gr.update(value=[], visible=True), gr.update(value="Running...", interactive=False)
-    #
-    #     env_desc, max_steps, parallel = args[:3]
-    #
-    #     offset = 3
-    #     if isinstance(arena.environment, ModeratedConversation):
-    #         moderator, offset = Moderator.parse_components(args, start_idx=offset)
-    #
-    #     players = []
-    #     for player_id in range(1, len(arena.players) + 1):
-    #         player, offset = Player.parse_components(args, f"Player {player_id}", start_idx=offset)
-    #         players.append(player)
-    #
-    #     # Create the arena to manage the game environment
-    #     if isinstance(arena.environment, ModeratedConversation):
-    #         arena = Arena(
-    #             players,
-    #             environment=ModeratedConversation(
-    #                 player_names=[player.name for player in players],
-    #                 env_desc=env_desc,
-    #                 parallel=parallel,
-    #                 moderator=moderator,
-    #                 moderator_visibility="all")
-    #         )
-    #     else:
-    #         arena = Arena(
-    #             players,
-    #             environment=Conversation(
-    #                 player_names=[player.name for player in players],
-    #                 env_desc=env_desc,
-    #                 parallel=parallel)
-    #         )
-    #
-    #     def _convert_to_chatbot_output(all_messages):
-    #         chatbot_output = []
-    #         for i, message in enumerate(all_messages):
-    #             agent_name, msg = message.agent_name, message.content
-    #             new_msg = re.sub(r'\n+', '<br>', msg.strip())  # Preprocess message for chatbot output
-    #             new_msg = f"**[{agent_name}]**: {new_msg}"  # Add role to the message
-    #
-    #             if agent_name == "Moderator":
-    #                 chatbot_output.append((new_msg, None))
-    #             else:
-    #                 chatbot_output.append((None, new_msg))
-    #         return chatbot_output
-    #
-    #     # Main loop: Play the game
-    #     for turn in range(max_steps):
-    #         try:
-    #             timestep = arena.step()
-    #             arena.environment.print()
-    #             all_messages = timestep.observation  # user sees what the moderator sees
-    #             chatbot_output = _convert_to_chatbot_output(all_messages)
-    #             # Update the chatbot UI output
-    #             yield chatbot_output, gr.update()
-    #             sleep(0.2)
-    #
-    #             if timestep.terminal:
-    #                 break
-    #         except Exception as e:
-    #             print(e)
-    #
-    #     yield gr.update(), gr.update(value="Run", interactive=True)
-    #
-    # btn_run.click(play_game, all_components, [chatbot, btn_run])
+                all_components += [human_input, btn_step, btn_restart]
+
+
+    def _convert_to_chatbot_output(all_messages):
+        chatbot_output = []
+        for i, message in enumerate(all_messages):
+            agent_name, msg = message.agent_name, message.content
+            new_msg = re.sub(r'\n+', '<br>', msg.strip())  # Preprocess message for chatbot output
+            new_msg = f"**[{agent_name}]**: {new_msg}"  # Add role to the message
+
+            if agent_name == "Moderator":
+                chatbot_output.append((new_msg, None))
+            else:
+                chatbot_output.append((None, new_msg))
+        return chatbot_output
+
+
+    def _create_arena_config_from_components(all_comps: dict):
+        env_desc = all_comps[env_desc_textbox]
+
+        # Initialize the players
+        num_players = all_comps[num_player_slider]
+        player_configs = []
+        for i in range(num_players):
+            player_name = f"Player {i + 1}"
+            role_desc, backend_type, temperature, max_tokens = [
+                all_comps[c] for c in players_idx2comp[i] if not isinstance(c, (gr.Accordion, gr.Tab))]
+            player_config = {
+                "name": player_name,
+                "role_desc": role_desc,
+                "env_desc": env_desc,
+                "backend": {
+                    "backend_type": backend_type,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens
+                }
+            }
+            player_configs.append(player_config)
+
+        # Initialize the environment
+        env_type = all_comps[env_selector]
+        # Get moderator config
+        mod_role_desc, mod_terminal_condition, moderator_backend_type, mod_temp, mod_max_tokens = [
+            all_comps[c] for c in moderator_components if not isinstance(c, (gr.Accordion, gr.Tab))]
+        moderator_config = {
+            "role_desc": mod_role_desc,
+            "env_desc": env_desc,
+            "terminal_condition": mod_terminal_condition,
+            "backend": {
+                "backend_type": moderator_backend_type,
+                "temperature": mod_temp,
+                "max_tokens": mod_max_tokens
+            }
+        }
+        env_config = {
+            "env_type": env_type,
+            "player_names": [conf["name"] for conf in player_configs],
+            "env_desc": env_desc,
+            "parallel": all_comps[parallel_checkbox],
+            "moderator": moderator_config
+        }
+
+        arena_config = {"players": player_configs, "environment": env_config}
+        return arena_config
+
+
+    def step_game(all_comps: dict):
+        yield {btn_step: gr.update(value="Running...", interactive=False),
+               btn_restart: gr.update(value="Restart", interactive=False)}
+
+        cur_state = all_comps[state]
+
+        # If arena is not yet created, create it
+        if cur_state["arena"] is None:
+            # Create the Arena
+            arena_config = _create_arena_config_from_components(all_comps)
+            arena = Arena.from_config(arena_config)
+            cur_state["arena"] = arena
+        else:
+            arena = cur_state["arena"]
+
+        timestep = arena.step()
+
+        all_messages = timestep.observation  # user sees what the moderator sees
+        chatbot_output = _convert_to_chatbot_output(all_messages)
+        if DEBUG:
+            arena.environment.print()
+
+        yield {chatbot: chatbot_output, btn_step: gr.update(value="Step", interactive=True),
+               btn_restart: gr.update(interactive=True), state: cur_state}
+
+
+    def restart_game(all_comps: dict):
+        cur_state = all_comps[state]
+        cur_state["arena"] = None
+        yield {chatbot: [], btn_restart: gr.update(value="Running...", interactive=False),
+               btn_step: gr.update(interactive=False), state: cur_state}
+
+        arena_config = _create_arena_config_from_components(all_comps)
+        arena = Arena.from_config(arena_config)
+        cur_state["arena"] = arena
+
+        timestep = arena.step()
+        all_messages = timestep.observation  # user sees what the moderator sees
+        chatbot_output = _convert_to_chatbot_output(all_messages)
+        yield {chatbot: chatbot_output, btn_step: gr.update(interactive=True),
+               btn_restart: gr.update(value="Restart", interactive=True), state: cur_state}
+
+
+    # Remove Accordion and Tab from the list of components
+    all_components = [comp for comp in all_components if not isinstance(comp, (gr.Accordion, gr.Tab))]
+
+    # If any of the Textbox, Slider, Checkbox, Dropdown, RadioButtons is changed, the Step button is disabled
+    for comp in all_components:
+        if isinstance(comp, (gr.Textbox, gr.Slider, gr.Checkbox, gr.Dropdown, gr.Radio)):
+            comp.change(lambda x: gr.update(interactive=False), btn_step, btn_step)
+
+    btn_step.click(step_game, set(all_components + [state]), [chatbot, btn_step, btn_restart, state])
+    btn_restart.click(restart_game, set(all_components + [state]), [chatbot, btn_step, btn_restart, state])
 
 demo.queue()
-# demo.launch(debug=True)
-demo.launch()
+demo.launch(debug=DEBUG)

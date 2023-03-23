@@ -1,7 +1,7 @@
 from typing import List
 
 from .agent import Player
-from .environment import Environment, TimeStep
+from .environment import Environment, TimeStep, load_environment
 
 
 class Arena():
@@ -55,7 +55,7 @@ class Arena():
             players.append(player)
 
         # Load the environment
-        env = Environment.from_config(config["environment"])
+        env = load_environment(config["environment"])
 
         # Check that the player names in environment agree with the players
         assert set(env.player_names) == set([player.name for player in players])

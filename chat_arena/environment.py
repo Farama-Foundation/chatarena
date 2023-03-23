@@ -169,7 +169,7 @@ class ModeratedConversation(Conversation):
             env_desc=config["env_desc"],
             parallel=config["parallel"],
             moderator=Moderator.from_config(config["moderator"]),
-            moderator_visibility=config["moderator_visibility"],
+            moderator_visibility=config.get("moderator_visibility", "all")
         )
 
     def to_config(self) -> dict:
@@ -217,9 +217,9 @@ ENV_REGISTRY = {
     "moderated_conversation": ModeratedConversation,
 }
 
+
 # Load an environment from a config dictionary
 def load_environment(config):
-    env_config = config["environment"]
-    env_cls = ENV_REGISTRY[env_config["env_type"]]
-    env = env_cls.from_config(env_config)
+    env_cls = ENV_REGISTRY[config["env_type"]]
+    env = env_cls.from_config(config)
     return env
