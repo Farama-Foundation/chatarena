@@ -22,6 +22,13 @@ class Environment(ABC):
         self.player_names = player_names
         self.env_desc = env_desc
 
+    @classmethod
+    def from_config(cls, config: dict):
+        pass
+
+    def to_config(self) -> dict:
+        pass
+
     def get_next_player(self) -> str:
         """
         get name of the next player
@@ -77,6 +84,23 @@ class Conversation(Environment):
 
         self._current_turn = 0
         self._next_player_idx = 0
+
+    @classmethod
+    def from_config(cls, config: dict):
+        assert config["env_type"] == "conversation"
+        return cls(
+            player_names=config["player_names"],
+            env_desc=config["env_desc"],
+            parallel=config["parallel"],
+        )
+
+    def to_config(self) -> dict:
+        return {
+            "env_type": "conversation",
+            "player_names": self.player_names,
+            "env_desc": self.env_desc,
+            "parallel": self.parallel,
+        }
 
     def reset(self):
         self._current_turn = 0
@@ -140,6 +164,31 @@ class ModeratedConversation(Conversation):
         self.moderator = moderator
         self.moderator_visibility = moderator_visibility  # by default, all players can see the moderator's messages
 
+    @classmethod
+    def from_config(cls, config: dict):
+        assert config["env_type"] == "moderated_conversation"
+        # Add env_desc to the config of the moderator if it is not there
+        if "env_desc" not in config["moderator"]:
+            config["moderator"]["env_desc"] = config["env_desc"]
+
+        return cls(
+            player_names=config["player_names"],
+            env_desc=config["env_desc"],
+            parallel=config["parallel"],
+            moderator=Moderator.from_config(config["moderator"]),
+            moderator_visibility=config.get("moderator_visibility", "all")
+        )
+
+    def to_config(self) -> dict:
+        return {
+            "env_type": "moderated_conversation",
+            "player_names": self.player_names,
+            "env_desc": self.env_desc,
+            "parallel": self.parallel,
+            "moderator": self.moderator.to_config(),
+            "moderator_visibility": self.moderator_visibility,
+        }
+
     def step(self, player_name: str, action: str) -> TimeStep:
         """
         step function that is called by the arena
@@ -168,3 +217,5 @@ class ModeratedConversation(Conversation):
 
         timestep = TimeStep(observation=self.get_observation(), reward=0, terminal=terminal)  # Return all the messages
         return timestep
+
+

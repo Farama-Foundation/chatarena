@@ -1,54 +1,111 @@
 from typing import List
-from abc import abstractmethod
 import os
 import openai
 import cohere
+from abc import ABC
 
 from .message import Message
+
+# from .utils import register_backend
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 
-class IntelligenceBackend:
+class IntelligenceBackend(ABC):
     """An abstraction of the intelligence source of the agents."""
 
-    @abstractmethod
     def query(self, agent_name: str, role_desc: str, env_desc: str,
               history_messages: List[Message], request_msg: Message = None,
               *args, **kwargs) -> str:
         pass
 
+    @classmethod
+    def from_config(cls, config: dict):
+        pass
+
+    def to_config(self) -> dict:
+        pass
+
+
+# An Error class for the human backend
+class HumanBackendError(Exception):
+    def __init__(self, agent_name: str):
+        self.agent_name = agent_name
+        super().__init__(f"Human backend requires a UI to get input from {agent_name}.")
+
 
 class Human(IntelligenceBackend):
+
     def query(self, agent_name: str, *args, **kwargs) -> str:
-        ui = kwargs.get("ui", None)
-        if ui is None:
-            raise ValueError("ui is not specified")
-        elif ui == "cli":
-            user_input = input(f"[{agent_name}]: ")
-            return user_input
-        elif ui == "gradio":
-            return ""
-        else:
-            raise NotImplementedError
+        # ui = kwargs.get("ui", None)
+        # if ui is None:
+        #     raise ValueError("ui is not specified")
+        # elif ui == "cli":
+        #     user_input = input(f"[{agent_name}]: ")
+        #     return user_input
+        # elif ui == "gradio":
+        #     return ""
+        # else:
+        #     raise NotImplementedError
+        raise HumanBackendError(agent_name)
+
+    @classmethod
+    def from_config(cls, config: dict):
+        assert config["backend_type"] == "human"
+        return cls()
+
+    def to_config(self) -> dict:
+        return {"backend_type": "human"}
 
 
 class RemoteAPI(IntelligenceBackend):
-    pass
+
+    def __init__(self, temperature, max_tokens):
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+
+    # @staticmethod
+    # def get_components(config):
+    #     temperature = gr.Slider(minimum=0, maximum=2.0, step=0.1, interactive=True,
+    #                             label=f"temperature", value=config["temperature"])
+    #     max_tokens = gr.Slider(minimum=10, maximum=500, step=10, interactive=True,
+    #                            label=f"max tokens per response", value=config["max_tokens"])
+    #
+    #     return [temperature, max_tokens]
+    #
+    # @classmethod
+    # def parse_components(cls, components, start_idx):
+    #     temperature = components[start_idx]
+    #     max_tokens = components[start_idx + 1]
+    #     return cls(temperature, max_tokens)
+
+
+DEFAULT_OPENAI_MODEL = "gpt-3.5-turbo"
 
 
 class OpenAIChat(RemoteAPI):
     """
     Interface to the ChatGPT style model with system, user, assistant roles separation
     """
-
     stateful = False
 
-    def __init__(self, temperature, max_tokens, model_name="gpt-3.5-turbo"):
-        self.temperature = temperature
-        self.max_tokens = max_tokens
+    def __init__(self, temperature, max_tokens, model_name=DEFAULT_OPENAI_MODEL):
+        super().__init__(temperature, max_tokens)
         self.model = model_name
         self.stop = ("<EOS>", "[EOS]", "(EOS)")  # End of sentence token
+
+    @classmethod
+    def from_config(cls, config):
+        assert config["backend_type"] == "openai-chat"
+        return cls(config["temperature"], config["max_tokens"], config.get("model", DEFAULT_OPENAI_MODEL))
+
+    def to_config(self):
+        return {
+            "backend_type": "openai-chat",
+            "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
+            "model": self.model
+        }
 
     def _get_response(self, messages, temperature=None, max_tokens=None):
         if temperature is None:
@@ -110,7 +167,6 @@ class OpenAIChat(RemoteAPI):
         return response
 
 
-# Using Cohere co.chat API as the backend
 class CohereChat(RemoteAPI):
     """
     Interface to the Cohere API
@@ -119,16 +175,26 @@ class CohereChat(RemoteAPI):
     stateful = True
 
     def __init__(self, temperature, max_tokens):
-        self.temperature = temperature
-        self.max_tokens = max_tokens
-        # self.model = model_name
-        # self.stop = ("<EOS>", "[EOS]", "(EOS)")  # End of sentence token
+        super().__init__(temperature, max_tokens)
+
         self.api_key = os.environ.get('COHEREAI_API_KEY')
         self.client = cohere.Client(self.api_key)
 
         # Stateful variables
         self.session_id = None  # The session id for the last conversation
         self.last_msg_id = None  # The hash of the last message of the last conversation
+
+    @classmethod
+    def from_config(cls, config):
+        assert config["backend_type"] == "cohere-chat"
+        return cls(config["temperature"], config["max_tokens"])
+
+    def to_config(self):
+        return {
+            "backend_type": "cohere-chat",
+            "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
+        }
 
     def _get_response(self, new_message: str, persona_prompt: str, temperature=None, max_tokens=None):
         if temperature is None:
@@ -185,3 +251,17 @@ class CohereChat(RemoteAPI):
                                       max_tokens=kwargs.get("max_tokens", None))
 
         return response
+
+
+BACKEND_REGISTRY = {
+    "openai-chat": OpenAIChat,
+    "cohere-chat": CohereChat,
+    "human": Human,
+}
+
+
+# Load a backend from a config dictionary
+def load_backend(config):
+    backend_cls = BACKEND_REGISTRY[config["backend_type"]]
+    backend = backend_cls.from_config(config)
+    return backend
