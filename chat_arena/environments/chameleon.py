@@ -197,7 +197,7 @@ class Chameleon(Environment):
                 self._next_player_idx = 0
                 self._current_phase = "accuse"
                 self.moderator_say("Now vote which of the other players (excluding yourself) is the chameleon. "
-                                   "Remember who you are, and do not vote for yourself.")
+                                   "You cannot vote for yourself.")
                 self._current_turn += 1
 
             timestep = TimeStep(observation=self.get_observation(),
