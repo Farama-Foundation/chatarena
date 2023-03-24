@@ -80,7 +80,7 @@ class TestArena(TestCase):
     #     self.assertTrue(True)
     #
     # def test_arena_8(self):
-    #     with open("examples/nlp-classroom-3players-gpt4.json", "r") as fp:
+    #     with open("examples/nlp-classroom-3players.json", "r") as fp:
     #         config = json.load(fp)
     #     arena = Arena.from_config(config)
     #     arena.launch_gradio()
