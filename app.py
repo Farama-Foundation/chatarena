@@ -147,7 +147,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
                 num_player_slider.change(variable_players, num_player_slider, all_players_components)
 
                 human_input_textbox = gr.Textbox(show_label=True, label="Human Input", lines=1, visible=True,
-                                                 interactive=True)
+                                                 interactive=True, placeholder="Enter your input here")
                 with gr.Row():
                     btn_step = gr.Button("Start")
                     btn_restart = gr.Button("Clear")
@@ -244,7 +244,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
                 timestep = arena.environment.step(e.agent_name, human_input)
 
         if timestep is None:
-            yield {human_input_textbox: gr.Textbox.update(value="", placeholder="Please enter a valid input"),
+            yield {human_input_textbox: gr.update(value="", placeholder="Please enter a valid input"),
                    btn_step: gr.update(value="Next Step", interactive=True),
                    btn_restart: gr.update(interactive=True)}
 
@@ -254,7 +254,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
             if DEBUG:
                 arena.environment.print()
 
-            yield {human_input_textbox: gr.Textbox.update(value=""),
+            yield {human_input_textbox: gr.update(value=""),
                    chatbot: chatbot_output, btn_step: gr.update(value="Next Step", interactive=True),
                    btn_restart: gr.update(interactive=True), state: cur_state}
 
