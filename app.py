@@ -1,5 +1,7 @@
 import re
+import json
 import gradio as gr
+from glob import glob
 
 from chat_arena.arena import Arena
 from chat_arena.backend import BACKEND_REGISTRY, HumanBackendError
@@ -24,8 +26,19 @@ DEFAULT_ENV = "conversation"
 MAX_NUM_PLAYERS = 6
 DEFAULT_NUM_PLAYERS = 2
 
-# TODO: temporary hacky placeholder for examples
-EXAMPLE_REGISTRY = {}
+
+def load_examples():
+    example_configs = {}
+    # Load json config files from examples folder
+    example_files = glob("examples/*.json")
+    for example_file in example_files:
+        with open(example_file, 'r') as f:
+            example = json.load(f)
+            example_configs[example["name"]] = example
+    return example_configs
+
+
+EXAMPLE_REGISTRY = load_examples()
 
 
 def get_moderator_components(visible=True):
@@ -136,8 +149,8 @@ Prompting chat-based AI agents to play games in a language-driven environment.
                 human_input_textbox = gr.Textbox(show_label=True, label="Human Input", lines=1, visible=True,
                                                  interactive=True)
                 with gr.Row():
-                    btn_step = gr.Button("Step")
-                    btn_restart = gr.Button("Start")
+                    btn_step = gr.Button("Start")
+                    btn_restart = gr.Button("Clear")
 
                 all_components += [human_input_textbox, btn_step, btn_restart]
 
@@ -207,7 +220,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
     def step_game(all_comps: dict):
         yield {btn_step: gr.update(value="Running...", interactive=False),
-               btn_restart: gr.update(value="Restart", interactive=False)}
+               btn_restart: gr.update(interactive=False)}
 
         cur_state = all_comps[state]
 
@@ -232,7 +245,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
         if timestep is None:
             yield {human_input_textbox: gr.Textbox.update(value="", placeholder="Please enter a valid input"),
-                   btn_step: gr.update(value="Step", interactive=True),
+                   btn_step: gr.update(value="Next Step", interactive=True),
                    btn_restart: gr.update(interactive=True)}
 
         else:
@@ -242,25 +255,22 @@ Prompting chat-based AI agents to play games in a language-driven environment.
                 arena.environment.print()
 
             yield {human_input_textbox: gr.Textbox.update(value=""),
-                   chatbot: chatbot_output, btn_step: gr.update(value="Step", interactive=True),
+                   chatbot: chatbot_output, btn_step: gr.update(value="Next Step", interactive=True),
                    btn_restart: gr.update(interactive=True), state: cur_state}
 
 
     def restart_game(all_comps: dict):
         cur_state = all_comps[state]
         cur_state["arena"] = None
-        yield {chatbot: [], btn_restart: gr.update(value="Running...", interactive=False),
+        yield {chatbot: [], btn_restart: gr.update(interactive=False),
                btn_step: gr.update(interactive=False), state: cur_state}
 
         arena_config = _create_arena_config_from_components(all_comps)
         arena = Arena.from_config(arena_config)
         cur_state["arena"] = arena
 
-        # timestep = arena.step()
-        # all_messages = timestep.observation  # user sees what the moderator sees
-        # chatbot_output = _convert_to_chatbot_output(all_messages)
-        yield {btn_step: gr.update(interactive=True),
-               btn_restart: gr.update(value="Restart", interactive=True), state: cur_state}
+        yield {btn_step: gr.update(value="Start", interactive=True),
+               btn_restart: gr.update(interactive=True), state: cur_state}
 
 
     # Remove Accordion and Tab from the list of components
@@ -268,14 +278,62 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
     # If any of the Textbox, Slider, Checkbox, Dropdown, RadioButtons is changed, the Step button is disabled
     for comp in all_components:
+        def _disable_step_button(state):
+            if state["arena"] is not None:
+                return gr.update(interactive=False)
+            else:
+                return gr.update()
+
+
         if isinstance(comp,
                       (gr.Textbox, gr.Slider, gr.Checkbox, gr.Dropdown, gr.Radio)) and comp is not human_input_textbox:
-            comp.change(lambda x: gr.update(interactive=False), btn_step, btn_step)
+            comp.change(_disable_step_button, state, btn_step)
 
     btn_step.click(step_game, set(all_components + [state]),
                    [chatbot, btn_step, btn_restart, state, human_input_textbox])
     btn_restart.click(restart_game, set(all_components + [state]),
                       [chatbot, btn_step, btn_restart, state, human_input_textbox])
+
+
+    # If an example is selected, update the components
+    def update_components_from_example(all_comps: dict):
+        example_name = all_comps[example_selector]
+        example_config = EXAMPLE_REGISTRY[example_name]
+        update_dict = {}
+
+        # Update the environment components
+        env_config = example_config['environment']
+        update_dict[env_desc_textbox] = gr.update(value=env_config['env_desc'])
+        update_dict[env_selector] = gr.update(value=env_config['env_type'])
+        update_dict[parallel_checkbox] = gr.update(value=env_config['parallel'])
+
+        # Update the moderator components
+        if "moderator" in env_config:
+            mod_role_desc, mod_terminal_condition, moderator_backend_type, mod_temp, mod_max_tokens = [
+                c for c in moderator_components if not isinstance(c, (gr.Accordion, gr.Tab))
+            ]
+            update_dict[mod_role_desc] = gr.update(value=env_config['moderator']['role_desc'])
+            update_dict[mod_terminal_condition] = gr.update(value=env_config['moderator']['terminal_condition'])
+            update_dict[moderator_backend_type] = gr.update(value=env_config['moderator']['backend']['backend_type'])
+            update_dict[mod_temp] = gr.update(value=env_config['moderator']['backend']['temperature'])
+            update_dict[mod_max_tokens] = gr.update(value=env_config['moderator']['backend']['max_tokens'])
+
+        update_dict[num_player_slider] = example_config['num_players']
+
+        # Update the player components
+        for i, player_config in enumerate(example_config['players']):
+            role_desc, backend_type, temperature, max_tokens = [
+                c for c in players_idx2comp[i] if not isinstance(c, (gr.Accordion, gr.Tab))
+            ]
+            update_dict[role_desc] = gr.update(value=player_config['role_desc'])
+            update_dict[backend_type] = gr.update(value=player_config['backend']['backend_type'])
+            update_dict[temperature] = gr.update(value=player_config['backend']['temperature'])
+            update_dict[max_tokens] = gr.update(value=player_config['backend']['max_tokens'])
+
+        return update_dict
+
+
+    example_selector.change(update_components_from_example, set(all_components + [state]), all_components)
 
 demo.queue()
 demo.launch(debug=DEBUG)
