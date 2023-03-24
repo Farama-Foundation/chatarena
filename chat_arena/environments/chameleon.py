@@ -140,7 +140,13 @@ class Chameleon(Environment):
         if match:
             return match.group(1).lower().replace(" ", "") == self.code.lower().replace(" ", "")
         else:
-            return False
+            # if no quote marks, check whether the last k words match the code
+            words = text.split()
+            if len(words) >= len(self.code.split()):
+                guessed_term = "".join(words[-len(self.code.split()):]).lower().replace(".", "")
+                return guessed_term == self.code.lower().replace(" ", "").replace(".", "")
+            else:
+                return False
 
     def moderator_say(self, text: str, visible_to: Union[str, List[str]] = "all"):
         """
