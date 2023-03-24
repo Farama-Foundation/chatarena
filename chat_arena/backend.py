@@ -27,19 +27,27 @@ class IntelligenceBackend(ABC):
         pass
 
 
+# An Error class for the human backend
+class HumanBackendError(Exception):
+    def __init__(self, agent_name: str):
+        self.agent_name = agent_name
+        super().__init__(f"Human backend requires a UI to get input from {agent_name}.")
+
+
 class Human(IntelligenceBackend):
 
     def query(self, agent_name: str, *args, **kwargs) -> str:
-        ui = kwargs.get("ui", None)
-        if ui is None:
-            raise ValueError("ui is not specified")
-        elif ui == "cli":
-            user_input = input(f"[{agent_name}]: ")
-            return user_input
-        elif ui == "gradio":
-            return ""
-        else:
-            raise NotImplementedError
+        # ui = kwargs.get("ui", None)
+        # if ui is None:
+        #     raise ValueError("ui is not specified")
+        # elif ui == "cli":
+        #     user_input = input(f"[{agent_name}]: ")
+        #     return user_input
+        # elif ui == "gradio":
+        #     return ""
+        # else:
+        #     raise NotImplementedError
+        raise HumanBackendError(agent_name)
 
     @classmethod
     def from_config(cls, config: dict):

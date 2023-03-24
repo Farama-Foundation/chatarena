@@ -2,7 +2,7 @@ import re
 import gradio as gr
 
 from chat_arena.arena import Arena
-from chat_arena.backend import BACKEND_REGISTRY
+from chat_arena.backend import BACKEND_REGISTRY, HumanBackendError
 from chat_arena.environment import ENV_REGISTRY
 
 css = """
@@ -133,13 +133,13 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
                 num_player_slider.change(variable_players, num_player_slider, all_players_components)
 
-                human_input = gr.Textbox(show_label=True, label="Human Input", lines=1, visible=True,
-                                         interactive=False)
+                human_input_textbox = gr.Textbox(show_label=True, label="Human Input", lines=1, visible=True,
+                                                 interactive=True)
                 with gr.Row():
                     btn_step = gr.Button("Step")
                     btn_restart = gr.Button("Start")
 
-                all_components += [human_input, btn_step, btn_restart]
+                all_components += [human_input_textbox, btn_step, btn_restart]
 
 
     def _convert_to_chatbot_output(all_messages):
@@ -220,15 +220,30 @@ Prompting chat-based AI agents to play games in a language-driven environment.
         else:
             arena = cur_state["arena"]
 
-        timestep = arena.step()
+        try:
+            timestep = arena.step()
+        except HumanBackendError as e:
+            # Handle human input and recover with the game update
+            human_input = all_comps[human_input_textbox]
+            if human_input == "":
+                timestep = None  # Failed to get human input
+            else:
+                timestep = arena.environment.step(e.agent_name, human_input)
 
-        all_messages = timestep.observation  # user sees what the moderator sees
-        chatbot_output = _convert_to_chatbot_output(all_messages)
-        if DEBUG:
-            arena.environment.print()
+        if timestep is None:
+            yield {human_input_textbox: gr.Textbox.update(value="", placeholder="Please enter a valid input"),
+                   btn_step: gr.update(value="Step", interactive=True),
+                   btn_restart: gr.update(interactive=True)}
 
-        yield {chatbot: chatbot_output, btn_step: gr.update(value="Step", interactive=True),
-               btn_restart: gr.update(interactive=True), state: cur_state}
+        else:
+            all_messages = timestep.observation  # user sees what the moderator sees
+            chatbot_output = _convert_to_chatbot_output(all_messages)
+            if DEBUG:
+                arena.environment.print()
+
+            yield {human_input_textbox: gr.Textbox.update(value=""),
+                   chatbot: chatbot_output, btn_step: gr.update(value="Step", interactive=True),
+                   btn_restart: gr.update(interactive=True), state: cur_state}
 
 
     def restart_game(all_comps: dict):
@@ -241,10 +256,10 @@ Prompting chat-based AI agents to play games in a language-driven environment.
         arena = Arena.from_config(arena_config)
         cur_state["arena"] = arena
 
-        timestep = arena.step()
-        all_messages = timestep.observation  # user sees what the moderator sees
-        chatbot_output = _convert_to_chatbot_output(all_messages)
-        yield {chatbot: chatbot_output, btn_step: gr.update(interactive=True),
+        # timestep = arena.step()
+        # all_messages = timestep.observation  # user sees what the moderator sees
+        # chatbot_output = _convert_to_chatbot_output(all_messages)
+        yield {btn_step: gr.update(interactive=True),
                btn_restart: gr.update(value="Restart", interactive=True), state: cur_state}
 
 
@@ -253,11 +268,14 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
     # If any of the Textbox, Slider, Checkbox, Dropdown, RadioButtons is changed, the Step button is disabled
     for comp in all_components:
-        if isinstance(comp, (gr.Textbox, gr.Slider, gr.Checkbox, gr.Dropdown, gr.Radio)):
+        if isinstance(comp,
+                      (gr.Textbox, gr.Slider, gr.Checkbox, gr.Dropdown, gr.Radio)) and comp is not human_input_textbox:
             comp.change(lambda x: gr.update(interactive=False), btn_step, btn_step)
 
-    btn_step.click(step_game, set(all_components + [state]), [chatbot, btn_step, btn_restart, state])
-    btn_restart.click(restart_game, set(all_components + [state]), [chatbot, btn_step, btn_restart, state])
+    btn_step.click(step_game, set(all_components + [state]),
+                   [chatbot, btn_step, btn_restart, state, human_input_textbox])
+    btn_restart.click(restart_game, set(all_components + [state]),
+                      [chatbot, btn_step, btn_restart, state, human_input_textbox])
 
 demo.queue()
 demo.launch(debug=DEBUG)

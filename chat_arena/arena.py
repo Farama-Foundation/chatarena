@@ -2,6 +2,7 @@ from typing import List
 
 from .agent import Player
 from .environment import Environment, TimeStep, load_environment
+from .backend import Human
 
 
 class Arena():
@@ -29,6 +30,14 @@ class Arena():
         action = player(observation)  # take an action
         timestep = self.environment.step(player_name, action)  # update the environment
         return timestep
+
+    def next_is_human(self):
+        """
+        check if the next player is human
+        """
+        player_name = self.environment.get_next_player()
+        player = self._name2player[player_name]
+        return isinstance(player.backend, Human)
 
     def run(self, num_steps: int = 1):
         """
