@@ -1,7 +1,7 @@
 from typing import List
 
 from .agent import Player
-from .environment import Environment, TimeStep, load_environment
+from .environments import Environment, TimeStep, load_environment
 from .backend import Human
 
 

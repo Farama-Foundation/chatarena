@@ -5,7 +5,7 @@ from glob import glob
 
 from chat_arena.arena import Arena
 from chat_arena.backend import BACKEND_REGISTRY, HumanBackendError
-from chat_arena.environment import ENV_REGISTRY
+from chat_arena.environments import ENV_REGISTRY
 
 css = """
 #col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
@@ -158,9 +158,9 @@ Prompting chat-based AI agents to play games in a language-driven environment.
     def _convert_to_chatbot_output(all_messages):
         chatbot_output = []
         for i, message in enumerate(all_messages):
-            agent_name, msg = message.agent_name, message.content
+            agent_name, msg, recv = message.agent_name, message.content, str(message.visible_to)
             new_msg = re.sub(r'\n+', '<br>', msg.strip())  # Preprocess message for chatbot output
-            new_msg = f"**[{agent_name}]**: {new_msg}"  # Add role to the message
+            new_msg = f"**{agent_name} (-> {recv})**: {new_msg}"  # Add role to the message
 
             if agent_name == "Moderator":
                 chatbot_output.append((new_msg, None))
@@ -247,15 +247,14 @@ Prompting chat-based AI agents to play games in a language-driven environment.
             yield {human_input_textbox: gr.update(value="", placeholder="Please enter a valid input"),
                    btn_step: gr.update(value="Next Step", interactive=True),
                    btn_restart: gr.update(interactive=True)}
-
         else:
             all_messages = timestep.observation  # user sees what the moderator sees
             chatbot_output = _convert_to_chatbot_output(all_messages)
             if DEBUG:
                 arena.environment.print()
 
-            yield {human_input_textbox: gr.update(value=""),
-                   chatbot: chatbot_output, btn_step: gr.update(value="Next Step", interactive=True),
+            yield {human_input_textbox: gr.Textbox.update(value=""),
+                   chatbot: chatbot_output, btn_step: gr.update(value="Next Step", interactive=not timestep.terminal),
                    btn_restart: gr.update(interactive=True), state: cur_state}
 
 
