@@ -10,13 +10,13 @@ from chat_arena.environments import ENV_REGISTRY
 css = """
 #col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
 #header {text-align: center;}
-#col-chatbox {flex: 1; max-height: min(750px, 100%); display: flex;}
-#chatbox {height: min(750px, 100%); max-height: 750px; display:flex;}
+#col-chatbox {flex: 1; max-height: min(650px, 100%); display: flex;}
+#chatbox {height: min(650px, 100%); max-height: 650px; display:flex;}
 #label {font-size: 2em; padding: 0.5em; margin: 0;}
 .message {font-size: 1.2em;}
 .wrap.svelte-18ha8kq {flex: 1}
-.wrap.svelte-18ha8kq.svelte-18ha8kq {max-height: min(700px, 100vh);}
-.message-wrap {max-height: min(700px, 100vh);}
+.wrap.svelte-18ha8kq.svelte-18ha8kq {max-height: min(600px, 100vh);}
+.message-wrap {max-height: min(600px, 100vh);}
 """
 
 DEBUG = False
@@ -106,8 +106,18 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
         with gr.Row():
             with gr.Column(elem_id="col-chatbox"):
-                chatbot = gr.Chatbot(elem_id="chatbox", visible=True, label="Chat Arena")
-                all_components += [chatbot]
+                with gr.Tab("All"):
+                    chatbot = gr.Chatbot(elem_id="chatbox", visible=True, label="Chat Arena")
+
+                player_chatbots = []
+                for i in range(MAX_NUM_PLAYERS):
+                    player_name = f"Player {i + 1}"
+                    with gr.Tab(player_name, visible=(i < DEFAULT_NUM_PLAYERS)):
+                        player_chatbot = gr.Chatbot(elem_id=f"chatbox-{i}", visible=i < DEFAULT_NUM_PLAYERS,
+                                                    label=player_name)
+                        player_chatbots.append(player_chatbot)
+
+            all_components += [chatbot, *player_chatbots]
 
             with gr.Column(elem_id="col-config"):  # Player Configuration
                 # gr.Markdown("Player Configuration")
@@ -138,13 +148,15 @@ Prompting chat-based AI agents to play games in a language-driven environment.
                         if i < k:
                             for comp in players_idx2comp[i]:
                                 update_dict[comp] = gr.update(visible=True)
+                            update_dict[player_chatbots[i]] = gr.update(visible=True)
                         else:
                             for comp in players_idx2comp[i]:
                                 update_dict[comp] = gr.update(visible=False)
+                            update_dict[player_chatbots[i]] = gr.update(visible=False)
                     return update_dict
 
 
-                num_player_slider.change(variable_players, num_player_slider, all_players_components)
+                num_player_slider.change(variable_players, num_player_slider, all_players_components + player_chatbots)
 
                 human_input_textbox = gr.Textbox(show_label=True, label="Human Input", lines=1, visible=True,
                                                  interactive=True, placeholder="Enter your input here")
@@ -155,12 +167,15 @@ Prompting chat-based AI agents to play games in a language-driven environment.
                 all_components += [human_input_textbox, btn_step, btn_restart]
 
 
-    def _convert_to_chatbot_output(all_messages):
+    def _convert_to_chatbot_output(all_messages, display_recv=False):
         chatbot_output = []
         for i, message in enumerate(all_messages):
             agent_name, msg, recv = message.agent_name, message.content, str(message.visible_to)
             new_msg = re.sub(r'\n+', '<br>', msg.strip())  # Preprocess message for chatbot output
-            new_msg = f"**{agent_name} (-> {recv})**: {new_msg}"  # Add role to the message
+            if display_recv:
+                new_msg = f"**{agent_name} (-> {recv})**: {new_msg}"  # Add role to the message
+            else:
+                new_msg = f"**{agent_name}**: {new_msg}"
 
             if agent_name == "Moderator":
                 chatbot_output.append((new_msg, None))
@@ -249,13 +264,23 @@ Prompting chat-based AI agents to play games in a language-driven environment.
                    btn_restart: gr.update(interactive=True)}
         else:
             all_messages = timestep.observation  # user sees what the moderator sees
-            chatbot_output = _convert_to_chatbot_output(all_messages)
+            chatbot_output = _convert_to_chatbot_output(all_messages, display_recv=True)
+
+            update_dict = {human_input_textbox: gr.Textbox.update(value=""),
+                           chatbot: chatbot_output,
+                           btn_step: gr.update(value="Next Step", interactive=not timestep.terminal),
+                           btn_restart: gr.update(interactive=True), state: cur_state}
+            # Get the visible messages for each player
+            for i, player in enumerate(arena.players):
+                player_messages = arena.environment.get_observation(player.name)
+                player_output = _convert_to_chatbot_output(player_messages)
+                # Update the player's chatbot output
+                update_dict[player_chatbots[i]] = player_output
+
             if DEBUG:
                 arena.environment.print()
 
-            yield {human_input_textbox: gr.Textbox.update(value=""),
-                   chatbot: chatbot_output, btn_step: gr.update(value="Next Step", interactive=not timestep.terminal),
-                   btn_restart: gr.update(interactive=True), state: cur_state}
+            yield update_dict
 
 
     def restart_game(all_comps: dict):
@@ -289,9 +314,9 @@ Prompting chat-based AI agents to play games in a language-driven environment.
             comp.change(_disable_step_button, state, btn_step)
 
     btn_step.click(step_game, set(all_components + [state]),
-                   [chatbot, btn_step, btn_restart, state, human_input_textbox])
+                   [chatbot, *player_chatbots, btn_step, btn_restart, state, human_input_textbox])
     btn_restart.click(restart_game, set(all_components + [state]),
-                      [chatbot, btn_step, btn_restart, state, human_input_textbox])
+                      [chatbot, *player_chatbots, btn_step, btn_restart, state, human_input_textbox])
 
 
     # If an example is selected, update the components
@@ -317,9 +342,8 @@ Prompting chat-based AI agents to play games in a language-driven environment.
             update_dict[mod_temp] = gr.update(value=env_config['moderator']['backend']['temperature'])
             update_dict[mod_max_tokens] = gr.update(value=env_config['moderator']['backend']['max_tokens'])
 
-        update_dict[num_player_slider] = example_config['num_players']
-
         # Update the player components
+        update_dict[num_player_slider] = gr.update(value=len(example_config['players']))
         for i, player_config in enumerate(example_config['players']):
             role_desc, backend_type, temperature, max_tokens = [
                 c for c in players_idx2comp[i] if not isinstance(c, (gr.Accordion, gr.Tab))
@@ -332,7 +356,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
         return update_dict
 
 
-    example_selector.change(update_components_from_example, set(all_components + [state]), all_components)
+    example_selector.change(update_components_from_example, set(all_components + [state]), all_components + [state])
 
 demo.queue()
 demo.launch(debug=DEBUG)
