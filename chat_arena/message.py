@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple, Union
+from typing import List, Union
 from dataclasses import dataclass
 import time
 from uuid import uuid1
@@ -17,11 +17,13 @@ class Message():
     turn: int
     timestamp: int = time.time_ns()
     visible_to: Union[str, List[str]] = "all"
+    logged: bool = False  # Whether the message is logged in the database
 
     @property
-    def msg_id(self):
+    def msg_hash(self):
         # Generate a unique message id given the content, timestamp and role
-        return _hash(f"msg: {self.content}\ntimestamp: {str(self.timestamp)}\nrole: {self.agent_name}")
+        return _hash(
+            f"agent: {self.agent_name}\nmsg: {self.content}\ntimestamp: {str(self.timestamp)}\nturn: {self.turn}")
 
 
 class MessagePool():
@@ -39,6 +41,7 @@ class MessagePool():
     def __init__(self):
         self.conversation_id = str(uuid1())
         self._messages: List[Message] = []
+        self._last_message_idx = 0
 
     def reset(self):
         self._messages = []

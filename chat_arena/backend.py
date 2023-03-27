@@ -182,7 +182,7 @@ class CohereChat(RemoteAPI):
 
         # Stateful variables
         self.session_id = None  # The session id for the last conversation
-        self.last_msg_id = None  # The hash of the last message of the last conversation
+        self.last_msg_hash = None  # The hash of the last message of the last conversation
 
     @classmethod
     def from_config(cls, config):
@@ -224,14 +224,14 @@ class CohereChat(RemoteAPI):
 
         # Find the index of the last message of the last conversation
         new_message_start_idx = 0
-        if self.last_msg_id is not None:
+        if self.last_msg_hash is not None:
             for i, message in enumerate(history_messages):
-                if message.msg_id == self.last_msg_id:
+                if message.msg_hash == self.last_msg_hash:
                     new_message_start_idx = i + 1
                     break
         new_messages = history_messages[new_message_start_idx:]
         assert len(new_messages) > 0, "No new messages found (this should not happen)"
-        self.last_msg_id = new_messages[-1].msg_id
+        self.last_msg_hash = new_messages[-1].msg_hash
 
         new_conversations = []
         for message in new_messages:

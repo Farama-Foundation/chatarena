@@ -1,4 +1,5 @@
 from typing import List
+import uuid
 
 from .agent import Player
 from .environments import Environment, TimeStep, load_environment
@@ -15,6 +16,7 @@ class Arena():
         self.environment = environment
         self.current_timestep = self.environment.reset()
         self._name2player = {player.name: player for player in self.players}
+        self.uuid = uuid.uuid4()  # Generate a unique id for the game
 
     @property
     def num_players(self):

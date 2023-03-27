@@ -10,8 +10,8 @@ class TestMessagePool(TestCase):
         message_pool.append_message(p1_message)
         message_pool.append_message(p2_message)
         p1_observation = message_pool.get_visible_messages("player1", 2)
-        assert p1_observation[0].msg_id == p1_message.msg_id
-        assert p1_observation[1].msg_id == p2_message.msg_id
+        assert p1_observation[0].msg_hash == p1_message.msg_hash
+        assert p1_observation[1].msg_hash == p2_message.msg_hash
 
     def test_message_by_turn(self):
         message_pool = MessagePool()
@@ -20,7 +20,7 @@ class TestMessagePool(TestCase):
         message_pool.append_message(p1_message)
         message_pool.append_message(p2_message)
         p1_observation = message_pool.get_visible_messages("player1", 2)
-        assert p1_observation[0].msg_id == p1_message.msg_id
+        assert p1_observation[0].msg_hash == p1_message.msg_hash
         assert len(p1_observation) == 1
 
     def test_message_partial_observation(self):

@@ -1,4 +1,4 @@
-from .environment import Environment, Conversation, TimeStep
+from .base import Environment, TimeStep
 from chat_arena.message import Message, MessagePool
 from typing import List, Dict, Union
 import random
@@ -72,6 +72,14 @@ class Chameleon(Environment):
             player_names=config["player_names"],
             env_desc=config["env_desc"],
         )
+
+    def to_config(self) -> dict:
+        return {
+            "env_type": "chameleon",
+            "player_names": self.player_names,
+            "env_desc": self.env_desc,
+            "parallel": None,
+        }
 
     def get_next_player(self) -> str:
         """

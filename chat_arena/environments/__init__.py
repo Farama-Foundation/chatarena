@@ -1,4 +1,5 @@
-from .environment import Environment, TimeStep, Conversation, ModeratedConversation
+from .base import Environment, TimeStep
+from .conversation import Conversation, ModeratedConversation
 from .chameleon import Chameleon
 
 ENV_REGISTRY = {
@@ -6,6 +7,7 @@ ENV_REGISTRY = {
     "moderated_conversation": ModeratedConversation,
     "chameleon": Chameleon,
 }
+
 
 # Load an environment from a config dictionary
 def load_environment(config):

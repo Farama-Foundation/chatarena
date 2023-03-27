@@ -6,9 +6,9 @@ from glob import glob
 from chat_arena.arena import Arena
 from chat_arena.backend import BACKEND_REGISTRY, HumanBackendError
 from chat_arena.environments import ENV_REGISTRY
+from chat_arena.database import log_arena, log_messages, SupabaseDB, supabase_available
 
-css = """
-#col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
+css = """#col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
 #header {text-align: center;}
 #col-chatbox {flex: 1; max-height: min(650px, 100%); display: flex;}
 #chatbox {height: min(650px, 100%); max-height: 650px; display:flex;}
@@ -39,6 +39,8 @@ def load_examples():
 
 
 EXAMPLE_REGISTRY = load_examples()
+
+DB = SupabaseDB() if supabase_available else None
 
 
 def get_moderator_components(visible=True):
@@ -79,7 +81,7 @@ def get_player_components(name, visible):
 
 
 def get_empty_state():
-    return gr.State({"history": [], "arena": None})
+    return gr.State({"arena": None})
 
 
 with gr.Blocks(css=css) as demo:
@@ -244,6 +246,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
             # Create the Arena
             arena_config = _create_arena_config_from_components(all_comps)
             arena = Arena.from_config(arena_config)
+            log_arena(arena, database=DB)
             cur_state["arena"] = arena
         else:
             arena = cur_state["arena"]
@@ -264,8 +267,9 @@ Prompting chat-based AI agents to play games in a language-driven environment.
                    btn_restart: gr.update(interactive=True)}
         else:
             all_messages = timestep.observation  # user sees what the moderator sees
-            chatbot_output = _convert_to_chatbot_output(all_messages, display_recv=True)
+            log_messages(arena, all_messages, database=DB)
 
+            chatbot_output = _convert_to_chatbot_output(all_messages, display_recv=True)
             update_dict = {human_input_textbox: gr.Textbox.update(value=""),
                            chatbot: chatbot_output,
                            btn_step: gr.update(value="Next Step", interactive=not timestep.terminal),
@@ -291,6 +295,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
         arena_config = _create_arena_config_from_components(all_comps)
         arena = Arena.from_config(arena_config)
+        log_arena(arena, database=DB)
         cur_state["arena"] = arena
 
         yield {btn_step: gr.update(value="Start", interactive=True),
