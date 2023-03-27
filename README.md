@@ -63,162 +63,120 @@ gradio app.py
 
 This will launch a demo UI of the Chat Arena in your browser.
 
-[//]: # (## Usage)
+## Usage
 
-[//]: # ()
-[//]: # (Here's a simple example of how to use Chat Arena to create a conversation between a human and an LLM agent:)
+### Key Concepts
 
-[//]: # ()
-[//]: # (```python)
+- **Player**: a player is an agent that can interact with other players in a game environment. A player can be a human
+  or
+  a large language model (LLM). A player is defined by its name, its backend, and its role.
+    - **Backend**: a backend is a Python class that defines how a player interacts with other players. A backend can be
+      a
+      human, a LLM, or a combination of them. A backend is defined by its name, its type, and its parameters.
+- **Environment**: an environment is a Python class that defines the rules of a game. An environment is defined by its
+  name, its type, and its parameters.
+    - **Moderator**: a moderator is a Python class that defines how the game is played. A moderator is defined by its
+      name,
+      its type, and its parameters.
+- **Arena**: an arena is a Python class that defines the overall game. An arena is defined by its name, its type, and
+  its
+  parameters.
 
-[//]: # (from chat_arena import ChatArena, Human, LLM)
+### Quick Multi-LLM Player Definition
 
-[//]: # ()
-[//]: # (# Initialize the Chat Arena)
+```python
+from chat_arena.agent import Player
+from chat_arena.backend import OpenAIChat, Human, CohereChat
 
-[//]: # (arena = ChatArena&#40;&#41;)
+# Player 1: a "professor" agent played by OpenAI GPT-3.5-turbo 
+player1 = Player(
+    name="teacher",
+    backend=OpenAIChat(...),
+    role="You are a professor in ...")
 
-[//]: # ()
-[//]: # (# Add a human participant)
+# Player 2: a "student" agent played by a human
+player2 = Player(
+    name="student",
+    backend=Human(...),
+    role="You are a student who is interested in ...")
 
-[//]: # (human = Human&#40;name="Alice"&#41;)
+# Player 3: a "teaching assistant" agent played by Cohere
+player3 = Player(
+    name="teaching assistant",
+    backend=CohereChat(...),
+    role="You are a TA of module ...")
+```
 
-[//]: # (arena.add_participant&#40;human&#41;)
+### Define a Language-Driven Environment
 
-[//]: # ()
-[//]: # (# Add an LLM agent)
+You can also create a language model-driven environment and add it to the Chat Arena:
 
-[//]: # (llm_agent = LLM&#40;name="GPT-3"&#41;)
+```python
+from chat_arena.environments.conversation import ModeratedConversation
 
-[//]: # (arena.add_participant&#40;llm_agent&#41;)
+env = ModeratedConversation(
+    players=[player1.name, player2.name, player3.name],
+    moderator_role="You are a teaching admin ...",
+    moderator_backend=OpenAIChat(..),
+env_description = "It is in a NLP classroom ...",
+terminal_condition = "Has the student learned the basics of NLP?"
+)
+```
 
-[//]: # ()
-[//]: # (# Start a conversation)
+### Arena: a Playground to Run Language Games
 
-[//]: # (arena.start_conversation&#40;&#41;)
+Initialise Arena from scratch
 
-[//]: # ()
-[//]: # (# Human sends a message)
+```python
+from chat_arena.arena import Arena
 
-[//]: # (human.send_message&#40;"Hello, how are you?"&#41;)
+arena = Arena(
+    players=[player1, ...],
+    environment=env)
+for _ in range(...):
+    arena.print_status()
+    arena.step()
+```
 
-[//]: # ()
-[//]: # (# LLM agent responds)
+Load Example Arenas
 
-[//]: # (llm_agent.send_message&#40;"I'm doing great, thank you! How about you?"&#41;)
+```python
+arena = Arena.load("nlp-classroom")
+arena.run(step=...)
+```
 
-[//]: # ()
-[//]: # (# Continue the conversation...)
+Save Arena Gameplay History
 
-[//]: # (```)
+```python
+arena.save_history(fn=...)
+```
 
-[//]: # ()
-[//]: # (You can also create a language model-driven environment and add it to the Chat Arena:)
+## Documentation
 
-[//]: # ()
-[//]: # (```python)
+For more detailed information on the available functions and classes, please refer to
+the [documentation](link-to-documentation).
 
-[//]: # (from chat_arena import ChatArena, Human, LLM, Environment)
+## Contributing
 
-[//]: # ()
-[//]: # (# Initialize the Chat Arena)
+We welcome contributions to improve and extend Chat Arena. Please follow these steps to contribute:
 
-[//]: # (arena = ChatArena&#40;&#41;)
+1. Fork the repository.
+2. Create a new branch for your feature or bugfix.
+3. Commit your changes to the new branch.
+4. Create a pull request describing your changes.
+5. We will review your pull request and provide feedback or merge your changes.
 
-[//]: # ()
-[//]: # (# Add a human participant)
+Please ensure your code follows the existing style and structure.
 
-[//]: # (human = Human&#40;name="Alice"&#41;)
+## License
 
-[//]: # (arena.add_participant&#40;human&#41;)
+Chat Arena is released under the [Apache License](LICENSE).
 
-[//]: # ()
-[//]: # (# Add an LLM agent)
+## Contact
 
-[//]: # (llm_agent = LLM&#40;name="GPT-3"&#41;)
+If you have any questions or suggestions, feel free to open an issue or submit a pull request. You can also reach out to
+the maintainer at [chat-arena@gmail.com](mailto:chat-arena@gmail.com).
 
-[//]: # (arena.add_participant&#40;llm_agent&#41;)
-
-[//]: # ()
-[//]: # (# Create a language model-driven environment)
-
-[//]: # (env = Environment&#40;name="TriviaGame"&#41;)
-
-[//]: # (arena.add_environment&#40;env&#41;)
-
-[//]: # ()
-[//]: # (# Start a conversation)
-
-[//]: # (arena.start_conversation&#40;&#41;)
-
-[//]: # ()
-[//]: # (# Human sends a message)
-
-[//]: # (human.send_message&#40;"Let's play a trivia game!"&#41;)
-
-[//]: # ()
-[//]: # (# Environment starts the trivia game)
-
-[//]: # (env.send_message&#40;"Welcome to Trivia Game! Here's your first question: What is the capital of France?"&#41;)
-
-[//]: # ()
-[//]: # (# LLM agent responds)
-
-[//]: # (llm_agent.send_message&#40;"The capital of France is Paris."&#41;)
-
-[//]: # ()
-[//]: # (# Environment evaluates the answer)
-
-[//]: # (env.send_message&#40;"Correct! The capital of France is Paris. Next question: ..."&#41;)
-
-[//]: # ()
-[//]: # (# Continue the conversation and trivia game...)
-
-[//]: # (```)
-
-[//]: # ()
-[//]: # (## Documentation)
-
-[//]: # ()
-[//]: # (For more detailed information on the available functions and classes, please refer to)
-
-[//]: # (the [documentation]&#40;link-to-documentation&#41;.)
-
-[//]: # ()
-[//]: # (## Contributing)
-
-[//]: # ()
-[//]: # (We welcome contributions to improve and extend Chat Arena. Please follow these steps to contribute:)
-
-[//]: # ()
-[//]: # (1. Fork the repository.)
-
-[//]: # (2. Create a new branch for your feature or bugfix.)
-
-[//]: # (3. Commit your changes to the new branch.)
-
-[//]: # (4. Create a pull request describing your changes.)
-
-[//]: # (5. We will review your pull request and provide feedback or merge your changes.)
-
-[//]: # ()
-[//]: # (Please ensure your code follows the existing style and structure.)
-
-[//]: # ()
-[//]: # (## License)
-
-[//]: # ()
-[//]: # (Chat Arena is released under the [Apache License]&#40;LICENSE&#41;.)
-
-[//]: # ()
-[//]: # (## Contact)
-
-[//]: # ()
-[//]: # (If you have any questions or suggestions, feel free to open an issue or submit a pull request. You can also reach out to)
-
-[//]: # (the maintainer at [chat-arena@gmail.com]&#40;mailto:chat-arena@gmail.com&#41;.)
-
-[//]: # ()
-[//]: # (Happy chatting!)
+Happy chatting!
 
 
