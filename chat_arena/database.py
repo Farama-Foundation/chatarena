@@ -81,8 +81,8 @@ class SupabaseDB:
                 "name": player.name,
                 "role_desc": player_config["role_desc"],
                 "backend_type": player_config["backend"]["backend_type"],
-                "temperature": player_config["backend"]["temperature"],
-                "max_tokens": player_config["backend"]["max_tokens"],
+                "temperature": player_config["backend"].get("temperature", None),
+                "max_tokens": player_config["backend"].get("max_tokens", None),
             }
             player_rows.append(player_row)
 
