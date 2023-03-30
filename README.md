@@ -2,28 +2,33 @@
 <h1 align="center"> 🏟 <span style="color:coral">Chat Arena</span> </h1>
 </font>
 <h3 align="center">
-    <p>Multi-Agent Language-Driven Environments for Large Language Models</p>
+    <p>Multi-Player/Agent Language Game Environments/Platform/Library</p>
 </h3>
 
 ---
 
-Chat Arena is a Python library designed to facilitate interactions between multiple LLM-based agents in a
-language-driven game environment. It provides the following features:
+Chat Arena is a Python library designed to facilitate communication, collaboration and competition between multiple LLMs
+in a language-driven environment. It provides the following features:
 
+- Language-driven Game Environment: it provides a framework for creating a language-driven environment.
 - Infrastructure for Multi-LLM Interaction: it enables rapid definition and creation of LLM-based agents, and seamlessly
-  handles communication between them.
-- Language-driven Game Environment: it provides a framework for creating a language-driven game environment, and a
-  friendly UI to develop such games.
+  communication, collaboration, and competition between them.
 - Playground & Testbed for C3 Capabilities: it provides a set of environments for evaluating and developing the
   **communication, collaboration, and competition**  (C3) capabilities of LLMs.
 
-## Features
+[//]: # (## Features)
 
-- Support for multiple large language models.
-- Customizable language model-driven environments.
-- Easy-to-use API for efficient development.
-- Seamless interaction between humans and LLM agents.
-- Extensible design, allowing you to integrate additional models or environments.
+[//]: # ()
+
+[//]: # (- Support for multiple large language models.)
+
+[//]: # (- Customizable language model-driven environments.)
+
+[//]: # (- Easy-to-use API for efficient development.)
+
+[//]: # (- Seamless interaction between humans and LLM agents.)
+
+[//]: # (- Extensible design, allowing you to integrate additional models or environments.)
 
 ## Getting Started
 

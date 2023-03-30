@@ -14,7 +14,7 @@ setup(
     description="",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jimmycode/chat-arena",
+    url="https://github.com/chat-arena/chat-arena",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

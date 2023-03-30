@@ -91,8 +91,7 @@ with gr.Blocks(css=css) as demo:
     with gr.Column(elem_id="col-container"):
         gr.Markdown("""# 🏟 Chat Arena️<br>
 Prompting chat-based AI agents to play games in a language-driven environment. 
-[Arena Tutorial](https://chat.ai-arena.org/tutorial)""",
-                    elem_id="header")
+[Arena Tutorial](https://chat.ai-arena.org/tutorial)""", elem_id="header")
 
         with gr.Row():
             env_selector = gr.Dropdown(choices=list(ENV_REGISTRY.keys()), value=DEFAULT_ENV, interactive=True,
