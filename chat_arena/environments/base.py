@@ -55,7 +55,7 @@ class Environment(ABC):
         """
         pass
 
-    def check_action(self, action: str, agent: Agent) -> bool:
+    def check_action(self, action: str, agent_name: str) -> bool:
         """
         check whether the action is valid
         """
