@@ -120,7 +120,7 @@ You can also create a language model-driven environment and add it to the Chat A
 from chat_arena.environments.conversation import ModeratedConversation
 
 env = ModeratedConversation(
-    players=[player1.name, player2.name, player3.name],
+    players=[player1.type_name, player2.type_name, player3.type_name],
     moderator_role="You are a teaching admin ...",
     moderator_backend=OpenAIChat(..),
 env_description = "It is in a NLP classroom ...",

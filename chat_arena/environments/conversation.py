@@ -3,6 +3,7 @@ from typing import List, Union
 from .base import TimeStep, Environment
 from ..message import Message, MessagePool
 from ..agent import Moderator
+from ..config import EnvironmentConfig
 
 
 class Conversation(Environment):
@@ -10,31 +11,18 @@ class Conversation(Environment):
     Turn-based fully observable conversation environment.
     Next speaker order is either parallel or round-robin.
     """
+    type_name = "conversation"
 
-    def __init__(self, player_names: List[str], env_desc: str, parallel: bool = False):
-        super().__init__(player_names, env_desc)
+    def __init__(self, config: EnvironmentConfig, *args, **kwargs):
+        super().__init__(config, *args, **kwargs)
+
+        self._require_fields_in_config(['env_desc', 'parallel'])
+
+        # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
-        self.parallel = parallel  # if True, all players speak at the same time
 
         self._current_turn = 0
         self._next_player_idx = 0
-
-    @classmethod
-    def from_config(cls, config: dict):
-        assert config["env_type"] == "conversation"
-        return cls(
-            player_names=config["player_names"],
-            env_desc=config["env_desc"],
-            parallel=config["parallel"],
-        )
-
-    def to_config(self) -> dict:
-        return {
-            "env_type": "conversation",
-            "player_names": self.player_names,
-            "env_desc": self.env_desc,
-            "parallel": self.parallel,
-        }
 
     def reset(self):
         self._current_turn = 0
@@ -75,9 +63,9 @@ class Conversation(Environment):
         self.message_pool.append_message(message)
 
         # Update the counters
-        if not self.parallel or self._next_player_idx == 0:
+        if not self.config.parallel or self._next_player_idx == 0:
             self._current_turn += 1
-        self._next_player_idx = (self._next_player_idx + 1) % len(self.player_names)
+        self._next_player_idx = (self._next_player_idx + 1) % self.num_players
 
         timestep = TimeStep(observation=self.get_observation(),
                             reward=self.get_zero_rewards(),
@@ -92,36 +80,18 @@ class ModeratedConversation(Conversation):
     Moderator is a special agent that can see all messages and can decide whether the conversation is over.
     """
 
-    def __init__(self, player_names: List[str], env_desc: str, parallel: bool = False,
-                 moderator: Moderator = None, moderator_visibility: Union[str, List[str]] = "all"):
-        super().__init__(player_names, env_desc, parallel)
-        self.moderator = moderator
-        self.moderator_visibility = moderator_visibility  # by default, all players can see the moderator's messages
+    type_name = "moderated_conversation"
 
-    @classmethod
-    def from_config(cls, config: dict):
-        assert config["env_type"] == "moderated_conversation"
-        # Add env_desc to the config of the moderator if it is not there
-        if "env_desc" not in config["moderator"]:
-            config["moderator"]["env_desc"] = config["env_desc"]
+    def __init__(self, config: EnvironmentConfig, *args, **kwargs):
+        super().__init__(config, *args, **kwargs)
 
-        return cls(
-            player_names=config["player_names"],
-            env_desc=config["env_desc"],
-            parallel=config["parallel"],
-            moderator=Moderator.from_config(config["moderator"]),
-            moderator_visibility=config.get("moderator_visibility", "all")
-        )
+        self._require_fields_in_config(['moderator', 'moderator_visibility'])
 
-    def to_config(self) -> dict:
-        return {
-            "env_type": "moderated_conversation",
-            "player_names": self.player_names,
-            "env_desc": self.env_desc,
-            "parallel": self.parallel,
-            "moderator": self.moderator.to_config(),
-            "moderator_visibility": self.moderator_visibility,
-        }
+        moderator_config = self.config.moderator
+        self.moderator = Moderator(moderator_config)
+        # Check the moderator's env_desc matches the environment's env_desc
+        assert self.moderator.config.env_desc == self.config.env_desc, \
+            f"Moderator's env_desc {self.moderator.config.env_desc} does not match the environment's env_desc {self.config.env_desc}"
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """
@@ -139,15 +109,19 @@ class ModeratedConversation(Conversation):
         moderator_message = Message(agent_name=self.moderator.name,
                                     content=moderator_response,
                                     turn=self._current_turn,
-                                    visible_to=self.moderator_visibility)
+                                    visible_to=self.config.moderator_visibility)
         self.message_pool.append_message(moderator_message)
 
         terminal = self.moderator.is_terminal(moderator_history)
 
         # Update the counters
-        if not self.parallel or self._next_player_idx == 0:
+        if not self.config.parallel or self._next_player_idx == 0:
             self._current_turn += 1
-        self._next_player_idx = (self._next_player_idx + 1) % len(self.player_names)
 
-        timestep = TimeStep(observation=self.get_observation(), reward=0, terminal=terminal)  # Return all the messages
+        # Round-robin order for the next player
+        self._next_player_idx = (self._next_player_idx + 1) % self.num_players
+
+        timestep = TimeStep(observation=self.get_observation(),
+                            reward=self.get_zero_rewards(),
+                            terminal=terminal)  # Return all the messages
         return timestep

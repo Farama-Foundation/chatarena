@@ -94,7 +94,7 @@ class SupabaseDB:
             messages = arena.environment.get_observation()
 
         # Filter messages that are already logged
-        messages = [msg for msg in messages if msg.logged is False]
+        messages = [msg for msg in messages if not msg.logged]
 
         message_rows = []
         for message in messages:
@@ -105,6 +105,7 @@ class SupabaseDB:
                 "content": message.content,
                 "turn": message.turn,
                 "timestamp": str(message.timestamp),
+                "msg_type": message.msg_type,
                 "visible_to": json.dumps(message.visible_to),
             }
             message_rows.append(message_row)

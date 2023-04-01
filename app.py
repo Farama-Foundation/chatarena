@@ -4,7 +4,9 @@ import gradio as gr
 from glob import glob
 
 from chat_arena.arena import Arena
-from chat_arena.backend import BACKEND_REGISTRY, HumanBackendError
+from chat_arena.backends import BACKEND_REGISTRY
+from chat_arena.backends.human import HumanBackendError
+from chat_arena.config import ArenaConfig
 from chat_arena.environments import ENV_REGISTRY
 from chat_arena.database import log_arena, log_messages, SupabaseDB, supabase_available
 
@@ -185,7 +187,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
         return chatbot_output
 
 
-    def _create_arena_config_from_components(all_comps: dict):
+    def _create_arena_config_from_components(all_comps: dict) -> ArenaConfig:
         env_desc = all_comps[env_desc_textbox]
 
         # Initialize the players
@@ -224,13 +226,14 @@ Prompting chat-based AI agents to play games in a language-driven environment.
         }
         env_config = {
             "env_type": env_type,
-            "player_names": [conf["name"] for conf in player_configs],
             "env_desc": env_desc,
             "parallel": all_comps[parallel_checkbox],
-            "moderator": moderator_config
+            "moderator": moderator_config,
+            "moderator_visibility": "all"
         }
 
-        arena_config = {"players": player_configs, "environment": env_config}
+        # arena_config = {"players": player_configs, "environment": env_config}
+        arena_config = ArenaConfig(players=player_configs, environment=env_config)
         return arena_config
 
 
@@ -258,7 +261,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
             if human_input == "":
                 timestep = None  # Failed to get human input
             else:
-                timestep = arena.environment.step(e.agent_name, human_input)
+                timestep = arena.environment.turn(e.agent_name, human_input)
 
         if timestep is None:
             yield {human_input_textbox: gr.update(value="", placeholder="Please enter a valid input"),

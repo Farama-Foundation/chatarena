@@ -1,8 +1,10 @@
-from .base import Environment, TimeStep
-from chat_arena.message import Message, MessagePool
 from typing import List, Dict, Union
 import random
 import re
+
+from .base import Environment, TimeStep
+from ..config import EnvironmentConfig
+from ..message import Message, MessagePool
 
 DEFAULT_TOPIC_CODES = {
     "Fruits": [
@@ -49,37 +51,31 @@ DEFAULT_TOPIC_CODES = {
 
 
 class Chameleon(Environment):
-    def __init__(self, player_names: List[str], env_desc: str,
-                 topic_codes: Dict[str, List[str]] = DEFAULT_TOPIC_CODES):
-        super().__init__(player_names, env_desc)
+    type_name = "chameleon"
+
+    def __init__(self, config: EnvironmentConfig, *args, **kwargs):
+        super().__init__(config, *args, **kwargs)
+
+        # If topic_codes is not provided in the config, use the default topic codes
+        if 'topic_codes' not in self.config:
+            self.config.topic_codes = DEFAULT_TOPIC_CODES
+
+        # The "state" of the environment is maintained by the message pool
+        self.message_pool = MessagePool()
+
+        # Randomly sample a topic, code and chameleon player
         self.topic = None
         self.code = None
-        self.message_pool = MessagePool()
-        self.topic_codes_dict = topic_codes
         self.chameleon_name = None
         self.non_chameleon_names = None
 
-        self._current_turn = None
-        self._next_player_idx = None
-        self._current_phase = None  # "give clues", "accuse", "guess"
+        # Game states
+        self._current_turn = 0
+        self._next_player_idx = 0
+        self._current_phase = "give clues"  # "give clues", "accuse", "guess"
+        self._players_votes = None
 
-        self.reset()
-
-    @classmethod
-    def from_config(cls, config: dict):
-        assert config["env_type"] == "chameleon"
-        return cls(
-            player_names=config["player_names"],
-            env_desc=config["env_desc"],
-        )
-
-    def to_config(self) -> dict:
-        return {
-            "env_type": "chameleon",
-            "player_names": self.player_names,
-            "env_desc": self.env_desc,
-            "parallel": None,
-        }
+        self._initialized = False
 
     def get_next_player(self) -> str:
         """
@@ -95,25 +91,28 @@ class Chameleon(Environment):
 
     def reset(self):
         """
-        sample topic, code and chemeleon code
+        sample topic, code and chameleon code
         """
-        self.topic = random.choice(list(self.topic_codes_dict.keys()))
-        self.code = random.choice(self.topic_codes_dict[self.topic])
+        self.topic = random.choice(list(self.config.topic_codes.keys()))
+        self.code = random.choice(self.config.topic_codes[self.topic])
         self.chameleon_name = random.choice(self.player_names)
         self.non_chameleon_names = [name for name in self.player_names if name != self.chameleon_name]
 
         self._current_turn = 0
         self._next_player_idx = 0
         self._current_phase = "give clues"
+
         self.message_pool.reset()
-        self.moderator_say(f"The game started! Topic: {self.topic}")
-        self.moderator_say(f"You are not chameleon. The code is: {self.code}", visible_to=self.non_chameleon_names)
-        self.moderator_say(f"You are the chameleon!", visible_to=self.chameleon_name)
-        self.moderator_say(f"Now everyone can start giving clues. One can say anything you want but only say once. "
-                           f"Starting from {self.get_next_player()}.")
+
+        self._moderator_speak(f"Now the game starts! The topic is: {self.topic}")
+        self._moderator_speak(f"You are not chameleon. The code is: {self.code}", visible_to=self.non_chameleon_names)
+        self._moderator_speak(f"You are the chameleon!", visible_to=self.chameleon_name)
+        self._moderator_speak(f"Now everyone gives one clue. You cannot repeat what others has said.")
         self._current_turn = 1
 
-        self.players_votes = {name: 0 for name in self.player_names}
+        self._players_votes = {name: 0 for name in self.player_names}
+
+        self._initialized = True
 
         return self.get_observation()
 
@@ -126,7 +125,7 @@ class Chameleon(Environment):
         else:
             return self.message_pool.get_visible_messages(player_name, turn=self._current_turn)
 
-    def text2vote(self, text) -> str:
+    def _text2vote(self, text) -> str:
         """
         convert text to vote, return a player's name
         """
@@ -138,7 +137,7 @@ class Chameleon(Environment):
                 return name
         return ""
 
-    def is_true_code(self, text) -> bool:
+    def _is_true_code(self, text) -> bool:
         """
         Check whether the text is the true code
         """
@@ -156,32 +155,22 @@ class Chameleon(Environment):
             else:
                 return False
 
-    def moderator_say(self, text: str, visible_to: Union[str, List[str]] = "all"):
+    def _moderator_speak(self, text: str, visible_to: Union[str, List[str]] = "all"):
         """
         moderator say something
         """
-        message = Message(agent_name="Moderator",
-                          content=text,
-                          turn=self._current_turn,
-                          visible_to=visible_to)
+        message = Message(agent_name="Moderator", content=text, turn=self._current_turn, visible_to=visible_to)
         self.message_pool.append_message(message)
 
-    def get_rewards(self, chameleon_win: bool) -> List[float]:
+    def get_rewards(self, chameleon_win: bool) -> Dict[str, float]:
         """
         get rewards for each player
         """
-        rewards = []
+        rewards = {}
         for name in self.player_names:
-            if name == self.chameleon_name:
-                if chameleon_win:
-                    rewards.append(1)
-                else:
-                    rewards.append(0)
-            else:
-                if chameleon_win:
-                    rewards.append(0)
-                else:
-                    rewards.append(1)
+            # The winner gets 1, the loser gets 0
+            rewards[name] = float((name == self.chameleon_name) == chameleon_win)
+
         return rewards
 
     def step(self, player_name: str, action: str) -> TimeStep:
@@ -191,7 +180,12 @@ class Chameleon(Environment):
             player_name: the name of the player that takes the action
             action: the action that the agents wants to take
         """
-        self.message_pool.print()
+        # If not initialized, reset the environment
+        if not self._initialized:
+            self.reset()
+
+        # self.message_pool.print()
+        # print(f"Chameleon: {self.chameleon_name}, Code: {self.code}, Topic: {self.topic}")
         assert player_name == self.get_next_player(), f"Wrong player! It is {self.get_next_player()} turn."
         if self._current_phase == "give clues":
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
@@ -204,8 +198,8 @@ class Chameleon(Environment):
             else:
                 self._next_player_idx = 0
                 self._current_phase = "accuse"
-                self.moderator_say("Now vote which of the other players (excluding yourself) is the chameleon. "
-                                   "You cannot vote for yourself.")
+                self._moderator_speak("Now vote which of the other players (excluding yourself) is the chameleon. "
+                                      "You cannot vote for yourself.")
                 self._current_turn += 1
 
             timestep = TimeStep(observation=self.get_observation(),
@@ -215,38 +209,38 @@ class Chameleon(Environment):
             message = Message(agent_name=player_name, content=action, turn=self._current_turn,
                               visible_to=[player_name])
             self.message_pool.append_message(message)
-            vote = self.text2vote(action)
+            vote = self._text2vote(action)
             if vote in self.player_names:
-                self.players_votes[vote] += 1
+                self._players_votes[vote] += 1
 
             if self._next_player_idx < len(self.player_names) - 1:
                 self._next_player_idx += 1
                 rewards = self.get_zero_rewards()
                 terminal = False
             else:
-                print(self.players_votes)
+                # print(self._players_votes)
                 accuse_correct, even_vote = True, False
-                max_vote_player = max(self.players_votes, key=self.players_votes.get)
+                max_vote_player = max(self._players_votes, key=self._players_votes.get)
                 # detach if other players has the same number of votes
-                for name, vote in self.players_votes.items():
-                    if name != max_vote_player and vote == self.players_votes[max_vote_player]:
+                for name, vote in self._players_votes.items():
+                    if name != max_vote_player and vote == self._players_votes[max_vote_player]:
                         accuse_correct, even_vote = False, True
                 if max_vote_player != self.chameleon_name:
                     accuse_correct = False
 
                 if not accuse_correct:
                     if even_vote:
-                        self.moderator_say(f"There are even votes. The accusation does not stand. "
-                                           f"{self.chameleon_name} is the chameleon!")
+                        self._moderator_speak(f"There are even votes. The accusation does not stand. "
+                                              f"{self.chameleon_name} is the chameleon!")
                     else:
-                        self.moderator_say(f"The accused player is {max_vote_player}. The accusation is incorrect. "
-                                           f"{self.chameleon_name} is the chameleon!")
+                        self._moderator_speak(f"The accused player is {max_vote_player}. The accusation is incorrect. "
+                                              f"{self.chameleon_name} is the chameleon!")
                     rewards = self.get_rewards(chameleon_win=True)
                     terminal = True
                 else:
-                    self.moderator_say(f"The accusation is correct! {self.chameleon_name} is the chameleon! "
-                                       f"Now {self.chameleon_name} can guess the secret code. "
-                                       "You should say: I guess the code is \"...\"")
+                    self._moderator_speak(f"The accusation is correct! {self.chameleon_name} is the chameleon! "
+                                          f"Now {self.chameleon_name} can guess the secret code. "
+                                          "You should say: I guess the code is \"...\"")
                     self._current_phase = "guess"
                     rewards = self.get_zero_rewards()
                     terminal = False
@@ -257,11 +251,11 @@ class Chameleon(Environment):
             message = Message(agent_name=player_name, content=action, turn=self._current_turn,
                               visible_to=[player_name])
             self.message_pool.append_message(message)
-            if self.is_true_code(action):
-                self.moderator_say(f"{player_name} guessed the code correctly! {self.code} is the code!")
+            if self._is_true_code(action):
+                self._moderator_speak(f"{player_name} guessed the code correctly! {self.code} is the code!")
                 rewards = self.get_rewards(chameleon_win=True)
             else:
-                self.moderator_say(f"{player_name} guessed the code wrong! {self.code} is the code!")
+                self._moderator_speak(f"{player_name} guessed the code wrong! {self.code} is the code!")
                 rewards = self.get_rewards(chameleon_win=False)
             timestep = TimeStep(observation=self.get_observation(),
                                 reward=rewards,
