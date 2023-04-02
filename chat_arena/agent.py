@@ -1,9 +1,15 @@
 from typing import List
 import re
+from tenacity import RetryError
+import logging
 
 from .backends import IntelligenceBackend, load_backend
 from .message import Message
 from .config import AgentConfig, Configurable
+
+# A special signal sent by the player to indicate that it is not possible to continue the conversation, and it requests to end the conversation.
+# It contains a random UUID string to avoid being exploited by any of the players.
+SIGNAL_END_OF_CONVERSATION = '<<<<<<END_OF_CONVERSATION>>>>>>f2d7c727-b99c-4a7e-9d05-b61ae88c69d0'
 
 
 class Agent(Configurable):
@@ -33,12 +39,19 @@ class Player(Agent):
         """
         Call the agents to generate a response (equivalent to taking an action).
         """
-        response = self.backend.query(
-            agent_name=self.name,
-            role_desc=self.config.role_desc,
-            env_desc=self.config.env_desc,
-            history_messages=observation,
-            request_msg=None)
+        try:
+            response = self.backend.query(
+                agent_name=self.name,
+                role_desc=self.config.role_desc,
+                env_desc=self.config.env_desc,
+                history_messages=observation,
+                request_msg=None)
+        except RetryError as e:
+            logging.warning(f"Agent {self.name} failed to generate a response. "
+                            f"Error: {e.last_attempt.exception()}. "
+                            f"Sending signal to end the conversation.")
+            response = SIGNAL_END_OF_CONVERSATION
+
         return response
 
     def to_config(self) -> AgentConfig:
@@ -83,14 +96,23 @@ class Moderator(Agent):
         """
         check whether the conversation is over
         """
-        response = self.backend.query(
-            agent_name=self.name,
-            role_desc=self.config.role_desc,
-            env_desc=self.config.env_desc,
-            history_messages=history,
-            request_msg=Message(agent_name=self.name, content=self.config.terminal_condition, turn=-1),
-            *args, **kwargs
-        )
+        # If the last message is the signal, then the conversation is over
+        if history[-1].content == SIGNAL_END_OF_CONVERSATION:
+            return True
+
+        try:
+            response = self.backend.query(
+                agent_name=self.name,
+                role_desc=self.config.role_desc,
+                env_desc=self.config.env_desc,
+                history_messages=history,
+                request_msg=Message(agent_name=self.name, content=self.config.terminal_condition, turn=-1),
+                *args, **kwargs
+            )
+        except RetryError as e:
+            logging.warning(f"Agent {self.name} failed to generate a response. "
+                            f"Error: {e.last_attempt.exception()}.")
+            return True
 
         if re.match(r"yes|y|yea|yeah|yep|yup|sure|ok|okay|alright", response, re.IGNORECASE):
             print(f"Decision: {response}. Conversation is ended by moderator.")
@@ -102,12 +124,19 @@ class Moderator(Agent):
         """
         Call the moderator to generate an updated game state.
         """
-        response = self.backend.query(
-            agent_name=self.name,
-            role_desc=self.config.role_desc,
-            env_desc=self.config.env_desc,
-            history_messages=observation,
-            request_msg=None)
+        try:
+            response = self.backend.query(
+                agent_name=self.name,
+                role_desc=self.config.role_desc,
+                env_desc=self.config.env_desc,
+                history_messages=observation,
+                request_msg=None)
+        except RetryError as e:
+            logging.warning(f"Agent {self.name} failed to generate a response. "
+                            f"Error: {e.last_attempt.exception()}. "
+                            f"Sending signal to end the conversation.")
+            response = SIGNAL_END_OF_CONVERSATION
+
         return response
 
     def reset(self):

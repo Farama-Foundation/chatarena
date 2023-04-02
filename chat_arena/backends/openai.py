@@ -1,6 +1,7 @@
 from typing import List
 import os
 import openai
+from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .base import IntelligenceBackend
 from ..message import Message
@@ -33,6 +34,7 @@ class OpenAIChat(IntelligenceBackend):
             if key not in self.config:
                 self.config[key] = value
 
+    @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, messages, *args, **kwargs):
         # Make a deepcopy of the config to avoid modifying the original config
         config = self.config.deepcopy()

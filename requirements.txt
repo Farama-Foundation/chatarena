@@ -2,3 +2,4 @@ cohere==4.1.0
 openai==0.27.2
 gradio==3.20.0
 transformers==4.27.4
+tenacity==8.2.2

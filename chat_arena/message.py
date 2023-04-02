@@ -61,6 +61,13 @@ class MessagePool():
         else:
             return self._messages[-1].turn
 
+    @property
+    def last_message(self):
+        if len(self._messages) == 0:
+            return None
+        else:
+            return self._messages[-1]
+
     def get_all_messages(self) -> List[Message]:
         return self._messages
 

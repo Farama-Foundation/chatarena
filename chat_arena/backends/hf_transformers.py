@@ -1,4 +1,5 @@
 from typing import List
+from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .base import IntelligenceBackend
 from ..config import BackendConfig
@@ -31,6 +32,7 @@ class TransformersConversational(IntelligenceBackend):
         self.chatbot = pipeline(task="conversational", model=self.config.model,
                                 device=self.config.get("device", -1))
 
+    @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, conversation: Conversation):
         conversation = self.chatbot(conversation)
         response = conversation.generated_responses[-1]

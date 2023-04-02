@@ -123,5 +123,12 @@ class Environment(Configurable):
         """
         pass
 
+    @abstractmethod
+    def is_terminal(self) -> bool:
+        """
+        check whether the environment is in terminal state
+        """
+        pass
+
     def get_zero_rewards(self) -> Dict[str, float]:
         return {player_name: 0. for player_name in self.player_names}

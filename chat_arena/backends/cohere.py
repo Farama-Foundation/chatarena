@@ -1,5 +1,6 @@
 from typing import List
 import os
+from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .base import IntelligenceBackend
 from ..config import BackendConfig
@@ -50,6 +51,7 @@ class CohereAIChat(IntelligenceBackend):
         self.session_id = None
         self.last_msg_hash = None
 
+    @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, new_message: str, persona_prompt: str):
         response = self.client.chat(
             new_message,

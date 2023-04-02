@@ -1,3 +1,4 @@
+import logging
 from typing import List, Dict, Union
 import random
 import re
@@ -5,6 +6,7 @@ import re
 from .base import Environment, TimeStep
 from ..config import EnvironmentConfig
 from ..message import Message, MessagePool
+from ..agent import SIGNAL_END_OF_CONVERSATION
 
 DEFAULT_TOPIC_CODES = {
     "Fruits": [
@@ -173,6 +175,14 @@ class Chameleon(Environment):
 
         return rewards
 
+    def is_terminal(self) -> bool:
+        """
+        check if the conversation is over
+        """
+        # If the last message is the signal, then the conversation is over
+        if self.message_pool.last_message.content == SIGNAL_END_OF_CONVERSATION:
+            return True
+
     def step(self, player_name: str, action: str) -> TimeStep:
         """
         step function that is called by the arena
@@ -262,4 +272,9 @@ class Chameleon(Environment):
                                 terminal=True)
         else:
             raise ValueError(f"Unknown phase: {self._current_phase}")
+
+        # Check if the player signals the end of the conversation
+        if self.is_terminal():
+            timestep.terminal = True
+
         return timestep

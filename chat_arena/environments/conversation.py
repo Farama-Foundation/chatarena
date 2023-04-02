@@ -2,7 +2,7 @@ from typing import List, Union
 
 from .base import TimeStep, Environment
 from ..message import Message, MessagePool
-from ..agent import Moderator
+from ..agent import Moderator, SIGNAL_END_OF_CONVERSATION
 from ..config import EnvironmentConfig
 
 
@@ -52,6 +52,14 @@ class Conversation(Environment):
         else:
             return self.message_pool.get_visible_messages(player_name, turn=self._current_turn)
 
+    def is_terminal(self) -> bool:
+        """
+        check if the conversation is over
+        """
+        # If the last message is the signal, then the conversation is over
+        if self.message_pool.last_message.content == SIGNAL_END_OF_CONVERSATION:
+            return True
+
     def step(self, player_name: str, action: str) -> TimeStep:
         """
         step function that is called by the arena
@@ -69,7 +77,7 @@ class Conversation(Environment):
 
         timestep = TimeStep(observation=self.get_observation(),
                             reward=self.get_zero_rewards(),
-                            terminal=False)  # Return all the messages
+                            terminal=self.is_terminal())  # Return all the messages
         return timestep
 
 
@@ -112,7 +120,7 @@ class ModeratedConversation(Conversation):
                                     visible_to=self.config.moderator_visibility)
         self.message_pool.append_message(moderator_message)
 
-        terminal = self.moderator.is_terminal(moderator_history)
+        terminal = self.moderator.is_terminal(moderator_history) or self.is_terminal()
 
         # Update the counters
         if not self.config.parallel or self._next_player_idx == 0:
