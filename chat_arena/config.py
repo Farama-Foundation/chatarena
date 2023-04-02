@@ -2,10 +2,10 @@ import json
 import copy
 from typing import List, Union
 
-from .utils import AttributeDict
+from .utils import AttributedDict
 
 
-class Config(AttributeDict):
+class Config(AttributedDict):
     """
     Config class to manage the configuration of the games.
     The class has a few useful methods to load and save the config.

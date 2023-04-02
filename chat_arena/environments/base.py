@@ -4,12 +4,12 @@ from abc import abstractmethod
 
 from ..message import Message
 from ..agent import Player
-from ..utils import AttributeDict
+from ..utils import AttributedDict
 from ..config import EnvironmentConfig, Configurable
 
 
 @dataclass
-class TimeStep(AttributeDict):
+class TimeStep(AttributedDict):
     observation: List[Message]
     reward: Dict[str, float]
     terminal: bool

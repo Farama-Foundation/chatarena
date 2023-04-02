@@ -1,4 +1,4 @@
-class AttributeDict(dict):
+class AttributedDict(dict):
     """
     A dict class whose keys are automatically set as attributes of the class.
     Serializable to JSON.
