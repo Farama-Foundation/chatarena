@@ -1,6 +1,6 @@
 <h1 align="center"> 🏟 <span style="color:coral">Chat Arena</span> </h1>
 <h3 align="center">
-    <p>Multi-Player/Agent Language Game Environments/Platform/Library</p>
+    <p>Multi-Agent Language Game Environments for LLMs</p>
 </h3>
 
 ---
@@ -14,20 +14,6 @@ in a language-driven environment. It provides the following features:
 - Playground & Testbed for C3 Capabilities: it provides a set of environments for evaluating and developing the
   **communication, collaboration, and competition**  (C3) capabilities of LLMs.
 
-[//]: # (## Features)
-
-[//]: # ()
-
-[//]: # (- Support for multiple large language models.)
-
-[//]: # (- Customizable language model-driven environments.)
-
-[//]: # (- Easy-to-use API for efficient development.)
-
-[//]: # (- Seamless interaction between humans and LLM agents.)
-
-[//]: # (- Extensible design, allowing you to integrate additional models or environments.)
-
 ## Getting Started
 
 ### Prerequisites
@@ -40,17 +26,17 @@ in a language-driven environment. It provides the following features:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/chat-arena/chat-arena
+git clone https://github.com/chatarena/chatarena
 ```
 
 2. Install the package:
 
 ```bash
-cd chat-arena
+cd chatarena
 pip install .  # Install the package (which also installs the dependencies)
 ```
 
-3. (Optional) To use GPT-3 as an LLM agent, set your OpenAI API key:
+3. To use GPT-3 as an LLM agent, set your OpenAI API key:
 
 ```bash
 export OPENAI_API_KEY="your_api_key_here"
