@@ -110,8 +110,9 @@ class Chameleon(Environment):
         self._moderator_speak(f"You are not chameleon. The word is: {self.code}",
                               visible_to=self.non_chameleon_names)
         self._moderator_speak(f"You are the chameleon!", visible_to=self.chameleon_name)
-        self._moderator_speak(f"Now everyone gives one clue. You cannot repeat what others has said. "
-                              f"We will start with {self.player_names[0]}.")
+        self._moderator_speak(
+            f"Now everyone gives one clue (but don't give away the secret word). "
+            f"You cannot repeat what others has said. We will start with {self.player_names[0]}.")
         self._current_turn = 1
 
         self._players_votes = {name: 0 for name in self.player_names}

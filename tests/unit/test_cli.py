@@ -22,7 +22,5 @@ class TestArenaCLI(TestCase):
         arena.launch_cli(max_steps=10, interactive=False)
 
 
-
-
 if __name__ == "__main__":
     unittest.main()
