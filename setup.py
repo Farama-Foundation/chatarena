@@ -1,20 +1,29 @@
 from setuptools import setup, find_packages
 
+_deps = [
+    "cohere>=4.1.0",
+    "openai>=0.27.0",
+    "gradio>=3.20.0",
+    "transformers>=4.0",
+    "tenacity==8.2.2",
+    "rich>=13.3.1",
+    "prompt_toolkit>=3.0"
+]
+
 with open("README.md", "r") as f:
     long_description = f.read()
 
-with open("requirements.txt", "r") as f:
-    requirements = [req for req in f.readlines() if not req.startswith("#")]
+requirements = _deps
 
 setup(
-    name="chat_arena",
-    version="0.3.1",
+    name="chatarena",
+    version="0.1.0",
     author="Yuxiang Wu",
     author_email="yuxiang.cs@gmail.com",
     description="",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/chat-arena/chat-arena",
+    url="https://github.com/chatarena/chatarena",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

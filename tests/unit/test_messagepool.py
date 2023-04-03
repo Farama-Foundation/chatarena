@@ -1,4 +1,4 @@
-from refactor.message import Message, MessagePool
+from chatarena.message import Message, MessagePool
 from unittest import TestCase
 
 class TestMessagePool(TestCase):

@@ -1,6 +1,4 @@
-<font size="+2" > 
 <h1 align="center"> 🏟 <span style="color:coral">Chat Arena</span> </h1>
-</font>
 <h3 align="center">
     <p>Multi-Player/Agent Language Game Environments/Platform/Library</p>
 </h3>

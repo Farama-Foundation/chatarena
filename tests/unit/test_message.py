@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from chat_arena.message import MessagePool
+from chatarena.message import MessagePool
 
 # Write a test case for the message pool
 class TestMessagePool(TestCase):

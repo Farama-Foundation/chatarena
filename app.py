@@ -3,12 +3,12 @@ import json
 import gradio as gr
 from glob import glob
 
-from chat_arena.arena import Arena
-from chat_arena.backends import BACKEND_REGISTRY
-from chat_arena.backends.human import HumanBackendError
-from chat_arena.config import ArenaConfig
-from chat_arena.environments import ENV_REGISTRY
-from chat_arena.database import log_arena, log_messages, SupabaseDB, supabase_available
+from chatarena.arena import Arena
+from chatarena.backends import BACKEND_REGISTRY
+from chatarena.backends.human import HumanBackendError
+from chatarena.config import ArenaConfig
+from chatarena.environments import ENV_REGISTRY
+from chatarena.database import log_arena, log_messages, SupabaseDB, supabase_available
 
 css = """#col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
 #header {text-align: center;}

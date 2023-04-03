@@ -2,7 +2,7 @@ import unittest
 from unittest import TestCase
 import json
 
-from chat_arena.arena import Arena
+from chatarena.arena import Arena
 
 
 class TestArena(TestCase):

@@ -1,7 +1,7 @@
 import unittest
 from unittest import TestCase
 
-from chat_arena.arena import Arena
+from chatarena.arena import Arena
 
 
 class TestArenaCLI(TestCase):

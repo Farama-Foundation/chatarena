@@ -2,9 +2,9 @@ import unittest
 from unittest import TestCase
 import logging
 
-from chat_arena.backends.hf_transformers import TransformersConversational
-from chat_arena.config import BackendConfig
-from chat_arena.message import Message
+from chatarena.backends.hf_transformers import TransformersConversational
+from chatarena.config import BackendConfig
+from chatarena.message import Message
 
 # set logger level to info
 logging.basicConfig(level=logging.INFO)
