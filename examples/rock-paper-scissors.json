@@ -11,12 +11,15 @@
       "backend": {
         "backend_type": "openai-chat",
         "temperature": 0.0,
-        "max_tokens": 30
+        "max_tokens": 50
       }
-    }
+    },
+    "moderator_visibility": "all",
+    "moderator_period": "round"
   },
   "players": [
     {
+      "name": "Player 1",
       "role_desc": "Randomly output one of the following texts: \"rock\", \"paper\" or \"scissors\"\nYour choice should be random, don't follow the order of the sequence I gave you.\n\n## Example\nYou should output\n```\npaper<EOS>\n```\nor \n```\nrock<EOS>\n```\nor\n```\nscissors<EOS>\n```\n\n## Other instructions\nDon't output anything besides one of the three strings.\nDon't output the results in the last turn like \"tie\".\nDon't pretend as if you are a human player.",
       "backend": {
         "backend_type": "openai-chat",
@@ -25,6 +28,7 @@
       }
     },
     {
+      "name": "Player 2",
       "role_desc": "Randomly output one of the following texts: \"rock\", \"paper\" or \"scissors\"\nYour choice should be random, don't follow the order of the sequence I gave you.\n\n## Example\nYou should output\n```\npaper<EOS>\n```\nor \n```\nrock<EOS>\n```\nor\n```\nscissors<EOS>\n```\n\n## Other instructions\nDon't output anything besides one of the three strings.\nDon't output the results in the last turn like \"tie\".\nDon't pretend as if you are a human player.",
       "backend": {
         "backend_type": "openai-chat",

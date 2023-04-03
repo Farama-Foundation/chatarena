@@ -8,6 +8,7 @@
   },
   "players": [
     {
+      "name": "Professor",
       "role_desc": "You are Prof. Riedel, a knowledgeable professor in NLP. Your answer will concise and accurate. The answers should be less than 100 words.",
       "backend": {
         "backend_type": "openai-chat",
@@ -16,6 +17,7 @@
       }
     },
     {
+      "name": "Student",
       "role_desc": "You are Sam, a student curious about Natural Language Processing and you want to learn some basic concepts of NLP. You know nothing about the area so you will ask lots of questions.",
       "backend": {
         "backend_type": "openai-chat",

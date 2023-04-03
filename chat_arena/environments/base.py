@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Union
 from abc import abstractmethod
+import logging
 
 from ..message import Message
 from ..agent import Player
@@ -57,8 +58,13 @@ class Environment(Configurable):
                 raise ValueError(f"Player {player.name} already registered")
 
             # Check the player's env_desc matches the environment's env_desc
-            assert player.config.env_desc == self.config.env_desc, \
-                f"Player {player.name} env_desc {player.config.env_desc} does not match environment env_desc {self.config.env_desc}"
+            if "env_desc" not in player.config:
+                logging.warning(f"Player {player.name} does not have env_desc in config, using environment's env_desc")
+                player.set_env_desc(self.config.env_desc)
+            elif player.config.env_desc != self.config.env_desc:
+                logging.warning(
+                    f"Player {player.name} env_desc {player.config.env_desc} does not match environment env_desc {self.config.env_desc}, using environment's env_desc")
+                player.set_env_desc(self.config.env_desc)
 
             self._players.append(player)
 

@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 import uuid
 
 from .agent import Player
@@ -27,7 +27,7 @@ class Arena:
     def name_to_player(self) -> Dict[str, Player]:
         return {player.name: player for player in self.players}
 
-    def reset(self):
+    def reset(self) -> TimeStep:
         # Reset the environment
         self.current_timestep = self.environment.reset()
         # Reset the players
@@ -35,6 +35,7 @@ class Arena:
             player.reset()
         # Reset the uuid
         self.uuid = uuid.uuid4()
+        return self.current_timestep
 
     def step(self) -> TimeStep:
         """
@@ -65,10 +66,14 @@ class Arena:
                 break
 
     @classmethod
-    def from_config(cls, config: ArenaConfig):
+    def from_config(cls, config: Union[str, ArenaConfig]):
         """
         create an arena from a config
         """
+        # If config is a path, load the config
+        if isinstance(config, str):
+            config = ArenaConfig.load(config)
+
         # Load the players
         players = []
         for player_config in config.players:
@@ -97,3 +102,11 @@ class Arena:
             "players": [player.to_config() for player in self.players],
             "environment": self.environment.to_config(),
         }
+
+    def launch_cli(self, max_steps: int = None, interactive: bool = True):
+        """
+        launch the command line interface
+        """
+        from .ui.cli import ArenaCLI
+        cli = ArenaCLI(self)
+        cli.launch(max_steps=max_steps, interactive=interactive)

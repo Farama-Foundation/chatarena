@@ -93,13 +93,18 @@ class ModeratedConversation(Conversation):
     def __init__(self, config: EnvironmentConfig, *args, **kwargs):
         super().__init__(config, *args, **kwargs)
 
-        self._require_fields_in_config(['moderator', 'moderator_visibility'])
+        self._require_fields_in_config(['moderator', 'moderator_visibility', 'moderator_period'])
 
         moderator_config = self.config.moderator
+        if "env_desc" not in moderator_config:
+            # If env_desc is not specified, use the environment's env_desc
+            moderator_config["env_desc"] = self.config.env_desc
+        else:
+            # Check the moderator's env_desc matches the environment's env_desc
+            assert moderator_config["env_desc"] == self.config.env_desc, \
+                f"Moderator's env_desc {moderator_config['env_desc']} does not match the environment's env_desc {self.config.env_desc}"
+
         self.moderator = Moderator(moderator_config)
-        # Check the moderator's env_desc matches the environment's env_desc
-        assert self.moderator.config.env_desc == self.config.env_desc, \
-            f"Moderator's env_desc {self.moderator.config.env_desc} does not match the environment's env_desc {self.config.env_desc}"
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """
@@ -111,23 +116,26 @@ class ModeratedConversation(Conversation):
         message = Message(agent_name=player_name, content=action, turn=self._current_turn)
         self.message_pool.append_message(message)
 
-        # Moderator's turn
-        moderator_history = self.message_pool.get_all_messages()
-        moderator_response = self.moderator(moderator_history)
-        moderator_message = Message(agent_name=self.moderator.name,
-                                    content=moderator_response,
-                                    turn=self._current_turn,
-                                    visible_to=self.config.moderator_visibility)
-        self.message_pool.append_message(moderator_message)
+        # Round-robin order for the next player
+        self._next_player_idx = (self._next_player_idx + 1) % self.num_players
 
-        terminal = self.moderator.is_terminal(moderator_history) or self.is_terminal()
+        if self.config.moderator_period == "turn" or \
+                (self.config.moderator_period == "round" and self._next_player_idx == 0):
+            # Moderator's turn
+            moderator_history = self.message_pool.get_all_messages()
+            moderator_response = self.moderator(moderator_history)
+            moderator_message = Message(agent_name=self.moderator.name,
+                                        content=moderator_response,
+                                        turn=self._current_turn,
+                                        visible_to=self.config.moderator_visibility)
+            self.message_pool.append_message(moderator_message)
+            terminal = self.moderator.is_terminal(moderator_history) or self.is_terminal()
+        else:
+            terminal = self.is_terminal()
 
         # Update the counters
         if not self.config.parallel or self._next_player_idx == 0:
             self._current_turn += 1
-
-        # Round-robin order for the next player
-        self._next_player_idx = (self._next_player_idx + 1) % self.num_players
 
         timestep = TimeStep(observation=self.get_observation(),
                             reward=self.get_zero_rewards(),

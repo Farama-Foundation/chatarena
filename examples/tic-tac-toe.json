@@ -13,10 +13,13 @@
         "temperature": 0.0,
         "max_tokens": 50
       }
-    }
+    },
+    "moderator_visibility": "all",
+    "moderator_period": "turn"
   },
   "players": [
     {
+      "name": "Player 1",
       "role_desc": "You play X.\nYou should only output X and the position of the move, for example: \"X: (1, 3)<EOS>\"\nThe position you put the mark on must be empty.\n\nYou shouldn't act as a moderator.\nDo not output \"Moderator\" and the board status.\nDon't say anything besides mark position.",
       "backend": {
         "backend_type": "openai-chat",
@@ -25,6 +28,7 @@
       }
     },
     {
+      "name": "Player 2",
       "role_desc": "You play O.\nYou should only output O and the position of the move, for example: \"O: (2, 3)<EOS>\"\nThe position you put the mark on must be empty.\n\nYou shouldn't act as a moderator.\nDo not output \"Moderator\" and the board status.\nDon't say anything besides mark position.",
       "backend": {
         "backend_type": "openai-chat",

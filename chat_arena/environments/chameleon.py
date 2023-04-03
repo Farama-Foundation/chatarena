@@ -107,16 +107,22 @@ class Chameleon(Environment):
         self.message_pool.reset()
 
         self._moderator_speak(f"Now the game starts! The topic is: {self.topic}")
-        self._moderator_speak(f"You are not chameleon. The code is: {self.code}", visible_to=self.non_chameleon_names)
+        self._moderator_speak(f"You are not chameleon. The word is: {self.code}",
+                              visible_to=self.non_chameleon_names)
         self._moderator_speak(f"You are the chameleon!", visible_to=self.chameleon_name)
-        self._moderator_speak(f"Now everyone gives one clue. You cannot repeat what others has said.")
+        self._moderator_speak(f"Now everyone gives one clue. You cannot repeat what others has said. "
+                              f"We will start with {self.player_names[0]}.")
         self._current_turn = 1
 
         self._players_votes = {name: 0 for name in self.player_names}
 
         self._initialized = True
 
-        return self.get_observation()
+        init_timestep = TimeStep(observation=self.get_observation(),
+                                 reward=self.get_zero_rewards(),
+                                 terminal=False)
+
+        return init_timestep
 
     def get_observation(self, player_name=None) -> List[Message]:
         """
@@ -241,10 +247,12 @@ class Chameleon(Environment):
                 if not accuse_correct:
                     if even_vote:
                         self._moderator_speak(f"There are even votes. The accusation does not stand. "
-                                              f"{self.chameleon_name} is the chameleon!")
+                                              f"{self.chameleon_name} is the chameleon. {self.chameleon_name} won the game!")
                     else:
-                        self._moderator_speak(f"The accused player is {max_vote_player}. The accusation is incorrect. "
-                                              f"{self.chameleon_name} is the chameleon!")
+                        self._moderator_speak(
+                            f"The most-voted player is {max_vote_player}. The accusation is incorrect. "
+                            f"{self.chameleon_name} is the chameleon. {self.chameleon_name} won the game!"
+                        )
                     rewards = self.get_rewards(chameleon_win=True)
                     terminal = True
                 else:
@@ -259,13 +267,15 @@ class Chameleon(Environment):
             timestep = TimeStep(observation=self.get_observation(), reward=rewards, terminal=terminal)
         elif self._current_phase == "guess":
             message = Message(agent_name=player_name, content=action, turn=self._current_turn,
-                              visible_to=[player_name])
+                              visible_to=player_name)
             self.message_pool.append_message(message)
             if self._is_true_code(action):
-                self._moderator_speak(f"{player_name} guessed the code correctly! {self.code} is the code!")
+                self._moderator_speak(f"{player_name} guessed the code correctly! The secret word is {self.code}. "
+                                      f"{self.chameleon_name} won!")
                 rewards = self.get_rewards(chameleon_win=True)
             else:
-                self._moderator_speak(f"{player_name} guessed the code wrong! {self.code} is the code!")
+                self._moderator_speak(f"{player_name} guessed the code wrong! The secret word is {self.code}. "
+                                      f"{self.non_chameleon_names} won!")
                 rewards = self.get_rewards(chameleon_win=False)
             timestep = TimeStep(observation=self.get_observation(),
                                 reward=rewards,

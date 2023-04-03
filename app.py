@@ -261,7 +261,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
             if human_input == "":
                 timestep = None  # Failed to get human input
             else:
-                timestep = arena.environment.turn(e.agent_name, human_input)
+                timestep = arena.environment.step(e.agent_name, human_input)
 
         if timestep is None:
             yield {human_input_textbox: gr.update(value="", placeholder="Please enter a valid input"),
