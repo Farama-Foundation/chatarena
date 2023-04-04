@@ -47,18 +47,18 @@ class SupabaseDB:
     def _save_environment(self, arena: Arena):
         env = arena.environment
         env_config = env.to_config()
+        moderator_config = env_config.pop("moderator", None)
 
         arena_row = {
             "arena_id": str(arena.uuid),
+            "global_prompt": arena.global_prompt,
             "env_type": env_config["env_type"],
-            "env_desc": arena.global_prompt,
-            "parallel": env_config.get("parallel", None),
+            "env_config": json.dumps(env_config),
         }
         self.client.table("Arena").insert(arena_row).execute()
 
         # Get the moderator config
-        if env_config.get("moderator", None):
-            moderator_config = env_config["moderator"]
+        if moderator_config:
             moderator_row = {
                 "moderator_id": str(uuid.uuid5(arena.uuid, json.dumps(moderator_config))),
                 "arena_id": str(arena.uuid),
