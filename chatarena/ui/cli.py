@@ -71,9 +71,10 @@ class ArenaCLI:
         step = 0
         while not timestep.terminal:
             if interactive:
-                command = prompt([('class:command', "command (n/r/q/h) > ")],
+                command = prompt([('class:command', "command (n/r/q/s/h) > ")],
                                  style=Style.from_dict({'command': 'blue'}),
-                                 completer=WordCompleter(['next', 'n', 'reset', 'r', 'exit', 'quit', 'q', 'help', 'h']))
+                                 completer=WordCompleter(
+                                     ['next', 'n', 'reset', 'r', 'exit', 'quit', 'q', 'help', 'h', 'save', 's']))
                 command = command.strip()
 
                 if command == "help" or command == "h":
@@ -82,6 +83,7 @@ class ArenaCLI:
                     console.print("    [bold]exit or quit or q[/]: exit the game")
                     console.print("    [bold]help or h[/]: print this message")
                     console.print("    [bold]reset or r[/]: reset the game")
+                    console.print("    [bold]save or s[/]: save the history to file")
                     continue
                 elif command == "exit" or command == "quit" or command == "q":
                     break
@@ -91,6 +93,15 @@ class ArenaCLI:
                     continue
                 elif command == "next" or command == "n" or command == "":
                     pass
+                elif command == "save" or command == "s":
+                    # Prompt to get the file path
+                    file_path = prompt([('class:command', "save file path > ")],
+                                       style=Style.from_dict({'command': 'blue'}))
+                    file_path = file_path.strip()
+                    # Save the history to file
+                    self.arena.save_history(file_path)
+                    # Print the save success message
+                    console.print(f"History saved to {file_path}", style="bold green")
                 else:
                     console.print(f"Invalid command: {command}", style="bold red")
                     continue
