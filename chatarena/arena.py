@@ -12,10 +12,12 @@ class Arena:
     Utility class that manages the game environment and players
     """
 
-    def __init__(self, players: List[Player], environment: Environment):
+    def __init__(self, players: List[Player], environment: Environment, global_prompt: str = None):
         # Create a container for the players and environment and reset the game
         self.players = players
         self.environment = environment
+        self.global_prompt = global_prompt
+
         self.current_timestep = environment.reset()
         self.uuid = uuid.uuid4()  # Generate a unique id for the game
 
@@ -74,25 +76,27 @@ class Arena:
         if isinstance(config, str):
             config = ArenaConfig.load(config)
 
-        # Load the players
+        global_prompt = config.get("global_prompt", None)
+
+        # Create the players
         players = []
         for player_config in config.players:
-            # Add env_desc to the player config if it is not there
-            if "env_desc" not in player_config:
-                player_config.env_desc = config.environment.env_desc
+            # Add public_prompt to the player config
+            if global_prompt is not None:
+                player_config["global_prompt"] = global_prompt
 
             player = Player.from_config(player_config)
             players.append(player)
 
-        # Load the environment
+        # Check that the player names are unique
+        player_names = [player.name for player in players]
+        assert len(player_names) == len(set(player_names)), "Player names must be unique"
+
+        # Create the environment
+        config.environment["player_names"] = player_names  # add the player names to the environment config
         env = load_environment(config.environment)
 
-        # Register the players with the environment
-        env.register_players(players)
-        # Check that the player names in environment agree with the players
-        assert set(env.player_names) == set([player.name for player in players])
-
-        return cls(players, env)
+        return cls(players, env, global_prompt=global_prompt)
 
     def to_config(self) -> dict:
         """
@@ -101,6 +105,7 @@ class Arena:
         return {
             "players": [player.to_config() for player in self.players],
             "environment": self.environment.to_config(),
+            "global_prompt": self.global_prompt
         }
 
     def launch_cli(self, max_steps: int = None, interactive: bool = True):

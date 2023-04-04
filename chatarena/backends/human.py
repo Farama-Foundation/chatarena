@@ -13,8 +13,11 @@ class Human(IntelligenceBackend):
     stateful = False
     type_name = "human"
 
-    def __init__(self, config: BackendConfig, *args, **kwargs):
-        super().__init__(config, *args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-    def query(self, agent_name: str, *args, **kwargs) -> str:
+    def to_config(self) -> BackendConfig:
+        return BackendConfig(backend_type=self.type_name)
+
+    def query(self, agent_name: str, **kwargs) -> str:
         raise HumanBackendError(agent_name)

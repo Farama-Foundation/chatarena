@@ -49,7 +49,7 @@ class ArenaCLI:
         env = self.arena.environment
         players = self.arena.players
 
-        env_desc = self.arena.environment.config.env_desc
+        env_desc = self.arena.global_prompt
         num_players = env.num_players
         player_colors = random.sample(visible_colors, num_players)  # sample different colors for players
         name_to_color = dict(zip(env.player_names, player_colors))
@@ -57,14 +57,14 @@ class ArenaCLI:
         name_to_color["System"] = "red"
         name_to_color["Moderator"] = "red"
 
-        console.print(f"[bold green underline]Environment ({env.config.env_type})Description:[/]\n{env_desc}")
+        console.print(f"[bold green underline]Environment ({env.type_name}) description:[/]\n{env_desc}")
 
         # Print the player name, role_desc and backend_type
         for i, player in enumerate(players):
-            player_name = Text(f"[{player.name} ({player.backend.config.backend_type})] Role Description:")
+            player_name = Text(f"[{player.name} ({player.backend.type_name})] Role Description:")
             player_name.stylize(f"bold {name_to_color[player.name]} underline")
             console.print(player_name)
-            console.print(player.config.role_desc)
+            console.print(player.role_desc)
 
         console.print("\n========= Arena Start! ==========\n", style="bold green")
 

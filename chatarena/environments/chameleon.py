@@ -1,12 +1,11 @@
-import logging
 from typing import List, Dict, Union
 import random
 import re
 
 from .base import Environment, TimeStep
-from ..config import EnvironmentConfig
 from ..message import Message, MessagePool
 from ..agent import SIGNAL_END_OF_CONVERSATION
+from ..config import EnvironmentConfig
 
 DEFAULT_TOPIC_CODES = {
     "Fruits": [
@@ -55,12 +54,12 @@ DEFAULT_TOPIC_CODES = {
 class Chameleon(Environment):
     type_name = "chameleon"
 
-    def __init__(self, config: EnvironmentConfig, *args, **kwargs):
-        super().__init__(config, *args, **kwargs)
+    def __init__(self, player_names: List[str], topic_codes: Dict[str, List[str]] = None, **kwargs):
+        super().__init__(player_names=player_names, **kwargs)
 
-        # If topic_codes is not provided in the config, use the default topic codes
-        if 'topic_codes' not in self.config:
-            self.config.topic_codes = DEFAULT_TOPIC_CODES
+        if topic_codes is None:
+            topic_codes = DEFAULT_TOPIC_CODES
+        self.topic_codes = topic_codes
 
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
@@ -76,8 +75,9 @@ class Chameleon(Environment):
         self._next_player_idx = 0
         self._current_phase = "give clues"  # "give clues", "accuse", "guess"
         self._players_votes = None
-
         self._initialized = False
+
+        self.reset()  # To initialize the game (select topic, code, chameleon)
 
     def get_next_player(self) -> str:
         """
@@ -88,15 +88,12 @@ class Chameleon(Environment):
         else:
             return self.chameleon_name
 
-    def print(self):
-        self.message_pool.print()
-
     def reset(self):
         """
         sample topic, code and chameleon code
         """
-        self.topic = random.choice(list(self.config.topic_codes.keys()))
-        self.code = random.choice(self.config.topic_codes[self.topic])
+        self.topic = random.choice(list(self.topic_codes.keys()))
+        self.code = random.choice(self.topic_codes[self.topic])
         self.chameleon_name = random.choice(self.player_names)
         self.non_chameleon_names = [name for name in self.player_names if name != self.chameleon_name]
 
@@ -118,12 +115,17 @@ class Chameleon(Environment):
         self._players_votes = {name: 0 for name in self.player_names}
 
         self._initialized = True
-
         init_timestep = TimeStep(observation=self.get_observation(),
                                  reward=self.get_zero_rewards(),
                                  terminal=False)
 
         return init_timestep
+
+    def to_config(self) -> EnvironmentConfig:
+        return EnvironmentConfig(env_type=self.type_name, player_names=self.player_names, topic_codes=self.topic_codes)
+
+    def print(self):
+        self.message_pool.print()
 
     def get_observation(self, player_name=None) -> List[Message]:
         """

@@ -23,14 +23,20 @@ class TransformersConversational(IntelligenceBackend):
     stateful = False
     type_name = "transformers:conversational"
 
-    def __init__(self, config: BackendConfig, *args, **kwargs):
-        super().__init__(config, *args, **kwargs)
+    def __init__(self, model: str, device: int = -1, **kwargs):
+        super().__init__(**kwargs)
+        self.model = model
+        self.device = device
 
         assert is_transformers_available, "Transformers package is not installed"
+        self.chatbot = pipeline(task="conversational", model=self.model, device=self.device)
 
-        # Check if the model field is specified
-        self.chatbot = pipeline(task="conversational", model=self.config.model,
-                                device=self.config.get("device", -1))
+    def to_config(self) -> BackendConfig:
+        return BackendConfig(
+            backend_type=self.type_name,
+            model=self.model,
+            device=self.device
+        )
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, conversation: Conversation):
@@ -42,12 +48,11 @@ class TransformersConversational(IntelligenceBackend):
     def _msg_template(agent_name, content):
         return f"[{agent_name}]: {content}"
 
-    def query(self, agent_name: str, role_desc: str, env_desc: str,
-              history_messages: List[Message], request_msg: Message = None,
-              *args, **kwargs) -> str:
+    def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,
+              request_msg: Message = None, *args, **kwargs) -> str:
         user_inputs, generated_responses = [], []
 
-        all_messages = [("System", env_desc), ("System", role_desc)]
+        all_messages = [("System", global_prompt), ("System", prompt)]
         for msg in history_messages:
             all_messages.append((msg.agent_name, msg.content))
         if request_msg:
@@ -82,7 +87,6 @@ class TransformersConversational(IntelligenceBackend):
         # Get the response
         response = self._get_response(conversation)
         return response
-
 
 # conversation = Conversation("Going to the movies tonight - any suggestions?")
 #

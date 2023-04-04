@@ -3,7 +3,7 @@ from typing import List, Union
 from .base import TimeStep, Environment
 from ..message import Message, MessagePool
 from ..agent import Moderator, SIGNAL_END_OF_CONVERSATION
-from ..config import EnvironmentConfig
+from ..config import EnvironmentConfig, AgentConfig
 
 
 class Conversation(Environment):
@@ -13,10 +13,10 @@ class Conversation(Environment):
     """
     type_name = "conversation"
 
-    def __init__(self, config: EnvironmentConfig, *args, **kwargs):
-        super().__init__(config, *args, **kwargs)
+    def __init__(self, player_names: List[str], parallel: bool = False, **kwargs):
+        super().__init__(player_names=player_names, **kwargs)
 
-        self._require_fields_in_config(['env_desc', 'parallel'])
+        self.parallel = parallel
 
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
@@ -33,6 +33,9 @@ class Conversation(Environment):
                                  reward=self.get_zero_rewards(),
                                  terminal=False)
         return init_timestep
+
+    def to_config(self) -> EnvironmentConfig:
+        return EnvironmentConfig(env_type=self.type_name, player_names=self.player_names, parallel=self.parallel)
 
     def print(self):
         self.message_pool.print()
@@ -71,7 +74,7 @@ class Conversation(Environment):
         self.message_pool.append_message(message)
 
         # Update the counters
-        if not self.config.parallel or self._next_player_idx == 0:
+        if not self.parallel or self._next_player_idx == 0:
             self._current_turn += 1
         self._next_player_idx = (self._next_player_idx + 1) % self.num_players
 
@@ -90,21 +93,25 @@ class ModeratedConversation(Conversation):
 
     type_name = "moderated_conversation"
 
-    def __init__(self, config: EnvironmentConfig, *args, **kwargs):
-        super().__init__(config, *args, **kwargs)
+    def __init__(self, player_names: List[str], moderator: Union[Moderator, AgentConfig],
+                 parallel: bool = False, moderator_visibility="all", moderator_period="turn", **kwargs):
 
-        self._require_fields_in_config(['moderator', 'moderator_visibility', 'moderator_period'])
+        super().__init__(player_names=player_names, parallel=parallel, **kwargs)
 
-        moderator_config = self.config.moderator
-        if "env_desc" not in moderator_config:
-            # If env_desc is not specified, use the environment's env_desc
-            moderator_config["env_desc"] = self.config.env_desc
-        else:
-            # Check the moderator's env_desc matches the environment's env_desc
-            assert moderator_config["env_desc"] == self.config.env_desc, \
-                f"Moderator's env_desc {moderator_config['env_desc']} does not match the environment's env_desc {self.config.env_desc}"
+        if isinstance(moderator, AgentConfig):
+            moderator_config = moderator
+            moderator = Moderator.from_config(moderator_config)
+        elif not isinstance(moderator, Moderator):
+            raise ValueError("moderator must be either an AgentConfig or a Moderator instance.")
 
-        self.moderator = Moderator(moderator_config)
+        self.moderator = moderator
+        self.moderator_visibility = moderator_visibility
+        self.moderator_period = moderator_period
+
+    def to_config(self) -> EnvironmentConfig:
+        return EnvironmentConfig(env_type=self.type_name, player_names=self.player_names, parallel=self.parallel,
+                                 moderator=self.moderator.to_config(), moderator_visibility=self.moderator_visibility,
+                                 moderator_period=self.moderator_period)
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """
@@ -119,22 +126,22 @@ class ModeratedConversation(Conversation):
         # Round-robin order for the next player
         self._next_player_idx = (self._next_player_idx + 1) % self.num_players
 
-        if self.config.moderator_period == "turn" or \
-                (self.config.moderator_period == "round" and self._next_player_idx == 0):
+        if self.moderator_period == "turn" or \
+                (self.moderator_period == "round" and self._next_player_idx == 0):
             # Moderator's turn
             moderator_history = self.message_pool.get_all_messages()
             moderator_response = self.moderator(moderator_history)
             moderator_message = Message(agent_name=self.moderator.name,
                                         content=moderator_response,
                                         turn=self._current_turn,
-                                        visible_to=self.config.moderator_visibility)
+                                        visible_to=self.moderator_visibility)
             self.message_pool.append_message(moderator_message)
             terminal = self.moderator.is_terminal(moderator_history) or self.is_terminal()
         else:
             terminal = self.is_terminal()
 
         # Update the counters
-        if not self.config.parallel or self._next_player_idx == 0:
+        if not self.parallel or self._next_player_idx == 0:
             self._current_turn += 1
 
         timestep = TimeStep(observation=self.get_observation(),

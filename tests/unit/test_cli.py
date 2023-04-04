@@ -21,6 +21,10 @@ class TestArenaCLI(TestCase):
         arena = Arena.from_config("examples/rock-paper-scissors.json")
         arena.launch_cli(max_steps=10, interactive=False)
 
+    def test_cli_5(self):
+        arena = Arena.from_config("examples/nlp-classroom-3players.json")
+        arena.launch_cli(max_steps=10, interactive=False)
+
 
 if __name__ == "__main__":
     unittest.main()

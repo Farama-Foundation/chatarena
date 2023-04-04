@@ -1,5 +1,8 @@
-from chatarena.message import Message, MessagePool
+import unittest
 from unittest import TestCase
+
+from chatarena.message import Message, MessagePool
+
 
 class TestMessagePool(TestCase):
     def test_message_fully_observable(self):
@@ -36,3 +39,5 @@ class TestMessagePool(TestCase):
         assert len(p2_observation) == 2
 
 
+if __name__ == "__main__":
+    unittest.main()
