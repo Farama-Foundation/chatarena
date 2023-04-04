@@ -30,15 +30,18 @@ class ChessEnvironment(Environment):
     def __init__(self, player_names: List[str], **kwargs):
         super().__init__(player_names)
         self.env = chess_v5.env(render_mode="ansi")
-        self.reset()
-
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
+        self.reset()
+
 
     def reset(self):
         self.env.reset()
         self.current_player = 0
         self.turn = 0
+        obs_dict, reward, terminal, truncation, info = self.env.last()
+        observation = self.get_observation()
+        return TimeStep(observation=observation, reward=reward, terminal=terminal)
 
     def get_next_player(self) -> str:
         return self.player_names[self.current_player]
@@ -69,11 +72,8 @@ class ChessEnvironment(Environment):
         if alphazero_move == -1:
             raise ValueError(f"Invalid action: {action}")
 
-        obs_dict, reward, termination, truncation, info = self.env.last()
-        print(obs_dict["action_mask"])
+        obs_dict, reward, terminal, truncation, info = self.env.last()
         self.env.step(alphazero_move)
-        terminal = termination
-        reward = reward
 
         self.current_player = 1 - self.current_player
         self.turn += 1

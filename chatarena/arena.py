@@ -56,7 +56,7 @@ class Arena:
             elif i < self.invalid_actions_retry - 1:
                 print(f"Player {player_name} input an invalid action {action}")
             else:
-                raise ValueError(f"Player {player_name} keep inputing invalid actions")
+                return TimeStep(observation=observation, reward=self.environment.get_zero_rewards(), terminal=True)
         timestep = self.environment.step(player_name, action)  # update the environment
         return timestep
 
