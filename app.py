@@ -111,14 +111,14 @@ Prompting multiple AI agents to play games in a language-driven environment.
         with gr.Row():
             with gr.Column(elem_id="col-chatbox"):
                 with gr.Tab("All"):
-                    chatbot = gr.Chatbot(elem_id="chatbox", visible=True, label="Chat Arena")
+                    chatbot = gr.Chatbot(elem_id="chatbox", visible=True, show_label=False)
 
                 player_chatbots = []
                 for i in range(MAX_NUM_PLAYERS):
                     player_name = f"Player {i + 1}"
                     with gr.Tab(player_name, visible=(i < DEFAULT_NUM_PLAYERS)):
                         player_chatbot = gr.Chatbot(elem_id=f"chatbox-{i}", visible=i < DEFAULT_NUM_PLAYERS,
-                                                    label=player_name)
+                                                    label=player_name, show_label=False)
                         player_chatbots.append(player_chatbot)
 
             all_components += [chatbot, *player_chatbots]

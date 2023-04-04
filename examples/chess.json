@@ -1,5 +1,5 @@
 {
-  "name": "chess",
+  "name": "Chess",
   "global_prompt": "",
   "environment": {
     "env_type": "pettingzoo:chess",
