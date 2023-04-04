@@ -17,7 +17,7 @@ requirements = _deps
 
 setup(
     name="chatarena",
-    version="0.1.2",
+    version="0.1.3",
     author="Yuxiang Wu",
     author_email="yuxiang.cs@gmail.com",
     description="",
