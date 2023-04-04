@@ -30,7 +30,7 @@ class Environment(Configurable):
         # check if the subclass has the required attributes
         for required in ('type_name',):
             if getattr(cls, required) is None:
-                raise TypeError(f"Can't instantiate abstract class {cls.__name__} without {required} attribute defined")
+                cls.type_name = cls.__name__.lower()
 
         return super().__init_subclass__(**kwargs)
 

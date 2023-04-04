@@ -1,6 +1,7 @@
 from .base import Environment, TimeStep
 from .conversation import Conversation, ModeratedConversation
 from .chameleon import Chameleon
+from .pettingzoo_chess import ChessEnvironment
 
 from ..config import EnvironmentConfig
 
@@ -8,6 +9,7 @@ ALL_ENVIRONMENTS = [
     Conversation,
     ModeratedConversation,
     Chameleon,
+    ChessEnvironment,
 ]
 
 ENV_REGISTRY = {env.type_name: env for env in ALL_ENVIRONMENTS}
