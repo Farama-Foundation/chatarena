@@ -1,6 +1,8 @@
+import unittest
 from unittest import TestCase
 
-from chatarena.message import MessagePool
+from chatarena.message import MessagePool, Message
+
 
 # Write a test case for the message pool
 class TestMessagePool(TestCase):
@@ -8,24 +10,14 @@ class TestMessagePool(TestCase):
     # Test the append message function
     def test_append_message_1(self):
         message_pool = MessagePool()
-        message_pool.append_message("hello", "user", True)
-        self.assertEqual(message_pool.pool()[0].content, "hello")
-        self.assertEqual(message_pool.pool()[0].role, "user")
-        self.assertEqual(message_pool.pool()[0].turn, 1)
-        message_pool.append_message("hello", "user", False)
-        self.assertEqual(message_pool.pool()[1].content, "hello")
-        self.assertEqual(message_pool.pool()[1].role, "user")
-        self.assertEqual(message_pool.pool()[1].turn, 1)
-        message_pool.append_message("hello", "user", True)
-        self.assertEqual(message_pool.pool()[2].content, "hello")
-        self.assertEqual(message_pool.pool()[2].role, "user")
-        self.assertEqual(message_pool.pool()[2].turn, 2)
-
-    def test_append_message_2(self):
-        message_pool = MessagePool()
         p1_message = "I'm player 1"
         p2_message = "I'm player 2"
-        message_pool.append_message(p1_message, "player1", True)
-        message_pool.append_message(p2_message, "player2", True)
-        api_inputs = message_pool.get_visible_messages("player1", ["player2"], 2)
-        self.assertEqual(api_inputs[0]["content"], p2_message)
+        message_pool.append_message(Message("player1", p1_message, 1, visible_to=["player2"]))
+        message_pool.append_message(Message("player2", p2_message, 2, visible_to=["player1"]))
+
+        self.assertEqual(message_pool.get_visible_messages("player1", 3)[0].content, p2_message)
+        self.assertEqual(message_pool.get_visible_messages("player2", 2)[0].content, p1_message)
+
+
+if __name__ == "__main__":
+    unittest.main()

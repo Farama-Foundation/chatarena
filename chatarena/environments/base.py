@@ -1,12 +1,11 @@
 from dataclasses import dataclass
-from typing import List, Dict, Union
+from typing import List, Dict
 from abc import abstractmethod
-import logging
 
 from ..message import Message
 from ..agent import Player
 from ..utils import AttributedDict
-from ..config import EnvironmentConfig, Configurable
+from ..config import Configurable
 
 
 @dataclass
@@ -22,12 +21,10 @@ class Environment(Configurable):
     """
     type_name = None
 
-    def __init__(self, config: EnvironmentConfig, *args, **kwargs):
-        # Check the backend_type matches the class type_name
-        assert config["env_type"] == self.__class__.type_name
-
-        super().__init__(config=config, *args, **kwargs)
-        self._players = []
+    @abstractmethod
+    def __init__(self, player_names: List[str], **kwargs):
+        super().__init__(**kwargs)
+        self.player_names = player_names
 
     def __init_subclass__(cls, **kwargs):
         # check if the subclass has the required attributes
@@ -44,50 +41,12 @@ class Environment(Configurable):
         """
         pass
 
-    def register_players(self, players: Union[Player, List[Player]]):
-        """
-        register the players
-        """
-        if isinstance(players, Player):
-            players = [players]
-
-        # Check if the players are unique and not already registered, then add them to the list
-        for player in players:
-            assert isinstance(player, Player)
-            if player.name in self.player_names:
-                raise ValueError(f"Player {player.name} already registered")
-
-            # Check the player's env_desc matches the environment's env_desc
-            if "env_desc" not in player.config:
-                logging.warning(f"Player {player.name} does not have env_desc in config, using environment's env_desc")
-                player.set_env_desc(self.config.env_desc)
-            elif player.config.env_desc != self.config.env_desc:
-                logging.warning(
-                    f"Player {player.name} env_desc {player.config.env_desc} does not match environment env_desc {self.config.env_desc}, using environment's env_desc")
-                player.set_env_desc(self.config.env_desc)
-
-            self._players.append(player)
-
-    @property
-    def players(self) -> List[Player]:
-        """
-        get the players
-        """
-        return self._players
-
-    @property
-    def player_names(self) -> List[str]:
-        """
-        get the player names
-        """
-        return [player.name for player in self.players]
-
     @property
     def num_players(self) -> int:
         """
         get the number of players
         """
-        return len(self.players)
+        return len(self.player_names)
 
     @abstractmethod
     def get_next_player(self) -> str:

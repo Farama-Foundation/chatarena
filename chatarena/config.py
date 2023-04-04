@@ -1,6 +1,6 @@
 import json
 import copy
-from typing import List, Union
+from abc import abstractmethod
 
 from .utils import AttributedDict
 
@@ -45,30 +45,17 @@ class Configurable:
     Configurable is an interface for classes that can be initialized with a config.
     """
 
-    def __init__(self, config: Config, *args, **kwargs):
-        # Make a copy of the config so that changes to the original config
-        # won't affect the environment
-        config = config.deepcopy()
-
-        self.config = config
-        # New arguments in the args and kwargs will be added/updated to the config
-        self.config.update(*args, **kwargs)
-
-    def _require_fields_in_config(self, keys: Union[str, List[str]]):
-        if isinstance(keys, str):
-            keys = [keys]
-
-        # Check whether the config contains all the required keys
-        for key in keys:
-            if key not in self.config:
-                raise ValueError(f"The {key} field is not specified in the config.")
+    @abstractmethod
+    def __init__(self, **kwargs):
+        pass
 
     @classmethod
     def from_config(cls, config: Config):
-        return cls(config)
+        return cls(**config)
 
+    @abstractmethod
     def to_config(self) -> Config:
-        return self.config
+        raise NotImplementedError
 
     def save_config(self, path: str):
         self.to_config().save(path)

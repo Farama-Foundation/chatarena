@@ -1,20 +1,29 @@
 from typing import List
 import os
-import openai
+import logging
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .base import IntelligenceBackend
 from ..message import Message
 from ..config import BackendConfig
 
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+try:
+    import openai
+except ImportError:
+    is_openai_available = False
+    logging.warning("OpenAI package is not installed")
+else:
+    openai.api_key = os.environ.get("OPENAI_API_KEY")
+    if openai.api_key is not None:
+        logging.warning("OpenAI API key is not set. Please set the environment variable OPENAI_API_KEY")
+        is_openai_available = False
+    else:
+        is_openai_available = True
 
 # Default config follows the OpenAI playground
-OPENAI_CHAT_DEFAULT_CONFIG = {
-    "temperature": 0.7,
-    "max_tokens": 256,
-    "model": "gpt-3.5-turbo"
-}
+DEFAULT_TEMPERATURE = 0.7
+DEFAULT_MAX_TOKENS = 256
+DEFAULT_MODEL = "gpt-3.5-turbo"
 
 STOP = ("<EOS>", "[EOS]", "(EOS)")  # End of sentence token
 
@@ -26,26 +35,26 @@ class OpenAIChat(IntelligenceBackend):
     stateful = False
     type_name = "openai-chat"
 
-    def __init__(self, config: BackendConfig, *args, **kwargs):
-        super().__init__(config, *args, **kwargs)
+    def __init__(self, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int = DEFAULT_MAX_TOKENS,
+                 model: str = DEFAULT_MODEL, **kwargs):
+        assert is_openai_available, "OpenAI package is not installed or the API key is not set"
+        super().__init__(**kwargs)
 
-        # If temperature, max_tokens, or model are not specified, use the default values
-        for key, value in OPENAI_CHAT_DEFAULT_CONFIG.items():
-            if key not in self.config:
-                self.config[key] = value
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.model = model
+
+    def to_config(self) -> BackendConfig:
+        return BackendConfig(backend_type=self.type_name, temperature=self.temperature, max_tokens=self.max_tokens,
+                             model=self.model)
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
-    def _get_response(self, messages, *args, **kwargs):
-        # Make a deepcopy of the config to avoid modifying the original config
-        config = self.config.deepcopy()
-        # update the config with the new values
-        config.update(*args, **kwargs)
-
+    def _get_response(self, messages):
         completion = openai.ChatCompletion.create(
-            model=config.model,
+            model=self.model,
             messages=messages,
-            temperature=config.temperature,
-            max_tokens=config.max_tokens,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
             stop=STOP
         )
 
@@ -61,14 +70,13 @@ class OpenAIChat(IntelligenceBackend):
         stop_prompt = "You will end your answer with <EOS>"
         remember_your_role_prompt = f"Remember that your are {agent_name}. Do not pretend to be someone else."
         other_player_tags = "Messages from other players will be tagged with [player_name]."
-        do_not_output_tags = "However, you do not need to output your own tag in your answer."
+        do_not_output_tags = "However, you do not need to output your name tag in your answer."
 
         return {"role": "system", "content": "\n".join([stop_prompt, remember_your_role_prompt,
                                                         other_player_tags, do_not_output_tags])}
 
-    def query(self, agent_name: str, role_desc: str, env_desc: str,
-              history_messages: List[Message], request_msg: Message = None,
-              *args, **kwargs) -> str:
+    def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,
+              request_msg: Message = None, *args, **kwargs) -> str:
         """
         format the input and call the ChatGPT/GPT-4 API
         args:
@@ -86,18 +94,18 @@ class OpenAIChat(IntelligenceBackend):
                 # Since there are more than one player, we need to distinguish between the players
                 conversations.append({"role": "user", "content": f"[{message.agent_name}]: {message.content}"})
 
-        system_prompt = [
-            {"role": "system", "content": env_desc},
-            {"role": "system", "content": role_desc},
-            self._hidden_prompt(agent_name),
-        ]
+        system_prompt_str = f"Your name is {agent_name}.\n{prompt}\n" \
+                            f"Other instructions:\n{self._hidden_prompt(agent_name)}"
+        if global_prompt:  # Prepend the global prompt if it exists
+            system_prompt_str = f"{global_prompt.strip()}\n{system_prompt_str}"
+        system_prompt = {"role": "system", "content": system_prompt_str}
 
         if request_msg:
-            request_prompt = [{"role": "system", "content": request_msg.content}]
+            request_prompt = [{"role": "user", "content": request_msg.content}]
         else:
             request_prompt = []
 
-        response = self._get_response(system_prompt + conversations + request_prompt, *args, **kwargs)
+        response = self._get_response([system_prompt] + conversations + request_prompt, *args, **kwargs)
 
         # Remove the prefix if the response starts with it
         prefix = f"[{agent_name}]:"

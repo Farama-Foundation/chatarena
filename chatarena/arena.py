@@ -1,5 +1,7 @@
 from typing import List, Dict, Union
 import uuid
+import json
+import csv
 
 from .agent import Player
 from .environments import Environment, TimeStep, load_environment
@@ -12,10 +14,12 @@ class Arena:
     Utility class that manages the game environment and players
     """
 
-    def __init__(self, players: List[Player], environment: Environment):
+    def __init__(self, players: List[Player], environment: Environment, global_prompt: str = None):
         # Create a container for the players and environment and reset the game
         self.players = players
         self.environment = environment
+        self.global_prompt = global_prompt
+
         self.current_timestep = environment.reset()
         self.uuid = uuid.uuid4()  # Generate a unique id for the game
 
@@ -74,34 +78,42 @@ class Arena:
         if isinstance(config, str):
             config = ArenaConfig.load(config)
 
-        # Load the players
+        global_prompt = config.get("global_prompt", None)
+
+        # Create the players
         players = []
         for player_config in config.players:
-            # Add env_desc to the player config if it is not there
-            if "env_desc" not in player_config:
-                player_config.env_desc = config.environment.env_desc
+            # Add public_prompt to the player config
+            if global_prompt is not None:
+                player_config["global_prompt"] = global_prompt
 
             player = Player.from_config(player_config)
             players.append(player)
 
-        # Load the environment
+        # Check that the player names are unique
+        player_names = [player.name for player in players]
+        assert len(player_names) == len(set(player_names)), "Player names must be unique"
+
+        # Create the environment
+        config.environment["player_names"] = player_names  # add the player names to the environment config
         env = load_environment(config.environment)
 
-        # Register the players with the environment
-        env.register_players(players)
-        # Check that the player names in environment agree with the players
-        assert set(env.player_names) == set([player.name for player in players])
+        return cls(players, env, global_prompt=global_prompt)
 
-        return cls(players, env)
-
-    def to_config(self) -> dict:
+    def to_config(self) -> ArenaConfig:
         """
         convert the arena to a config
         """
-        return {
-            "players": [player.to_config() for player in self.players],
-            "environment": self.environment.to_config(),
-        }
+        # return {
+        #     "players": [player.to_config() for player in self.players],
+        #     "environment": self.environment.to_config(),
+        #     "global_prompt": self.global_prompt
+        # }
+        return ArenaConfig(
+            players=[player.to_config() for player in self.players],
+            environment=self.environment.to_config(),
+            global_prompt=self.global_prompt
+        )
 
     def launch_cli(self, max_steps: int = None, interactive: bool = True):
         """
@@ -110,3 +122,52 @@ class Arena:
         from .ui.cli import ArenaCLI
         cli = ArenaCLI(self)
         cli.launch(max_steps=max_steps, interactive=interactive)
+
+    def save_config(self, path: str):
+        """
+        save the config to a file
+        """
+        config = self.to_config()
+        config.save(path)
+
+    def save_history(self, path: str):
+        """
+        save the history of the game to a file
+        Supports csv and json formats.
+        """
+        messages = self.environment.get_observation()
+        message_rows = []
+
+        if path.endswith(".csv"):
+            header = ["agent_name", "content", "turn", "timestamp", "visible_to", "msg_type"]
+            for message in messages:
+                message_row = [
+                    message.agent_name,
+                    message.content,
+                    message.turn,
+                    str(message.timestamp),
+                    message.visible_to,
+                    message.msg_type,
+                ]
+                message_rows.append(message_row)
+
+            with open(path, "w") as f:
+                writer = csv.writer(f)
+                writer.writerow(header)
+                writer.writerows(message_rows)
+        elif path.endswith(".json"):
+            for message in messages:
+                message_row = {
+                    "agent_name": message.agent_name,
+                    "content": message.content,
+                    "turn": message.turn,
+                    "timestamp": str(message.timestamp),
+                    "visible_to": message.visible_to,
+                    "msg_type": message.msg_type,
+                }
+                message_rows.append(message_row)
+
+            with open(path, "w") as f:
+                json.dump(message_rows, f, indent=4)
+        else:
+            raise ValueError("Invalid file format")

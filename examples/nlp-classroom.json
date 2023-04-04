@@ -1,9 +1,8 @@
 {
   "name": "NLP Classroom",
-  "num_players": 2,
+  "global_prompt": "You are in a university classroom and it is COMP0087 Natural Language Processing module. You start by introducing themselves. Your answer will end with <EOS>.",
   "environment": {
     "env_type": "conversation",
-    "env_desc": "You are in a university classroom and it is COMP0087 Natural Language Processing module. You start by introducing themselves. Your answer will end with <EOS>.",
     "parallel": false
   },
   "players": [

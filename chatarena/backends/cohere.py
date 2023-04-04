@@ -18,11 +18,9 @@ else:
         is_cohere_available = True
 
 # Default config follows the [Cohere documentation](https://cohere-sdk.readthedocs.io/en/latest/cohere.html#cohere.client.Client.chat)
-COHEREAI_CHAT_DEFAULT_CONFIG = {
-    "temperature": 0.8,
-    "max_tokens": 200,
-    "model": None
-}
+DEFAULT_TEMPERATURE = 0.8
+DEFAULT_MAX_TOKENS = 200
+DEFAULT_MODEL = "command-xlarge"
 
 
 class CohereAIChat(IntelligenceBackend):
@@ -32,13 +30,13 @@ class CohereAIChat(IntelligenceBackend):
     stateful = True
     type_name = "cohere-chat"
 
-    def __init__(self, config: BackendConfig, *args, **kwargs):
-        super().__init__(config, *args, **kwargs)
+    def __init__(self, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int = DEFAULT_MAX_TOKENS,
+                 model: str = DEFAULT_MODEL, **kwargs):
+        super().__init__(**kwargs)
 
-        # If temperature, max_tokens, or model are not specified, use the default values
-        for key, value in COHEREAI_CHAT_DEFAULT_CONFIG.items():
-            if key not in self.config:
-                self.config[key] = value
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.model = model
 
         assert is_cohere_available, "Cohere package is not installed or the API key is not set"
         self.client = cohere.Client(os.environ.get('COHEREAI_API_KEY'))
@@ -46,6 +44,14 @@ class CohereAIChat(IntelligenceBackend):
         # Stateful variables
         self.session_id = None  # The session id for the last conversation
         self.last_msg_hash = None  # The hash of the last message of the last conversation
+
+    def to_config(self) -> BackendConfig:
+        return BackendConfig(
+            backend_type=self.type_name,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            model=self.model
+        )
 
     def reset(self):
         self.session_id = None
@@ -56,17 +62,16 @@ class CohereAIChat(IntelligenceBackend):
         response = self.client.chat(
             new_message,
             persona_prompt=persona_prompt,
-            temperature=self.config.temperature,
-            max_tokens=self.config.max_tokens,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
             session_id=self.session_id
         )
 
         self.session_id = response.session_id  # Update the session id
         return response.reply
 
-    def query(self, agent_name: str, role_desc: str, env_desc: str,
-              history_messages: List[Message], request_msg: Message = None,
-              *args, **kwargs) -> str:
+    def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,
+              request_msg: Message = None, *args, **kwargs) -> str:
         """
         format the input and call the Cohere API
         args:
@@ -98,7 +103,7 @@ class CohereAIChat(IntelligenceBackend):
 
         # Concatenate all new messages into one message because the Cohere API only accepts one message
         new_message = "\n".join(new_conversations)
-        persona_prompt = f"Environment:\n{env_desc}\n\nYour role:\n{role_desc}"
+        persona_prompt = f"Environment:\n{global_prompt}\n\nYour role:\n{prompt}"
 
         response = self._get_response(new_message, persona_prompt)
 

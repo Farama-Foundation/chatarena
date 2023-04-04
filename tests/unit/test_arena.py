@@ -1,15 +1,12 @@
 import unittest
 from unittest import TestCase
-import json
 
 from chatarena.arena import Arena
 
 
 class TestArena(TestCase):
     def test_arena_1(self):
-        with open("examples/nlp-classroom.json", "r") as fp:
-            config = json.load(fp)
-        arena = Arena.from_config(config)
+        arena = Arena.from_config("examples/nlp-classroom.json")
 
         print("=== Step 1 ===")
         arena.step()
@@ -26,9 +23,7 @@ class TestArena(TestCase):
         self.assertTrue(True)
 
     def test_arena_2(self):
-        with open("examples/nlp-classroom.json", "r") as fp:
-            config = json.load(fp)
-        arena = Arena.from_config(config)
+        arena = Arena.from_config("examples/nlp-classroom.json")
 
         arena.run(num_steps=10)
         arena.environment.print()
@@ -36,9 +31,7 @@ class TestArena(TestCase):
         self.assertTrue(True)
 
     def test_arena_3(self):
-        with open("examples/tic-tac-toe.json", "r") as fp:
-            config = json.load(fp)
-        arena = Arena.from_config(config)
+        arena = Arena.from_config("examples/tic-tac-toe.json")
 
         for i in range(1, 10):
             print(f"=== Step {i} ===")

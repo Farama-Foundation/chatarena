@@ -1,4 +1,4 @@
-<h1 align="center"> 🏟 <span style="color:coral">Chat Arena</span> </h1>
+<h1 align="center"> 🏟 <span style="color:orange">Chat Arena</span> </h1>
 <h3 align="center">
     <p>Multi-Agent Language Game Environments for LLMs</p>
 </h3>
@@ -16,27 +16,28 @@ in a language-driven environment. It provides the following features:
 
 ## Getting Started
 
-### Prerequisites
-
-- Python >= 3.7
-- [OpenAI GPT-3](https://beta.openai.com/signup/) API key (optional, for using GPT-3 as an LLM agent)
-
 ### Installation
 
-1. Clone the repository:
+Requirements:
+
+- Python >= 3. 7
+- OpenAI API key (optional, for using GPT-3.5-turbo or GPT-4 as an LLM agent)
+
+Install with pip:
+
+```bash
+pip install chatarena
+```
+
+or install from this repository:
 
 ```bash
 git clone https://github.com/chatarena/chatarena
-```
-
-2. Install the package:
-
-```bash
 cd chatarena
-pip install .  # Install the package (which also installs the dependencies)
+pip install -e .
 ```
 
-3. To use GPT-3 as an LLM agent, set your OpenAI API key:
+To use GPT-3 as an LLM agent, set your OpenAI API key:
 
 ```bash
 export OPENAI_API_KEY="your_api_key_here"
@@ -71,73 +72,82 @@ This will launch a demo UI of the Chat Arena in your browser.
   its
   parameters.
 
-### Quick Multi-LLM Player Definition
+### Step 1: Defining Multiple Players with LLM Backend
 
 ```python
-from chat_arena.agent import Player
-from chat_arena.backend import OpenAIChat, Human, CohereChat
+from chatarena.agent import Player
+from chatarena.backends import OpenAIChat
 
-# Player 1: a "professor" agent played by OpenAI GPT-3.5-turbo 
-player1 = Player(
-    name="teacher",
-    backend=OpenAIChat(...),
-    role="You are a professor in ...")
+# Describe the environment (which is shared by all players)
+environment_description = "It is in a university classroom ..."
 
-# Player 2: a "student" agent played by a human
-player2 = Player(
-    name="student",
-    backend=Human(...),
-    role="You are a student who is interested in ...")
-
-# Player 3: a "teaching assistant" agent played by Cohere
-player3 = Player(
-    name="teaching assistant",
-    backend=CohereChat(...),
-    role="You are a TA of module ...")
+# A "Professor" player
+player1 = Player(name="Professor", backend=OpenAIChat(),
+                 role_desc="You are a professor in ...",
+                 global_prompt=environment_description)
+# A "Student" player
+player2 = Player(name="Student", backend=OpenAIChat(),
+                 role_desc="You are a student who is interested in ...",
+                 global_prompt=environment_description)
+# A "Teaching Assistant" player
+player3 = Player(name="Teaching assistant", backend=OpenAIChat(),
+                 role_desc="You are a teaching assistant of module ...",
+                 global_prompt=environment_description)
 ```
 
-### Define a Language-Driven Environment
+### Step 2: Create a Language Game Environment
 
 You can also create a language model-driven environment and add it to the Chat Arena:
 
 ```python
-from chat_arena.environments.conversation import ModeratedConversation
+from chatarena.environments.conversation import Conversation
 
-env = ModeratedConversation(
-    players=[player1.type_name, player2.type_name, player3.type_name],
-    moderator_role="You are a teaching admin ...",
-    moderator_backend=OpenAIChat(..),
-env_description = "It is in a NLP classroom ...",
-terminal_condition = "Has the student learned the basics of NLP?"
-)
+env = Conversation(player_names=[p.name for p in [player1, player2, player3]])
 ```
 
-### Arena: a Playground to Run Language Games
+### Step 3: Run the Language Games using Arena
 
-Initialise Arena from scratch
+Arena is a utility class to help you run language games.
 
 ```python
-from chat_arena.arena import Arena
+from chatarena.arena import Arena
 
-arena = Arena(
-    players=[player1, ...],
-    environment=env)
-for _ in range(...):
-    arena.print_status()
+arena = Arena(players=[player1, player2, player3],
+              environment=env, global_prompt=environment_description)
+# Run the game for 10 steps
+arena.run(num_steps=10)
+
+# Alternatively, you can run your own main loop
+for _ in range(10):
     arena.step()
+    # Your code goes here ...
 ```
 
-Load Example Arenas
+You can easily save your game play history to file
 
 ```python
-arena = Arena.load("nlp-classroom")
-arena.run(step=...)
+arena.save_history(path=...)
 ```
 
-Save Arena Gameplay History
+and save your game config to file
 
 ```python
-arena.save_history(fn=...)
+arena.save_config(path=...)
+```
+
+### Other Utilities
+
+Load Arena from config file (here we use `examples/nlp-classroom-3players.json` in this repository as an example)
+
+```python
+arena = Arena.from_config("examples/nlp-classroom-3players.json")
+arena.run(num_steps=10)
+```
+
+Run the game in an interactive CLI interface
+
+```python
+arena.launch_cli()
 ```
 
 ## Documentation

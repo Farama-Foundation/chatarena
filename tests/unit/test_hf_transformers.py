@@ -3,7 +3,6 @@ from unittest import TestCase
 import logging
 
 from chatarena.backends.hf_transformers import TransformersConversational
-from chatarena.config import BackendConfig
 from chatarena.message import Message
 
 # set logger level to info
@@ -12,28 +11,21 @@ logging.basicConfig(level=logging.INFO)
 
 class TestHFTransformers(TestCase):
     def test_transformers_conv_1(self):
-        backend = TransformersConversational(config=BackendConfig(
-            backend_type="transformers:conversational",
-            model="facebook/blenderbot-400M-distill"))
+        backend = TransformersConversational(model="facebook/blenderbot-400M-distill", device=-1)
 
         history_messages = [
             Message(agent_name="User",
                     content="Hello, I want to cook pasta, can you give me a recipe?", turn=1),
         ]
 
-        response = backend.query(
-            agent_name="Chatbot",
-            role_desc="You are a chatbot that can talk to you about anything.",
-            env_desc="You are chatting with a human.",
-            history_messages=history_messages,
-        )
+        response = backend.query(agent_name="Chatbot", history_messages=history_messages,
+                                 prompt="You are a chatbot that can talk to you about anything.",
+                                 global_prompt="You are chatting with a human.")
         logging.info(response)
         self.assertTrue(True)
 
     def test_transformers_conv_2(self):
-        backend = TransformersConversational(config=BackendConfig(
-            backend_type="transformers:conversational",
-            model="facebook/blenderbot-400M-distill"))
+        backend = TransformersConversational(model="facebook/blenderbot-400M-distill", device=-1)
 
         history_messages = [
             Message(agent_name="User",
@@ -44,12 +36,8 @@ class TestHFTransformers(TestCase):
                     content="I like Bucatini better. Could you suggest a recipe?", turn=3),
         ]
 
-        response = backend.query(
-            agent_name="Chatbot",
-            role_desc="You are an expert in food.",
-            env_desc="You are chatting with a human.",
-            history_messages=history_messages,
-        )
+        response = backend.query(agent_name="Chatbot", history_messages=history_messages,
+                                 prompt="You are an expert in food.", global_prompt="You are chatting with a human.")
         logging.info(response)
         self.assertTrue(True)
 
