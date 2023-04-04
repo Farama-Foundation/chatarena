@@ -1,13 +1,24 @@
 from typing import List
 import os
-import openai
+import logging
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .base import IntelligenceBackend
 from ..message import Message
 from ..config import BackendConfig
 
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+try:
+    import openai
+except ImportError:
+    is_openai_available = False
+    logging.warning("OpenAI package is not installed")
+else:
+    openai.api_key = os.environ.get("OPENAI_API_KEY")
+    if openai.api_key is not None:
+        logging.warning("OpenAI API key is not set. Please set the environment variable OPENAI_API_KEY")
+        is_openai_available = False
+    else:
+        is_openai_available = True
 
 # Default config follows the OpenAI playground
 DEFAULT_TEMPERATURE = 0.7
@@ -26,6 +37,7 @@ class OpenAIChat(IntelligenceBackend):
 
     def __init__(self, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int = DEFAULT_MAX_TOKENS,
                  model: str = DEFAULT_MODEL, **kwargs):
+        assert is_openai_available, "OpenAI package is not installed or the API key is not set"
         super().__init__(**kwargs)
 
         self.temperature = temperature
