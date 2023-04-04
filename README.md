@@ -17,6 +17,8 @@ in a language-driven environment. It provides the following features:
 - Playground & Testbed for C3 Capabilities: it provides a set of environments for evaluating and developing the
   **communication, collaboration, and competition**  (C3) capabilities of LLMs.
 
+![ChatArena Architecture](docs/images/chatarena_architecture.png)
+
 ## Getting Started
 
 ### Installation
@@ -290,10 +292,6 @@ We welcome contributions to improve and extend Chat Arena. Please follow these s
 5. We will review your pull request and provide feedback or merge your changes.
 
 Please ensure your code follows the existing style and structure.
-
-## License
-
-Chat Arena is released under the [Apache License](LICENSE).
 
 ## Contact
 
