@@ -1,7 +1,7 @@
-cohere==4.1.0
-openai==0.27.2
-gradio==3.20.0
-transformers==4.27.4
+cohere>=4.1.0
+openai>=0.27.2
+gradio>=3.20.0
+transformers>=4.0
 tenacity==8.2.2
 rich>=13.3.1
 prompt_toolkit>=3.0
