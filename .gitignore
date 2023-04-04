@@ -126,6 +126,7 @@ venv.bak/
 dmypy.json
 
 # Pyre type checker
+.DS_Store
 .pyre/
 .idea
 hf-spaces/
