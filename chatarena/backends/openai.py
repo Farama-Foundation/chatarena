@@ -14,7 +14,7 @@ except ImportError:
     logging.warning("OpenAI package is not installed")
 else:
     openai.api_key = os.environ.get("OPENAI_API_KEY")
-    if openai.api_key is not None:
+    if openai.api_key is None:
         logging.warning("OpenAI API key is not set. Please set the environment variable OPENAI_API_KEY")
         is_openai_available = False
     else:
