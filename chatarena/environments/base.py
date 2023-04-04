@@ -82,11 +82,11 @@ class Environment(Configurable):
         pass
 
     @abstractmethod
-    def check_action(self, action: str, player: Player) -> bool:
+    def check_action(self, action: str, player_name: str) -> bool:
         """
         check whether the action is valid
         """
-        pass
+        return True
 
     @abstractmethod
     def is_terminal(self) -> bool:
