@@ -1,8 +1,11 @@
 <h1 align="center"> 🏟 <span style="color:orange">Chat Arena</span> </h1>
+
 <h3 align="center">
     <p>Multi-Agent Language Game Environments for LLMs</p>
 </h3>
 
+
+[![License: Apache2](https://img.shields.io/github/license/chatarena/chatarena)](https://github.com/chatarena/chatarena/blob/main/LICENSE) [![PyPI](https://img.shields.io/pypi/v/chatarena)](https://pypi.org/project/chatarena/) [![Python 3.9+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/) [![Twitter](https://img.shields.io/twitter/follow/_chatarena?style=social)](https://twitter.com/_chatarena)
 ---
 
 Chat Arena is a Python library designed to facilitate communication, collaboration and competition between multiple LLMs
@@ -276,19 +279,6 @@ gradio app.py
 
 and select your custom environment from the dropdown menu.
 
-9. For example, in the `Chameleon` class, the role description prompts are defined in the `role_descs`
-   attribute.
-
-Test your custom class by simulating a game or by integrating it into an existing
-framework, such as an OpenAI Gym environment. Ensure that the class works as expected and correctly implements the
-desired game mechanics.
-
-[//]: # (## Documentation)
-
-[//]: # (For more detailed information on the available functions and classes, please refer to)
-
-[//]: # (the [documentation]&#40;link-to-documentation&#41;.)
-
 ## Contributing
 
 We welcome contributions to improve and extend Chat Arena. Please follow these steps to contribute:
@@ -307,8 +297,10 @@ Chat Arena is released under the [Apache License](LICENSE).
 
 ## Contact
 
-If you have any questions or suggestions, feel free to open an issue or submit a pull request. You can also reach out to
-the maintainer at [chatarena.dev@gmail.com](mailto:chatarena.dev@gmail.com).
+If you have any questions or suggestions, feel free to open an issue or submit a pull request.
+You can also follow the lead
+developer [![Twitter](https://img.shields.io/twitter/follow/mindjimmy?style=social)](https://twitter.com/mindjimmy) to
+get the latest updates.
 
 Happy chatting!
 
