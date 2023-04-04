@@ -335,7 +335,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
         # Update the environment components
         env_config = example_config['environment']
-        update_dict[env_desc_textbox] = gr.update(value=env_config['env_desc'])
+        update_dict[env_desc_textbox] = gr.update(value=example_config['global_prompt'])
         update_dict[env_selector] = gr.update(value=env_config['env_type'])
         update_dict[parallel_checkbox] = gr.update(value=env_config['parallel'])
 

@@ -22,6 +22,7 @@ class Arena:
 
         self.current_timestep = environment.reset()
         self.uuid = uuid.uuid4()  # Generate a unique id for the game
+        self.invalid_actions_retry = 5
 
     @property
     def num_players(self):
@@ -48,7 +49,14 @@ class Arena:
         player_name = self.environment.get_next_player()
         player = self.name_to_player[player_name]  # get the player object
         observation = self.environment.get_observation(player_name)  # get the observation for the player
-        action = player(observation)  # take an action
+        for i in range(self.invalid_actions_retry):
+            action = player(observation)  # take an action
+            if self.environment.check_action(action, player_name):
+                break
+            elif i < self.invalid_actions_retry - 1:
+                print(f"Player {player_name} input an invalid action {action}")
+            else:
+                raise ValueError(f"Player {player_name} keep inputing invalid actions")
         timestep = self.environment.step(player_name, action)  # update the environment
         return timestep
 

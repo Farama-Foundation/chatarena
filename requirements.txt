@@ -5,3 +5,5 @@ transformers>=4.0
 tenacity==8.2.2
 rich>=13.3.1
 prompt_toolkit>=3.0
+pettingzoo==1.22.3
+chess
