@@ -37,7 +37,6 @@ class ChessEnvironment(Environment):
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
         self._terminal = False
-
         self.reset()
 
     def reset(self):
@@ -45,12 +44,16 @@ class ChessEnvironment(Environment):
         self.current_player = 0
         self.turn = 0
         self.message_pool.reset()
-        self._terminal = False
 
-        return TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=False)
+        obs_dict, reward, terminal, truncation, info = self.env.last()
+        observation = self.get_observation()
+        self._terminal = terminal
+        return TimeStep(observation=observation, reward=reward, terminal=terminal)
+
 
     def to_config(self) -> EnvironmentConfig:
         return EnvironmentConfig(env_type=self.type_name, player_names=self.player_names)
+
 
     def get_next_player(self) -> str:
         return self.player_names[self.current_player]
@@ -82,10 +85,9 @@ class ChessEnvironment(Environment):
         if alphazero_move == -1:
             raise ValueError(f"Invalid action: {action}")
 
-        obs_dict, reward, termination, truncation, info = self.env.last()
+        obs_dict, reward, terminal, truncation, info = self.env.last()
         print(obs_dict["action_mask"])
         self.env.step(alphazero_move)
-        terminal = termination
         self._terminal = terminal  # Update the terminal state
         reward = reward  # TODO: bug here, reward needs to be a dict
 
