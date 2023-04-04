@@ -6,7 +6,7 @@ from rich.text import Text
 from rich.color import ANSI_COLOR_NAMES
 import random
 
-from ..arena import Arena
+from ..arena import Arena, TooManyInvalidActions
 from ..backends.human import HumanBackendError
 from ..agent import SIGNAL_END_OF_CONVERSATION
 
@@ -119,6 +119,10 @@ class ArenaCLI:
                     env.step(human_player_name, human_input)
                 else:
                     raise e  # cannot recover from this error in non-interactive mode
+            except TooManyInvalidActions as e:
+                # Print the error message
+                console.print(f"Too many invalid actions: {e}", style="bold red")
+                break
 
             # The messages that are not yet logged
             messages = [msg for msg in env.get_observation() if not msg.logged]
