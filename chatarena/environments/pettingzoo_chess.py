@@ -1,11 +1,13 @@
 from pettingzoo.classic.chess.chess_utils import *
 import re
-from typing import List
 from pettingzoo.classic import chess_v5
 
 from chatarena.environments.base import Environment, TimeStep
 from typing import List, Dict, Union
-from chatarena.message import Message, MessagePool
+
+from ..message import Message, MessagePool
+from ..config import EnvironmentConfig
+
 
 def action_string_to_alphazero_format(action: str, player_index: int) -> int:
     pattern = r"Move \((\d), (\d)\) to \((\d), (\d)\)"
@@ -22,23 +24,33 @@ def action_string_to_alphazero_format(action: str, player_index: int) -> int:
     move = chess.Move(from_square=8 * y1 + x1, to_square=8 * y2 + x2, promotion=None)
     move_plane = get_move_plane(move)
 
-    return x1 * 8 * 73 + y1 * 73+ move_plane
+    return x1 * 8 * 73 + y1 * 73 + move_plane
 
 
 class ChessEnvironment(Environment):
     type_name = "pettingzoo:chess"
+
     def __init__(self, player_names: List[str], **kwargs):
         super().__init__(player_names)
         self.env = chess_v5.env(render_mode="ansi")
-        self.reset()
 
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
+        self._terminal = False
+
+        self.reset()
 
     def reset(self):
         self.env.reset()
         self.current_player = 0
         self.turn = 0
+        self.message_pool.reset()
+        self._terminal = False
+
+        return TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=False)
+
+    def to_config(self) -> EnvironmentConfig:
+        return EnvironmentConfig(env_type=self.type_name, player_names=self.player_names)
 
     def get_next_player(self) -> str:
         return self.player_names[self.current_player]
@@ -47,8 +59,7 @@ class ChessEnvironment(Environment):
         if player_name is None:
             return self.message_pool.get_all_messages()
         else:
-            return self.message_pool.get_visible_messages(player_name, turn=self.turn+1)
-
+            return self.message_pool.get_visible_messages(player_name, turn=self.turn + 1)
 
     def _moderator_speak(self, text: str, visible_to: Union[str, List[str]] = "all"):
         """
@@ -57,10 +68,12 @@ class ChessEnvironment(Environment):
         message = Message(agent_name="Moderator", content=text, turn=self.turn, visible_to=visible_to)
         self.message_pool.append_message(message)
 
+    def is_terminal(self) -> bool:
+        return self._terminal
 
     def step(self, player_name: str, action: str) -> TimeStep:
         assert player_name == self.get_next_player(), f"Wrong player! It is {self.get_next_player()} turn."
-        self._moderator_speak("\n"+self.env.render())
+        self._moderator_speak("\n" + self.env.render())
 
         message = Message(agent_name=player_name, content=action, turn=self.turn)
         self.message_pool.append_message(message)
@@ -73,13 +86,13 @@ class ChessEnvironment(Environment):
         print(obs_dict["action_mask"])
         self.env.step(alphazero_move)
         terminal = termination
-        reward = reward
+        self._terminal = terminal  # Update the terminal state
+        reward = reward  # TODO: bug here, reward needs to be a dict
 
         self.current_player = 1 - self.current_player
         self.turn += 1
 
-        observation = self.get_observation()
-        return TimeStep(observation=observation, reward=reward, terminal=terminal)
+        return TimeStep(observation=self.get_observation(), reward=reward, terminal=terminal)
 
     def check_action(self, action: str, agent_name: str) -> bool:
         # This can be implemented depending on how you want to validate actions for a given agent
@@ -93,6 +106,7 @@ class ChessEnvironment(Environment):
 
     def print(self):
         print(self.env.render())
+
 
 def test_chess_environment():
     player_names = ["player1", "player2"]
@@ -112,6 +126,7 @@ def test_chess_environment():
         print(timestep.reward)
         print(timestep.terminal)
         env.print()
+
 
 if __name__ == "__main__":
     env = chess_v5.env()

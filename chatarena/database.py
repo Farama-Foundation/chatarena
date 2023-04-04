@@ -51,8 +51,8 @@ class SupabaseDB:
         arena_row = {
             "arena_id": str(arena.uuid),
             "env_type": env_config["env_type"],
-            "env_desc": env_config["env_desc"],
-            "parallel": env_config["parallel"],
+            "env_desc": arena.global_prompt,
+            "parallel": env_config.get("parallel", None),
         }
         self.client.table("Arena").insert(arena_row).execute()
 
