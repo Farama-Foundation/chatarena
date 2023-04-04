@@ -5,7 +5,6 @@ from chatarena.arena import Arena
 
 
 class TestArenaCLI(TestCase):
-    """
     def test_cli_1(self):
         arena = Arena.from_config("examples/nlp-classroom.json")
         arena.launch_cli(max_steps=10, interactive=False)
@@ -25,7 +24,6 @@ class TestArenaCLI(TestCase):
     def test_cli_5(self):
         arena = Arena.from_config("examples/nlp-classroom-3players.json")
         arena.launch_cli(max_steps=10, interactive=False)
-    """
 
     def test_cli_6(self):
         arena = Arena.from_config("examples/chess.json")
