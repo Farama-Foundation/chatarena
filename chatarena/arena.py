@@ -2,11 +2,16 @@ from typing import List, Dict, Union
 import uuid
 import json
 import csv
+import logging
 
-from .agent import Player
+from .agent import Player, SIGNAL_END_OF_CONVERSATION
 from .environments import Environment, TimeStep, load_environment
 from .backends import Human
 from .config import ArenaConfig
+
+
+class TooManyInvalidActions(Exception):
+    pass
 
 
 class Arena:
@@ -49,15 +54,22 @@ class Arena:
         player_name = self.environment.get_next_player()
         player = self.name_to_player[player_name]  # get the player object
         observation = self.environment.get_observation(player_name)  # get the observation for the player
-        for i in range(self.invalid_actions_retry):
+
+        timestep = None
+        for i in range(self.invalid_actions_retry):  # try to take an action for a few times
             action = player(observation)  # take an action
             if self.environment.check_action(action, player_name):
+                timestep = self.environment.step(player_name, action)  # update the environment
                 break
-            elif i < self.invalid_actions_retry - 1:
-                print(f"Player {player_name} input an invalid action {action}")
             else:
-                raise ValueError(f"Player {player_name} keep inputing invalid actions")
-        timestep = self.environment.step(player_name, action)  # update the environment
+                logging.warning(f"{player_name} made an invalid action {action}")
+                continue
+
+        if timestep is None:  # if the player made invalid actions for too many times, terminate the game
+            warning_msg = f"{player_name} has made invalid actions for {self.invalid_actions_retry} times. Terminating the game."
+            logging.warning(warning_msg)
+            raise TooManyInvalidActions(warning_msg)
+
         return timestep
 
     def next_is_human(self):

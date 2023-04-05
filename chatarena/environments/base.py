@@ -3,9 +3,8 @@ from typing import List, Dict
 from abc import abstractmethod
 
 from ..message import Message
-from ..agent import Player
 from ..utils import AttributedDict
-from ..config import Configurable
+from ..config import Configurable, EnvironmentConfig
 
 
 @dataclass
@@ -23,7 +22,7 @@ class Environment(Configurable):
 
     @abstractmethod
     def __init__(self, player_names: List[str], **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(player_names=player_names, **kwargs)  # registers the arguments with Configurable
         self.player_names = player_names
 
     def __init_subclass__(cls, **kwargs):
@@ -40,6 +39,10 @@ class Environment(Configurable):
         reset the environment
         """
         pass
+
+    def to_config(self) -> EnvironmentConfig:
+        self._config_dict["env_type"] = self.type_name
+        return EnvironmentConfig(**self._config_dict)
 
     @property
     def num_players(self) -> int:

@@ -10,12 +10,20 @@ class IntelligenceBackend(Configurable):
     stateful = None
     type_name = None
 
+    @abstractmethod
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)  # registers the arguments with Configurable
+
     def __init_subclass__(cls, **kwargs):
         # check if the subclass has the required attributes
         for required in ('stateful', 'type_name',):
             if getattr(cls, required) is None:
                 raise TypeError(f"Can't instantiate abstract class {cls.__name__} without {required} attribute defined")
         return super().__init_subclass__(**kwargs)
+
+    def to_config(self) -> BackendConfig:
+        self._config_dict["backend_type"] = self.type_name
+        return BackendConfig(**self._config_dict)
 
     @abstractmethod
     def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,

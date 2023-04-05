@@ -14,7 +14,7 @@ class Conversation(Environment):
     type_name = "conversation"
 
     def __init__(self, player_names: List[str], parallel: bool = False, **kwargs):
-        super().__init__(player_names=player_names, **kwargs)
+        super().__init__(player_names=player_names, parallel=parallel, **kwargs)
 
         self.parallel = parallel
 
@@ -109,6 +109,7 @@ class ModeratedConversation(Conversation):
         self.moderator_period = moderator_period
 
     def to_config(self) -> EnvironmentConfig:
+        # This environment contains some speical config arguments that needs to be handle specially
         return EnvironmentConfig(env_type=self.type_name, player_names=self.player_names, parallel=self.parallel,
                                  moderator=self.moderator.to_config(), moderator_visibility=self.moderator_visibility,
                                  moderator_period=self.moderator_period)

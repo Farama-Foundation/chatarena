@@ -1,20 +1,29 @@
 <h1 align="center"> 🏟 <span style="color:orange">Chat Arena</span> </h1>
+
 <h3 align="center">
     <p>Multi-Agent Language Game Environments for LLMs</p>
 </h3>
 
+
+[![License: Apache2](https://img.shields.io/github/license/chatarena/chatarena)](https://github.com/chatarena/chatarena/blob/main/LICENSE) [![PyPI](https://img.shields.io/pypi/v/chatarena)](https://pypi.org/project/chatarena/) [![Python 3.9+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/) [![Twitter](https://img.shields.io/twitter/follow/_chatarena?style=social)](https://twitter.com/_chatarena)
 ---
 
-Chat Arena is a Python library designed to facilitate communication, collaboration and competition between multiple LLMs
-in a language-driven environment. It provides the following features:
+Chat Arena is a Python library designed to facilitate communication and collaboration between multiple large language
+models (LLMs).
+It provides the following features:
 
-- Language-driven Game Environment: it provides a framework for creating a language-driven environment.
-- Infrastructure for Multi-LLM Interaction: it enables rapid definition and creation of LLM-based agents, and seamlessly
-  communication, collaboration, and competition between them.
-- Playground & Testbed for C3 Capabilities: it provides a set of environments for evaluating and developing the
-  **communication, collaboration, and competition**  (C3) capabilities of LLMs.
+- **Language Game Environments**: it provides a framework for creating multi-agent language game environments, and a set
+  of general-purposed language-driven environments.
+- **Infrastructure for Multi-LLM Interaction**: it allows you to quickly create multiple LLM-powered player agents, and
+  enables seamlessly communication between them.
+- **User-friendly Interfaces**: it provides both Web browser UI and command line interface (CLI) to develop (prompt
+  engineer) your LLM players to succeed in the environment.
+
+![ChatArena Architecture](docs/images/chatarena_architecture.png)
 
 ## Getting Started
+
+[![Demo button](docs/images/demo_button.svg)](https://chatarena-chatarena-demo.hf.space)
 
 ### Installation
 
@@ -29,12 +38,12 @@ Install with pip:
 pip install chatarena
 ```
 
-or install from this repository:
+or install from source:
 
 ```bash
 git clone https://github.com/chatarena/chatarena
 cd chatarena
-pip install -e .
+pip install .
 ```
 
 To use GPT-3 as an LLM agent, set your OpenAI API key:
@@ -43,15 +52,19 @@ To use GPT-3 as an LLM agent, set your OpenAI API key:
 export OPENAI_API_KEY="your_api_key_here"
 ```
 
-### Launch the Demo
+### Launch the Demo Locally
 
-To launch the demo, run the following command in the root directory of the repository:
+The quickest way to see Chat Arena in action is via the demo Web UI.
+To launch the demo on your local machine, you first need to git clone the repository and install it from source
+(see above instruction). Then run the following command in the root directory of the repository:
 
 ```shell
 gradio app.py
 ```
 
-This will launch a demo UI of the Chat Arena in your browser.
+This will launch a demo server for Chat Arena and you can access it via http://127.0.0.1:7860/ in your browser.
+
+[//]: # (TODO: put a gif here)
 
 ## Basic Usage
 
@@ -72,7 +85,7 @@ This will launch a demo UI of the Chat Arena in your browser.
   its
   parameters.
 
-### Step 1: Defining Multiple Players with LLM Backend
+### Step 1: Define Multiple Players with LLM Backend
 
 ```python
 from chatarena.agent import Player
@@ -105,7 +118,7 @@ from chatarena.environments.conversation import Conversation
 env = Conversation(player_names=[p.name for p in [player1, player2, player3]])
 ```
 
-### Step 3: Run the Language Games using Arena
+### Step 3: Run the Language Game using Arena
 
 Arena is a utility class to help you run language games.
 
@@ -150,9 +163,11 @@ Run the game in an interactive CLI interface
 arena.launch_cli()
 ```
 
+[//]: # (TODO: put a CLI gif here)
+
 ## Advanced Usage
 
-### `ModeratedConversation`
+### `ModeratedConversation`: a LLM-driven Environment
 
 We support a more advanced environment called `ModeratedConversation` that allows you to **control the game dynamics
 using an LLM**.
@@ -162,132 +177,32 @@ wins.
 You can try out our Tic-tac-toe and Rock-paper-scissors games to get a sense of how it works:
 
 ```python
-# Tic-tac-toe game
+# Tic-tac-toe example
 Arena.from_config("examples/tic-tac-toe.json").launch_cli()
 
-# Rock-paper-scissors game
+# Rock-paper-scissors example
 Arena.from_config("examples/rock-paper-scissors.json").launch_cli()
 ```
 
-### Defining your Custom Environment
+### Creating your Custom Environment
 
-You can define your own environment by extending the `Environment` class.
-We provide [an example](chatarena/environments/chameleon.py) to demonstrate how to define a custom environment.
-In this example, we develop a language
-game based on [The Chameleon](https://bigpotato.co.uk/blogs/blog/how-to-play-the-chameleon-instructions).
+You can define your own environment by extending the `Environment` class. Here are the general steps:
 
-**Steps to Develop a Custom Class**
+1. Define the class by inheriting from a base class and setting `type_name`, then add the class
+   to [`ALL_ENVIRONMENTS`](chatarena/environments/__init__.py#L17)
+2. Initialize the class by defining `__init__` method (its arguments will define the corresponding config) and
+   initializing class attributes
+3. Implement game mechanics in methods `step`
+4. Handle game states and rewards by implementing methods such as `reset`, `get_observation`, `is_terminal`,
+   and `get_rewards`
+5. Develop role description prompts (and global prompt if necessary) for players using CLI or Web UI and save them to a
+   config file.
 
-1. **Define the class**: Start by defining the class and inherit from a suitable base class (e.g., `Environment`). In
-   this case, the custom class `Chameleon` inherits from the `Environment` base class.
+We provide [a detailed tutorial](docs/tutorials/create_your_environment.md) to demonstrate how to define a custom
+environment,
+using the [`Chameleon` environment](chatarena/environments/chameleon.py) as example.
 
-```python
-class Chameleon(Environment):
-    type_name = "chameleon"
-```
-
-The `type_name` is required and it is used by the [`ENV_REGISTRY`](chatarena/environments/__init__.py#L13) to identify
-the class when loading the class
-from a config file.
-
-Make sure you add the class to [`ALL_ENVIRONMENTS`](chatarena/environments/__init__.py#L17)
-in `environments/__init__.py` so that it can be detected.
-
-2. **Initialize the class**: Define the `__init__` method to initialize the class attributes, such as player names, game
-   state, and any other necessary variables.
-
-```python
-def __init__(self, player_names: List[str], topic_codes: Dict[str, List[str]] = None, **kwargs):
-    super().__init__(player_names=player_names, **kwargs)
-
-    if topic_codes is None:
-        topic_codes = DEFAULT_TOPIC_CODES
-    self.topic_codes = topic_codes
-
-    # The "state" of the environment is maintained by the message pool
-    self.message_pool = MessagePool()
-    ...
-```
-
-3. **Implement game mechanics**: Write methods that define the game mechanics, such as giving clues, voting, and
-   guessing the secret word. In the `Chameleon` class, these mechanics are implemented in the `step` method.
-
-```python
-def step(self, player_name: str, action: str) -> TimeStep:
-    ...
-```
-
-You may create helper methods to perform common operations for game mechanics such as
-
-```python
-def _text2vote(self, text) -> str:
-    ...
-
-
-def _is_true_code(self, text) -> bool:
-    ...
-
-```
-
-4. **Handle game states and rewards**: Implement methods to manage game states, such as resetting the environment,
-   getting
-   observations, checking if the game has reached a terminal state, and giving rewards to players.
-
-```python
-def reset(self):
-    ...
-
-
-def get_observation(self, player_name=None) -> List[Message]:
-    ...
-
-
-def is_terminal(self) -> bool:
-    ...
-
-
-def get_rewards(self, ...) -> Dict[str, float]:
-    ...
-```
-
-5. **Develop your role description prompts for the players**: Now that you have defined the game mechanics, you can
-   develop the role description prompts for the players. These prompts are used to guide the LLM-powered players to play
-   the game
-   correctly. You can use the CLI for this purpose. For example, you can run the following code to launch the CLI:
-
-```python
-alice = Player(name="Alice", backend=OpenAIChat(), role_desc="Write your prompt here")
-bob = Player(name="Bob", backend=OpenAIChat(), role_desc="Write your prompt here")
-env = Chameleon(player_names=["Alice", "Bob"], topic_codes=...)
-arena = Arena(players=[alice, bob], environment=env).launch_cli()
-```
-
-Once you are happy with you prompts, you can save them to a config file for future use or sharing.
-
-```python
-arena.save_config(path=...)
-```
-
-Another option is using the Web UI. You can run the following code to launch the Web UI:
-
-```bash
-gradio app.py
-```
-
-and select your custom environment from the dropdown menu.
-
-9. For example, in the `Chameleon` class, the role description prompts are defined in the `role_descs`
-   attribute.
-
-Test your custom class by simulating a game or by integrating it into an existing
-framework, such as an OpenAI Gym environment. Ensure that the class works as expected and correctly implements the
-desired game mechanics.
-
-[//]: # (## Documentation)
-
-[//]: # (For more detailed information on the available functions and classes, please refer to)
-
-[//]: # (the [documentation]&#40;link-to-documentation&#41;.)
+If you want to port an existing library's environment to Chat Arena, check out [`PettingzooChess` environment](chatarena/environments/pettingzoo_chess.py) as an example.
 
 ## Contributing
 
@@ -301,14 +216,12 @@ We welcome contributions to improve and extend Chat Arena. Please follow these s
 
 Please ensure your code follows the existing style and structure.
 
-## License
-
-Chat Arena is released under the [Apache License](LICENSE).
-
 ## Contact
 
-If you have any questions or suggestions, feel free to open an issue or submit a pull request. You can also reach out to
-the maintainer at [chatarena.dev@gmail.com](mailto:chatarena.dev@gmail.com).
+If you have any questions or suggestions, feel free to open an issue or submit a pull request.
+You can also follow the lead
+developer [![Twitter](https://img.shields.io/twitter/follow/mindjimmy?style=social)](https://twitter.com/mindjimmy) to
+get the latest updates.
 
 Happy chatting!
 

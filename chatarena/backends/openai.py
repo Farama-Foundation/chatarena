@@ -38,15 +38,11 @@ class OpenAIChat(IntelligenceBackend):
     def __init__(self, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int = DEFAULT_MAX_TOKENS,
                  model: str = DEFAULT_MODEL, **kwargs):
         assert is_openai_available, "OpenAI package is not installed or the API key is not set"
-        super().__init__(**kwargs)
+        super().__init__(temperature=temperature, max_tokens=max_tokens, model=model, **kwargs)
 
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.model = model
-
-    def to_config(self) -> BackendConfig:
-        return BackendConfig(backend_type=self.type_name, temperature=self.temperature, max_tokens=self.max_tokens,
-                             model=self.model)
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, messages):

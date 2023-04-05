@@ -32,7 +32,7 @@ class CohereAIChat(IntelligenceBackend):
 
     def __init__(self, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int = DEFAULT_MAX_TOKENS,
                  model: str = DEFAULT_MODEL, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(temperature=temperature, max_tokens=max_tokens, model=model, **kwargs)
 
         self.temperature = temperature
         self.max_tokens = max_tokens
@@ -44,14 +44,6 @@ class CohereAIChat(IntelligenceBackend):
         # Stateful variables
         self.session_id = None  # The session id for the last conversation
         self.last_msg_hash = None  # The hash of the last message of the last conversation
-
-    def to_config(self) -> BackendConfig:
-        return BackendConfig(
-            backend_type=self.type_name,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            model=self.model
-        )
 
     def reset(self):
         self.session_id = None

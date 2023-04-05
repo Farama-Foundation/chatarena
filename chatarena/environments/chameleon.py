@@ -55,7 +55,7 @@ class Chameleon(Environment):
     type_name = "chameleon"
 
     def __init__(self, player_names: List[str], topic_codes: Dict[str, List[str]] = None, **kwargs):
-        super().__init__(player_names=player_names, **kwargs)
+        super().__init__(player_names=player_names, topic_codes=topic_codes, **kwargs)
 
         if topic_codes is None:
             topic_codes = DEFAULT_TOPIC_CODES
@@ -120,9 +120,6 @@ class Chameleon(Environment):
                                  terminal=False)
 
         return init_timestep
-
-    def to_config(self) -> EnvironmentConfig:
-        return EnvironmentConfig(env_type=self.type_name, player_names=self.player_names, topic_codes=self.topic_codes)
 
     def print(self):
         self.message_pool.print()
