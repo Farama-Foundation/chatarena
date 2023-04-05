@@ -13,13 +13,12 @@ from chatarena.message import Message
 
 css = """#col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
 #header {text-align: center;}
-#col-chatbox {flex: 1; max-height: min(650px, 100%); display: flex;}
-#chatbox {height: min(650px, 100%); max-height: 650px; display:flex;}
+#col-chatbox {flex: 1; max-height: min(750px, 100%); display: flex;}
+#chatbox {height: min(750px, 100%); max-height: 750px; display:flex;}
 #label {font-size: 2em; padding: 0.5em; margin: 0;}
 .message {font-size: 1.2em;}
-.wrap.svelte-18ha8kq {flex: 1}
-.wrap.svelte-18ha8kq.svelte-18ha8kq {max-height: min(600px, 100vh);}
-.message-wrap {max-height: min(600px, 100vh);}
+.wrap {min-width: min(640px, 100vh)}
+.message-wrap {max-height: min(700px, 100vh);}
 """
 
 DEBUG = False
@@ -94,7 +93,7 @@ with gr.Blocks(css=css) as demo:
     with gr.Column(elem_id="col-container"):
         gr.Markdown("""# 🏟 Chat Arena️<br>
 Prompting multiple AI agents to play games in a language-driven environment. 
-[Chat Arena Homepage](https://github.com/chatarena/chatarena)""", elem_id="header")
+**[Project Homepage](https://github.com/chatarena/chatarena)**""", elem_id="header")
 
         with gr.Row():
             env_selector = gr.Dropdown(choices=list(ENV_REGISTRY.keys()), value=DEFAULT_ENV, interactive=True,
