@@ -5,7 +5,7 @@
 </h3>
 
 
-[![License: Apache2](https://img.shields.io/github/license/chatarena/chatarena)](https://github.com/chatarena/chatarena/blob/main/LICENSE) [![PyPI](https://img.shields.io/pypi/v/chatarena)](https://pypi.org/project/chatarena/) [![Python 3.9+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/) [![Twitter](https://img.shields.io/twitter/follow/_chatarena?style=social)](https://twitter.com/_chatarena)
+[![License: Apache2](https://img.shields.io/badge/License-Apache_2.0-green.svg)](https://github.com/chatarena/chatarena/blob/main/LICENSE) [![PyPI](https://img.shields.io/pypi/v/chatarena)](https://pypi.org/project/chatarena/) [![Python 3.9+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/) [![Twitter](https://img.shields.io/twitter/follow/_chatarena?style=social)](https://twitter.com/_chatarena)
 ---
 
 Chat Arena is a Python library designed to facilitate communication and collaboration between multiple large language
