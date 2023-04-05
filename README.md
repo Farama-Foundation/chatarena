@@ -23,30 +23,7 @@ It provides the following features:
 
 ## Getting Started
 
-<style>
-  .hf-button {
-    background-color: #0084ff;
-    border: none;
-    color: white;
-    text-align: center;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    padding: 12px 24px;
-    border-radius: 8px;
-    text-decoration: none;
-  }
-
-  .hf-button:hover {
-    background-color: #0073e6;
-  }
-</style>
-<span>
-<center>
-<a href="https://chatarena-chatarena-demo.hf.space" class="hf-button">Try online demo on Huggingface Spaces🤗</a>
-</center>
-</span>
+[![Demo button](docs/images/demo_button.svg)](https://chatarena-chatarena-demo.hf.space)
 
 ### Installation
 
