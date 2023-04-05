@@ -45,17 +45,16 @@ class Configurable:
     Configurable is an interface for classes that can be initialized with a config.
     """
 
-    @abstractmethod
     def __init__(self, **kwargs):
-        pass
+        self._config_dict = kwargs
 
     @classmethod
     def from_config(cls, config: Config):
         return cls(**config)
 
-    @abstractmethod
     def to_config(self) -> Config:
-        raise NotImplementedError
+        # Convert the _config_dict to Config
+        return Config(**self._config_dict)
 
     def save_config(self, path: str):
         self.to_config().save(path)

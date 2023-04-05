@@ -31,7 +31,7 @@ class ChessEnvironment(Environment):
     type_name = "pettingzoo:chess"
 
     def __init__(self, player_names: List[str], **kwargs):
-        super().__init__(player_names)
+        super().__init__(player_names=player_names, **kwargs)
         self.env = chess_v5.env(render_mode="ansi")
 
         # The "state" of the environment is maintained by the message pool
@@ -49,11 +49,6 @@ class ChessEnvironment(Environment):
         observation = self.get_observation()
         self._terminal = terminal
         return TimeStep(observation=observation, reward=reward, terminal=terminal)
-
-
-    def to_config(self) -> EnvironmentConfig:
-        return EnvironmentConfig(env_type=self.type_name, player_names=self.player_names)
-
 
     def get_next_player(self) -> str:
         return self.player_names[self.current_player]

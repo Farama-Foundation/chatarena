@@ -24,19 +24,12 @@ class TransformersConversational(IntelligenceBackend):
     type_name = "transformers:conversational"
 
     def __init__(self, model: str, device: int = -1, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(model=model, device=device, **kwargs)
         self.model = model
         self.device = device
 
         assert is_transformers_available, "Transformers package is not installed"
         self.chatbot = pipeline(task="conversational", model=self.model, device=self.device)
-
-    def to_config(self) -> BackendConfig:
-        return BackendConfig(
-            backend_type=self.type_name,
-            model=self.model,
-            device=self.device
-        )
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, conversation: Conversation):
