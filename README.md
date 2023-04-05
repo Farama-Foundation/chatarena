@@ -62,7 +62,7 @@ To launch the demo on your local machine, you first need to git clone the reposi
 gradio app.py
 ```
 
-This will launch a demo server for Chat Arena and you can access it via http://127.0.0.1:7861/ in your browser.
+This will launch a demo server for Chat Arena and you can access it via http://127.0.0.1:7860/ in your browser.
 
 [//]: # (TODO: put a gif here)
 
@@ -186,9 +186,23 @@ Arena.from_config("examples/rock-paper-scissors.json").launch_cli()
 
 ### Creating your Custom Environment
 
-You can define your own environment by extending the `Environment` class.
-We provide [a tutorial](docs/tutorials/create_your_environment.md) to demonstrate how to define a custom environment,
-using our `Chameleon` environment as example.
+You can define your own environment by extending the `Environment` class. Here are the general steps:
+
+1. Define the class by inheriting from a base class and setting `type_name`, then add the class
+   to [`ALL_ENVIRONMENTS`](chatarena/environments/__init__.py#L17)
+2. Initialize the class by defining `__init__` method (its arguments will define the corresponding config) and
+   initializing class attributes
+3. Implement game mechanics in methods `step`
+4. Handle game states and rewards by implementing methods such as `reset`, `get_observation`, `is_terminal`,
+   and `get_rewards`
+5. Develop role description prompts (and global prompt if necessary) for players using CLI or Web UI and save them to a
+   config file.
+
+We provide [a detailed tutorial](docs/tutorials/create_your_environment.md) to demonstrate how to define a custom
+environment,
+using the [`Chameleon` environment](chatarena/environments/chameleon.py) as example.
+
+If you want to port an existing library's environment to Chat Arena, check out [`PettingzooChess` environment](chatarena/environments/pettingzoo_chess.py) as an example.
 
 ## Contributing
 

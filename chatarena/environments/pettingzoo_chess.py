@@ -27,7 +27,7 @@ def action_string_to_alphazero_format(action: str, player_index: int) -> int:
     return x1 * 8 * 73 + y1 * 73 + move_plane
 
 
-class ChessEnvironment(Environment):
+class PettingzooChess(Environment):
     type_name = "pettingzoo:chess"
 
     def __init__(self, player_names: List[str], **kwargs):
@@ -107,7 +107,7 @@ class ChessEnvironment(Environment):
 
 def test_chess_environment():
     player_names = ["player1", "player2"]
-    env = ChessEnvironment(player_names)
+    env = PettingzooChess(player_names)
 
     env.reset()
     assert env.get_next_player() == "player1"

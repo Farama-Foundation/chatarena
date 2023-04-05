@@ -4,7 +4,7 @@ As an example to demonstrate how to develop your own environment, we develop a l
 game based on [The Chameleon](https://bigpotato.co.uk/blogs/blog/how-to-play-the-chameleon-instructions).
 The example code is available [here](../../chatarena/environments/chameleon.py).
 
-**Here are the detailed steps to Develop a Custom Class**
+**Here are the detailed steps to develop a custom environment class**
 
 1. **Define the class**: Start by defining the class and inherit from a suitable base class (e.g., `Environment`). In
    this case, the custom class `Chameleon` inherits from the `Environment` base class.
