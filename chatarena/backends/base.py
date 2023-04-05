@@ -22,7 +22,8 @@ class IntelligenceBackend(Configurable):
         return super().__init_subclass__(**kwargs)
 
     def to_config(self) -> BackendConfig:
-        return BackendConfig(backend_type=self.type_name, **self._config_dict)
+        self._config_dict["backend_type"] = self.type_name
+        return BackendConfig(**self._config_dict)
 
     @abstractmethod
     def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,

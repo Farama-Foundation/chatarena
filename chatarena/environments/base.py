@@ -41,7 +41,8 @@ class Environment(Configurable):
         pass
 
     def to_config(self) -> EnvironmentConfig:
-        return EnvironmentConfig(env_type=self.type_name, **self._config_dict)
+        self._config_dict["env_type"] = self.type_name
+        return EnvironmentConfig(**self._config_dict)
 
     @property
     def num_players(self) -> int:
