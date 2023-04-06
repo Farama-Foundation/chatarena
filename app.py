@@ -13,13 +13,20 @@ from chatarena.message import Message
 
 css = """#col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
 #header {text-align: center;}
-#col-chatbox {flex: 1; height: min(700px, 100vh); max-height: min(700px, 100%)}
-#chatbox {height: min(700px, 100%); max-height: 700px}
+#col-chatbox {flex: 1; max-height: min(750px, 100%);}
 #label {font-size: 2em; padding: 0.5em; margin: 0;}
+.scroll-hide {overflow-y: scroll; max-height: 100px;}
+.wrap {max-height: 680px;}
 .message {font-size: 1.2em;}
-.wrap {min-width: min(600px, 100vh)}
-.message-wrap {max-height: min(650px, 100vh);}
+.message-wrap {max-height: min(700px, 100vh);}
 """
+# .wrap {min-width: min(640px, 100vh)}
+# #env-desc {max-height: 100px; overflow-y: auto;}
+# .textarea {height: 100px; max-height: 100px;}
+# #chatbot-tab-all {height: 750px; max-height: min(750px, 100%);}
+# #chatbox {height: min(750px, 100%); max-height: min(750px, 100%);}
+# #chatbox.block {height: 730px}
+
 
 DEBUG = False
 
@@ -91,7 +98,7 @@ with gr.Blocks(css=css) as demo:
     all_components = []
 
     with gr.Column(elem_id="col-container"):
-        gr.Markdown("""# 🏟 Chat Arena️<br>
+        gr.Markdown("""# 🏟 ChatArena️<br>
 Prompting multiple AI agents to play games in a language-driven environment. 
 **[Project Homepage](https://github.com/chatarena/chatarena)**""", elem_id="header")
 
@@ -109,7 +116,7 @@ Prompting multiple AI agents to play games in a language-driven environment.
 
         with gr.Row():
             with gr.Column(elem_id="col-chatbox"):
-                with gr.Tab("All"):
+                with gr.Tab("All", visible=True):
                     chatbot = gr.Chatbot(elem_id="chatbox", visible=True, show_label=False)
 
                 player_chatbots = []
