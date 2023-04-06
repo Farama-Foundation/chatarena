@@ -202,7 +202,8 @@ We provide [a detailed tutorial](docs/tutorials/create_your_environment.md) to d
 environment,
 using the [`Chameleon` environment](chatarena/environments/chameleon.py) as example.
 
-If you want to port an existing library's environment to ChatArena, check out [`PettingzooChess` environment](chatarena/environments/pettingzoo_chess.py) as an example.
+If you want to port an existing library's environment to ChatArena, check
+out [`PettingzooChess` environment](chatarena/environments/pettingzoo_chess.py) as an example.
 
 ## Contributing
 
@@ -215,6 +216,21 @@ We welcome contributions to improve and extend ChatArena. Please follow these st
 5. We will review your pull request and provide feedback or merge your changes.
 
 Please ensure your code follows the existing style and structure.
+
+## Citation
+
+If you find ChatArena useful for your research, please cite our repository (our arxiv paper is coming soon):
+
+```bibtex
+@misc{ChatArena,
+  author = {Yuxiang Wu, Zhengyao Jiang, Akbir Khan, Yao Fu, Laura Ruis, Edward Grefenstette, and Tim Rocktäschel},
+  title = {ChatArena: Multi-Agent Language Game Environments for Large Language Models},
+  year = {2023},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/chatarena/chatarena}},
+}
+```
 
 ## Contact
 
