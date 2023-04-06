@@ -58,19 +58,6 @@ class OpenAIChat(IntelligenceBackend):
         response = response.strip()
         return response
 
-    def _hidden_prompt(self, agent_name: str):
-        """
-        The hidden prompt for the ChatGPT/GPT-4 API to improve the quality of the response.
-        The prompts here are mainly to improve the understanding of agency.
-        """
-        stop_prompt = "You will end your answer with <EOS>"
-        remember_your_role_prompt = f"Remember that your are {agent_name}. Do not pretend to be someone else."
-        other_player_tags = "Messages from other players will be tagged with [player_name]."
-        do_not_output_tags = "However, you do not need to output your name tag in your answer."
-
-        return {"role": "system", "content": "\n".join([stop_prompt, remember_your_role_prompt,
-                                                        other_player_tags, do_not_output_tags])}
-
     def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,
               request_msg: Message = None, *args, **kwargs) -> str:
         """
@@ -90,10 +77,10 @@ class OpenAIChat(IntelligenceBackend):
                 # Since there are more than one player, we need to distinguish between the players
                 conversations.append({"role": "user", "content": f"[{message.agent_name}]: {message.content}"})
 
-        system_prompt_str = f"Your name is {agent_name}.\n{prompt}\n" \
-                            f"Other instructions:\n{self._hidden_prompt(agent_name)}"
         if global_prompt:  # Prepend the global prompt if it exists
-            system_prompt_str = f"{global_prompt.strip()}\n{system_prompt_str}"
+            system_prompt_str = f"{global_prompt.strip()}\n{prompt}"
+        else:
+            system_prompt_str = prompt
         system_prompt = {"role": "system", "content": system_prompt_str}
 
         if request_msg:

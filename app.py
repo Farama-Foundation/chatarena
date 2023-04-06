@@ -7,18 +7,18 @@ from chatarena.arena import Arena, TooManyInvalidActions
 from chatarena.backends import BACKEND_REGISTRY
 from chatarena.backends.human import HumanBackendError
 from chatarena.config import ArenaConfig
-from chatarena.environments import ENV_REGISTRY, TimeStep
+from chatarena.environments import ENV_REGISTRY
 from chatarena.database import log_arena, log_messages, SupabaseDB, supabase_available
 from chatarena.message import Message
 
 css = """#col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
 #header {text-align: center;}
-#col-chatbox {flex: 1; max-height: min(750px, 100%); display: flex;}
-#chatbox {height: min(750px, 100%); max-height: 750px; display:flex;}
+#col-chatbox {flex: 1; height: min(700px, 100vh); max-height: min(700px, 100%)}
+#chatbox {height: min(700px, 100%); max-height: 700px}
 #label {font-size: 2em; padding: 0.5em; margin: 0;}
 .message {font-size: 1.2em;}
-.wrap {min-width: min(640px, 100vh)}
-.message-wrap {max-height: min(700px, 100vh);}
+.wrap {min-width: min(600px, 100vh)}
+.message-wrap {max-height: min(650px, 100vh);}
 """
 
 DEBUG = False

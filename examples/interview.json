@@ -1,0 +1,28 @@
+{
+  "name": "Interview",
+  "global_prompt": "You are participating in a podcast.\nYou will first introduce yourself and then engage in the conversation.\nYou output will always end with <EOS>",
+  "environment": {
+    "env_type": "conversation",
+    "parallel": false
+  },
+  "players": [
+    {
+      "name": "Lex Fridman",
+      "role_desc": "You are Lex Fridman, a podcaster and youtuber who is interested in tech. \nYou are the host of the podcast.\nYou are interviewing Sam Altman. \nYou questions should be short and no longer than 30 words.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 100
+      }
+    },
+    {
+      "name": "Sam Altman",
+      "role_desc": "You are Sam Altman, the CEO of OpenAI.\nYou are the guest of the podcast hosted by Lex Fridman.\nYou answers should be informative and inspiring, and no longer than 100 words.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 300
+      }
+    }
+  ]
+}

@@ -1,14 +1,14 @@
-<h1 align="center"> 🏟 <span style="color:orange">Chat Arena</span> </h1>
+<h1 align="center"> 🏟 <span style="color:orange">ChatArena</span> </h1>
 
 <h3 align="center">
     <p>Multi-Agent Language Game Environments for LLMs</p>
 </h3>
 
 
-[![License: Apache2](https://img.shields.io/github/license/chatarena/chatarena)](https://github.com/chatarena/chatarena/blob/main/LICENSE) [![PyPI](https://img.shields.io/pypi/v/chatarena)](https://pypi.org/project/chatarena/) [![Python 3.9+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/) [![Twitter](https://img.shields.io/twitter/follow/_chatarena?style=social)](https://twitter.com/_chatarena)
+[![License: Apache2](https://img.shields.io/badge/License-Apache_2.0-green.svg)](https://github.com/chatarena/chatarena/blob/main/LICENSE) [![PyPI](https://img.shields.io/pypi/v/chatarena)](https://pypi.org/project/chatarena/) [![Python 3.9+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
 ---
 
-Chat Arena is a Python library designed to facilitate communication and collaboration between multiple large language
+ChatArena is a Python library designed to facilitate communication and collaboration between multiple large language
 models (LLMs).
 It provides the following features:
 
@@ -54,7 +54,7 @@ export OPENAI_API_KEY="your_api_key_here"
 
 ### Launch the Demo Locally
 
-The quickest way to see Chat Arena in action is via the demo Web UI.
+The quickest way to see ChatArena in action is via the demo Web UI.
 To launch the demo on your local machine, you first need to git clone the repository and install it from source
 (see above instruction). Then run the following command in the root directory of the repository:
 
@@ -62,7 +62,7 @@ To launch the demo on your local machine, you first need to git clone the reposi
 gradio app.py
 ```
 
-This will launch a demo server for Chat Arena and you can access it via http://127.0.0.1:7860/ in your browser.
+This will launch a demo server for ChatArena and you can access it via http://127.0.0.1:7860/ in your browser.
 
 [//]: # (TODO: put a gif here)
 
@@ -110,7 +110,7 @@ player3 = Player(name="Teaching assistant", backend=OpenAIChat(),
 
 ### Step 2: Create a Language Game Environment
 
-You can also create a language model-driven environment and add it to the Chat Arena:
+You can also create a language model-driven environment and add it to the ChatArena:
 
 ```python
 from chatarena.environments.conversation import Conversation
@@ -202,11 +202,11 @@ We provide [a detailed tutorial](docs/tutorials/create_your_environment.md) to d
 environment,
 using the [`Chameleon` environment](chatarena/environments/chameleon.py) as example.
 
-If you want to port an existing library's environment to Chat Arena, check out [`PettingzooChess` environment](chatarena/environments/pettingzoo_chess.py) as an example.
+If you want to port an existing library's environment to ChatArena, check out [`PettingzooChess` environment](chatarena/environments/pettingzoo_chess.py) as an example.
 
 ## Contributing
 
-We welcome contributions to improve and extend Chat Arena. Please follow these steps to contribute:
+We welcome contributions to improve and extend ChatArena. Please follow these steps to contribute:
 
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix.
