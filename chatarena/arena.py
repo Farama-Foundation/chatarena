@@ -4,7 +4,7 @@ import json
 import csv
 import logging
 
-from .agent import Player, SIGNAL_END_OF_CONVERSATION
+from .agent import Player
 from .environments import Environment, TimeStep, load_environment
 from .backends import Human
 from .config import ArenaConfig

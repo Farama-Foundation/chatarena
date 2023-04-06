@@ -22,6 +22,5 @@ def load_environment(config: EnvironmentConfig):
     except KeyError:
         raise ValueError(f"Unknown environment type: {config['env_type']}")
 
-    print(config)
     env = env_cls.from_config(config)
     return env
