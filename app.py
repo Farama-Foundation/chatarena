@@ -15,8 +15,6 @@ css = """#col-container {max-width: 90%; margin-left: auto; margin-right: auto; 
 #header {text-align: center;}
 #col-chatbox {flex: 1; max-height: min(750px, 100%);}
 #label {font-size: 2em; padding: 0.5em; margin: 0;}
-.scroll-hide {overflow-y: scroll; max-height: 100px;}
-.wrap {max-height: 680px;}
 .message {font-size: 1.2em;}
 .message-wrap {max-height: min(700px, 100vh);}
 """
@@ -26,6 +24,8 @@ css = """#col-container {max-width: 90%; margin-left: auto; margin-right: auto; 
 # #chatbot-tab-all {height: 750px; max-height: min(750px, 100%);}
 # #chatbox {height: min(750px, 100%); max-height: min(750px, 100%);}
 # #chatbox.block {height: 730px}
+# .wrap {max-height: 680px;}
+# .scroll-hide {overflow-y: scroll; max-height: 100px;}
 
 
 DEBUG = False

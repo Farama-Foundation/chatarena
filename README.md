@@ -23,7 +23,9 @@ It provides the following features:
 
 ## Getting Started
 
-[![Demo button](docs/images/demo_button.svg)](https://huggingface.co/spaces/chatarena/chatarena-demo)  Due to the high volume of requests, the demo server may be unstable or slow to respond.
+[![Demo button](docs/images/demo_button.svg)](https://chatarena-chatarena-demo.hf.space)
+
+Due to the high volume of requests, the demo server may be unstable or slow to respond.
 
 ### Installation
 
