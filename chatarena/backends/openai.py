@@ -94,5 +94,11 @@ class OpenAIChat(IntelligenceBackend):
         prefix = f"[{agent_name}]:"
         if response.startswith(prefix):
             response = response[len(prefix):].strip()
+        
+        # Remove the first response of other players
+        if response.startswith('['):
+            response = response[response.index(']'):].strip()
+        # A case for incorrectly appended utterances
+        response =  re.split('\[.+\]',response)[0].strip()
 
         return response
