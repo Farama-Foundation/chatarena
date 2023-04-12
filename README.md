@@ -5,7 +5,12 @@
 </h3>
 
 
-[![License: Apache2](https://img.shields.io/badge/License-Apache_2.0-green.svg)](https://github.com/chatarena/chatarena/blob/main/LICENSE) [![PyPI](https://img.shields.io/pypi/v/chatarena)](https://pypi.org/project/chatarena/) [![Python 3.9+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
+[![License: Apache2](https://img.shields.io/badge/License-Apache_2.0-green.svg)](https://github.com/chatarena/chatarena/blob/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/chatarena)](https://pypi.org/project/chatarena/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
+[![twitter](https://img.shields.io/twitter/follow/_chatarena?style=social&label=Follow%20ChatArena)](https://twitter.com/_chatarena)
+[![slack](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/chatarena/shared_invite/zt-1t5fpbiep-CbKucEHdJ5YeDLEpKWxDOg)
+
 ---
 
 ChatArena is a Python library designed to facilitate communication and collaboration between multiple large language
@@ -23,9 +28,8 @@ It provides the following features:
 
 ## Getting Started
 
-[![Demo button](docs/images/demo_button.svg)](https://chatarena-chatarena-demo.hf.space)
-
-Due to the high volume of requests, the demo server may be unstable or slow to respond.
+**Try our online demo:**
+[![demo](https://img.shields.io/badge/Demo-Huggingface%F0%9F%A4%97%20Space-orange?style=flat)](https://chatarena-chatarena-demo.hf.space)
 
 ### Installation
 
@@ -64,7 +68,7 @@ To launch the demo on your local machine, you first need to git clone the reposi
 gradio app.py
 ```
 
-This will launch a demo server for ChatArena and you can access it via http://127.0.0.1:7860/ in your browser.
+This will launch a demo server for ChatArena and you can access it in your browser.
 
 [//]: # (TODO: put a gif here)
 
@@ -72,20 +76,15 @@ This will launch a demo server for ChatArena and you can access it via http://12
 
 ### Key Concepts
 
-- **Player**: a player is an agent that can interact with other players in a game environment. A player can be a human
-  or
-  a large language model (LLM). A player is defined by its name, its backend, and its role.
-    - **Backend**: a backend is a Python class that defines how a player interacts with other players. A backend can be
-      a
-      human, a LLM, or a combination of them. A backend is defined by its name, its type, and its parameters.
-- **Environment**: an environment is a Python class that defines the rules of a game. An environment is defined by its
-  name, its type, and its parameters.
-    - **Moderator**: a moderator is a Python class that defines how the game is played. A moderator is defined by its
-      name,
-      its type, and its parameters.
-- **Arena**: an arena is a Python class that defines the overall game. An arena is defined by its name, its type, and
-  its
-  parameters.
+- **Player**: a player is an agent that can interact with other players in a game environment. A player is defined by
+  its name, its backend, and its role description.
+    - **Backend**: a backend is a class that actually processes queries and generates responses in a conversation. A
+      backend can be a human, a remote or local LLM, or any program you create.
+- **Environment**: an environment is a class that defines the rules of a game and the game state transition.
+    - **Moderator**: a moderator is a special type of player that can control the game environment. It allows you to
+      define game environments using an LLM.
+- **Arena**: an arena is a utility class that contains the game environment and the players. It enables you to easily
+  run the game and save the game history, as well as interacting with the game via Web UI or CLI.
 
 ### Step 1: Define Multiple Players with LLM Backend
 
@@ -208,16 +207,21 @@ If you want to port an existing library's environment to ChatArena, check
 out [`PettingzooChess` environment](chatarena/environments/pettingzoo_chess.py) as an example.
 
 ## List of Games and Environments
+
 ### [Conversation](chatarena/environments/conversation.py)
+
 A multi-player language game environment that simulates a
-  conversation.
+conversation.
+
 * [NLP Classroom](examples/nlp-classroom-3players.json): a 3-player language game environment that simulates a
   classroom
   setting. The game is played in turns, and each turn a player can either ask a question or answer a question.
   The game ends when all players have asked and answered all questions.
 
 ### [Moderator Conversation](chatarena/environments/conversation.py)
+
 Based on converstion, but with a moderator that controls the game dynamics.
+
 * [Rock-paper-scissors](examples/rock-paper-scissors.json): a 2-player language game environment that simulates a
   rock-paper-scissors game with moderator conversation.
   Both player will act in parallel, and the game ends when one player wins 2 rounds.
@@ -228,19 +232,26 @@ Based on converstion, but with a moderator that controls the game dynamics.
   player wins or the board is full.
 
 ### [Chameleon](chatarena/environments/chameleon.py)
+
 A multi-player social deduction game. There are two roles in the game, chameleon and non-chameleon.
 The topic of the secret word will be first revealed to all the players.
 Then the secret word will be revealed to non-chameleons.
 The chameleon does not know the secret word.
 The objective in the game depends on the role of the player:
+
 - If you are not a chameleon, your goal is to reveal the chameleon without exposing the secret word.
-- If you are a chameleon, your aim is to blend in with other players, avoid being caught, and figure out the secret word.
-There are three stages in the game:
+- If you are a chameleon, your aim is to blend in with other players, avoid being caught, and figure out the secret
+  word.
+  There are three stages in the game:
+
 1. The giving clues stage: each player will describe the clues about the secret word.
-2. The accusation stage: In this stage, each player will vote for another player who is most likely the chameleon. The chameleon should vote for other players.
-3. The guess stage: If the accusation is correct, the chameleon should guess the secret word given the clues revealed by other players.
+2. The accusation stage: In this stage, each player will vote for another player who is most likely the chameleon. The
+   chameleon should vote for other players.
+3. The guess stage: If the accusation is correct, the chameleon should guess the secret word given the clues revealed by
+   other players.
 
 ### [PettingZooChess](chatarena/environments/pettingzoo_chess.py)
+
 A two-player chess game environment that uses the PettingZoo Chess environment.
 
 ## Contributing
@@ -273,9 +284,9 @@ If you find ChatArena useful for your research, please cite our repository (our 
 ## Contact
 
 If you have any questions or suggestions, feel free to open an issue or submit a pull request.
-You can also follow the lead
-developer [![Twitter](https://img.shields.io/twitter/follow/mindjimmy?style=social)](https://twitter.com/mindjimmy) to
-get the latest updates.
+You can also follow us on [Twitter](https://twitter.com/_chatarena) or
+join [our Slack channel](https://join.slack.com/t/chatarena/shared_invite/zt-1t5fpbiep-CbKucEHdJ5YeDLEpKWxDOg)
+to get the latest updates.
 
 Happy chatting!
 
