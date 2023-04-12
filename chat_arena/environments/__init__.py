@@ -1,11 +1,13 @@
 from .base import Environment, TimeStep
 from .conversation import Conversation, ModeratedConversation
 from .chameleon import Chameleon
+from .pettingzoo_chess import ChessEnvironment
 
 ENV_REGISTRY = {
     "conversation": Conversation,
     "moderated_conversation": ModeratedConversation,
     "chameleon": Chameleon,
+    "chess": ChessEnvironment,
 }
 
 
