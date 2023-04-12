@@ -3,21 +3,30 @@ import json
 import gradio as gr
 from glob import glob
 
-from chat_arena.arena import Arena
-from chat_arena.backend import BACKEND_REGISTRY, HumanBackendError
-from chat_arena.environments import ENV_REGISTRY
-from chat_arena.database import log_arena, log_messages, SupabaseDB, supabase_available
+from chatarena.arena import Arena, TooManyInvalidActions
+from chatarena.backends import BACKEND_REGISTRY
+from chatarena.backends.human import HumanBackendError
+from chatarena.config import ArenaConfig
+from chatarena.environments import ENV_REGISTRY
+from chatarena.database import log_arena, log_messages, SupabaseDB, supabase_available
+from chatarena.message import Message
 
 css = """#col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
 #header {text-align: center;}
-#col-chatbox {flex: 1; max-height: min(650px, 100%); display: flex;}
-#chatbox {height: min(650px, 100%); max-height: 650px; display:flex;}
+#col-chatbox {flex: 1; max-height: min(750px, 100%);}
 #label {font-size: 2em; padding: 0.5em; margin: 0;}
 .message {font-size: 1.2em;}
-.wrap.svelte-18ha8kq {flex: 1}
-.wrap.svelte-18ha8kq.svelte-18ha8kq {max-height: min(600px, 100vh);}
-.message-wrap {max-height: min(600px, 100vh);}
+.message-wrap {max-height: min(700px, 100vh);}
 """
+# .wrap {min-width: min(640px, 100vh)}
+# #env-desc {max-height: 100px; overflow-y: auto;}
+# .textarea {height: 100px; max-height: 100px;}
+# #chatbot-tab-all {height: 750px; max-height: min(750px, 100%);}
+# #chatbox {height: min(750px, 100%); max-height: min(750px, 100%);}
+# #chatbox.block {height: 730px}
+# .wrap {max-height: 680px;}
+# .scroll-hide {overflow-y: scroll; max-height: 100px;}
+
 
 DEBUG = False
 
@@ -89,10 +98,9 @@ with gr.Blocks(css=css) as demo:
     all_components = []
 
     with gr.Column(elem_id="col-container"):
-        gr.Markdown("""# 🏟 Chat Arena️<br>
-Prompting chat-based AI agents to play games in a language-driven environment. 
-[Arena Tutorial](https://chat.ai-arena.org/tutorial)""",
-                    elem_id="header")
+        gr.Markdown("""# 🏟 ChatArena️<br>
+Prompting multiple AI agents to play games in a language-driven environment. 
+**[Project Homepage](https://github.com/chatarena/chatarena)**""", elem_id="header")
 
         with gr.Row():
             env_selector = gr.Dropdown(choices=list(ENV_REGISTRY.keys()), value=DEFAULT_ENV, interactive=True,
@@ -108,15 +116,15 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
         with gr.Row():
             with gr.Column(elem_id="col-chatbox"):
-                with gr.Tab("All"):
-                    chatbot = gr.Chatbot(elem_id="chatbox", visible=True, label="Chat Arena")
+                with gr.Tab("All", visible=True):
+                    chatbot = gr.Chatbot(elem_id="chatbox", visible=True, show_label=False)
 
                 player_chatbots = []
                 for i in range(MAX_NUM_PLAYERS):
                     player_name = f"Player {i + 1}"
                     with gr.Tab(player_name, visible=(i < DEFAULT_NUM_PLAYERS)):
                         player_chatbot = gr.Chatbot(elem_id=f"chatbox-{i}", visible=i < DEFAULT_NUM_PLAYERS,
-                                                    label=player_name)
+                                                    label=player_name, show_label=False)
                         player_chatbots.append(player_chatbot)
 
             all_components += [chatbot, *player_chatbots]
@@ -186,7 +194,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
         return chatbot_output
 
 
-    def _create_arena_config_from_components(all_comps: dict):
+    def _create_arena_config_from_components(all_comps: dict) -> ArenaConfig:
         env_desc = all_comps[env_desc_textbox]
 
         # Initialize the players
@@ -199,7 +207,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
             player_config = {
                 "name": player_name,
                 "role_desc": role_desc,
-                "env_desc": env_desc,
+                "global_prompt": env_desc,
                 "backend": {
                     "backend_type": backend_type,
                     "temperature": temperature,
@@ -215,7 +223,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
             all_comps[c] for c in moderator_components if not isinstance(c, (gr.Accordion, gr.Tab))]
         moderator_config = {
             "role_desc": mod_role_desc,
-            "env_desc": env_desc,
+            "global_prompt": env_desc,
             "terminal_condition": mod_terminal_condition,
             "backend": {
                 "backend_type": moderator_backend_type,
@@ -225,13 +233,14 @@ Prompting chat-based AI agents to play games in a language-driven environment.
         }
         env_config = {
             "env_type": env_type,
-            "player_names": [conf["name"] for conf in player_configs],
-            "env_desc": env_desc,
             "parallel": all_comps[parallel_checkbox],
-            "moderator": moderator_config
+            "moderator": moderator_config,
+            "moderator_visibility": "all",
+            "moderator_period": "turn"
         }
 
-        arena_config = {"players": player_configs, "environment": env_config}
+        # arena_config = {"players": player_configs, "environment": env_config}
+        arena_config = ArenaConfig(players=player_configs, environment=env_config)
         return arena_config
 
 
@@ -260,6 +269,11 @@ Prompting chat-based AI agents to play games in a language-driven environment.
                 timestep = None  # Failed to get human input
             else:
                 timestep = arena.environment.step(e.agent_name, human_input)
+        except TooManyInvalidActions as e:
+            timestep = arena.current_timestep
+            timestep.observation.append(
+                Message("System", "Too many invalid actions. Game over.", turn=-1, visible_to="all"))
+            timestep.terminal = True
 
         if timestep is None:
             yield {human_input_textbox: gr.update(value="", placeholder="Please enter a valid input"),
@@ -332,7 +346,7 @@ Prompting chat-based AI agents to play games in a language-driven environment.
 
         # Update the environment components
         env_config = example_config['environment']
-        update_dict[env_desc_textbox] = gr.update(value=env_config['env_desc'])
+        update_dict[env_desc_textbox] = gr.update(value=example_config['global_prompt'])
         update_dict[env_selector] = gr.update(value=env_config['env_type'])
         update_dict[parallel_checkbox] = gr.update(value=env_config['parallel'])
 

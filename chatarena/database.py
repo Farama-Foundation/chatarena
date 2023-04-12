@@ -47,18 +47,18 @@ class SupabaseDB:
     def _save_environment(self, arena: Arena):
         env = arena.environment
         env_config = env.to_config()
+        moderator_config = env_config.pop("moderator", None)
 
         arena_row = {
             "arena_id": str(arena.uuid),
+            "global_prompt": arena.global_prompt,
             "env_type": env_config["env_type"],
-            "env_desc": env_config["env_desc"],
-            "parallel": env_config["parallel"],
+            "env_config": json.dumps(env_config),
         }
         self.client.table("Arena").insert(arena_row).execute()
 
         # Get the moderator config
-        if env_config.get("moderator", None):
-            moderator_config = env_config["moderator"]
+        if moderator_config:
             moderator_row = {
                 "moderator_id": str(uuid.uuid5(arena.uuid, json.dumps(moderator_config))),
                 "arena_id": str(arena.uuid),
@@ -94,7 +94,7 @@ class SupabaseDB:
             messages = arena.environment.get_observation()
 
         # Filter messages that are already logged
-        messages = [msg for msg in messages if msg.logged is False]
+        messages = [msg for msg in messages if not msg.logged]
 
         message_rows = []
         for message in messages:
@@ -105,6 +105,7 @@ class SupabaseDB:
                 "content": message.content,
                 "turn": message.turn,
                 "timestamp": str(message.timestamp),
+                "msg_type": message.msg_type,
                 "visible_to": json.dumps(message.visible_to),
             }
             message_rows.append(message_row)

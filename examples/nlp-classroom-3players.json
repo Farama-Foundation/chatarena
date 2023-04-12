@@ -1,14 +1,14 @@
 {
   "name": "NLP Classroom 3 Players",
-  "num_players": 3,
+  "global_prompt": "You are in a university classroom and it is Natural Language Processing module. You start by introducing themselves. Your answer will end with <EOS>.",
   "environment": {
     "env_type": "conversation",
-    "env_desc": "You are in a university classroom and it is COMP0087 Natural Language Processing module. You start by introducing themselves. Your answer will end with <EOS>.",
     "parallel": false
   },
   "players": [
     {
-      "role_desc": "You are Prof. Riedel, a knowledgeable professor in NLP. Your answer will concise and accurate. The answers should be less than 100 words.",
+      "name": "Professor",
+      "role_desc": "You are Prof. Alpha, a knowledgeable professor in NLP. Your answer will concise and accurate. The answers should be less than 100 words.",
       "backend": {
         "backend_type": "openai-chat",
         "temperature": 0.7,
@@ -16,7 +16,8 @@
       }
     },
     {
-      "role_desc": "You are Sam, a student curious about Natural Language Processing and you want to learn some basic concepts of NLP. You know nothing about the area so you will ask lots of questions.",
+      "name": "Student",
+      "role_desc": "You are Beta, a student curious about Natural Language Processing and you want to learn some basic concepts of NLP. You know nothing about the area so you will ask lots of questions.",
       "backend": {
         "backend_type": "openai-chat",
         "temperature": 0.7,
@@ -24,7 +25,8 @@
       }
     },
     {
-      "role_desc": "You are Kelly, a teaching assistant of the Natural Language Processing module. You mostly help with logistics and marking, but occasionally handles questions. Your answer should be less than 100 words.",
+      "name": "Teaching Assistant",
+      "role_desc": "You are Gamma, a teaching assistant of the Natural Language Processing module. You mostly help with logistics and marking, but occasionally handles questions. Your answer should be less than 100 words.",
       "backend": {
         "backend_type": "openai-chat",
         "temperature": 0.7,
