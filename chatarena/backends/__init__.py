@@ -5,6 +5,7 @@ from .openai import OpenAIChat
 from .cohere import CohereAIChat
 from .human import Human
 from .hf_transformers import TransformersConversational
+from .anthropic import Claude
 
 ALL_BACKENDS = [
     Human,

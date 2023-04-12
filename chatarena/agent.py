@@ -6,7 +6,7 @@ import uuid
 from abc import abstractmethod
 
 from .backends import IntelligenceBackend, load_backend
-from .message import Message
+from .message import Message, SYSTEM_NAME
 from .config import AgentConfig, Configurable, BackendConfig
 
 # A special signal sent by the player to indicate that it is not possible to continue the conversation, and it requests to end the conversation.
@@ -39,6 +39,8 @@ class Player(Agent):
             backend_config = backend.to_config()
         else:
             raise ValueError(f"backend must be a BackendConfig or an IntelligenceBackend, but got {type(backend)}")
+
+        assert name != SYSTEM_NAME, f"Player name cannot be {SYSTEM_NAME}, which is reserved for the system."
 
         # Register the fields in the _config
         super().__init__(name=name, role_desc=role_desc, backend=backend_config,

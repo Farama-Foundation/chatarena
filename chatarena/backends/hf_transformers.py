@@ -2,8 +2,7 @@ from typing import List
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .base import IntelligenceBackend
-from ..config import BackendConfig
-from ..message import Message
+from ..message import Message, SYSTEM_NAME as SYSTEM
 
 # Try to import the transformers package
 try:
@@ -44,30 +43,30 @@ class TransformersConversational(IntelligenceBackend):
     def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,
               request_msg: Message = None, *args, **kwargs) -> str:
         user_inputs, generated_responses = [], []
+        all_messages = [(SYSTEM, global_prompt), (SYSTEM, prompt)] if global_prompt else [(SYSTEM, prompt)]
 
-        all_messages = [("System", global_prompt), ("System", prompt)]
         for msg in history_messages:
             all_messages.append((msg.agent_name, msg.content))
         if request_msg:
-            all_messages.append(("System", request_msg.content))
+            all_messages.append((SYSTEM, request_msg.content))
 
-        last_is_user = False
+        prev_is_user = False  # Whether the previous message is from the user
         for i, message in enumerate(all_messages):
             if i == 0:
-                assert message[0] == "System"  # The first message should be from the system
+                assert message[0] == SYSTEM  # The first message should be from the system
 
             if message[0] != agent_name:
-                if not last_is_user:
+                if not prev_is_user:
                     user_inputs.append(self._msg_template(message[0], message[1]))
                 else:
                     user_inputs[-1] += "\n" + self._msg_template(message[0], message[1])
-                last_is_user = True
+                prev_is_user = True
             else:
-                if last_is_user:
+                if prev_is_user:
                     generated_responses.append(message[1])
                 else:
                     generated_responses[-1] += "\n" + message[1]
-                last_is_user = False
+                prev_is_user = False
 
         assert len(user_inputs) == len(generated_responses) + 1
         past_user_inputs = user_inputs[:-1]

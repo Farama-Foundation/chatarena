@@ -3,7 +3,6 @@ import os
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .base import IntelligenceBackend
-from ..config import BackendConfig
 from ..message import Message
 
 # Try to import the cohere package and check whether the API key is set
