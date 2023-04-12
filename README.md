@@ -209,7 +209,7 @@ out [`PettingzooChess` environment](chatarena/environments/pettingzoo_chess.py) 
 
 ## List of Games and Environments
 ### [Conversation](chatarena/environments/conversation.py)
-a multi-player language game environment that simulates a
+A multi-player language game environment that simulates a
   conversation.
 * [NLP Classroom](examples/nlp-classroom-3players.json): a 3-player language game environment that simulates a
   classroom
