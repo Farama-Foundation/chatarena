@@ -69,9 +69,11 @@ To launch the demo on your local machine, you first need to git clone the reposi
 gradio app.py
 ```
 
-This will launch a demo server for ChatArena and you can access it in your browser. The interface looks like this:
+This will launch a demo server for ChatArena and you can access it in your browser.
 
-![webui screenshot](docs/images/webui.png)
+[//]: # (The interface looks like this:)
+
+[//]: # (![webui screenshot]&#40;docs/images/webui.png&#41;)
 
 Check out this video to learn how to use Web
 UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816979419)
