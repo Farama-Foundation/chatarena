@@ -30,6 +30,7 @@ It provides the following features:
 
 **Try our online demo:**
 [![demo](https://img.shields.io/badge/Demo-Huggingface%F0%9F%A4%97%20Space-orange?style=flat)](https://chatarena-chatarena-demo.hf.space)
+[![Demo video](https://img.shields.io/badge/Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816979419)
 
 ### Installation
 
@@ -68,9 +69,12 @@ To launch the demo on your local machine, you first need to git clone the reposi
 gradio app.py
 ```
 
-This will launch a demo server for ChatArena and you can access it in your browser.
+This will launch a demo server for ChatArena and you can access it in your browser. The interface looks like this:
 
-[//]: # (TODO: put a gif here)
+![webui screenshot](docs/images/webui.png)
+
+Check out this video to learn how to use Web
+UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816979419)
 
 ## Basic Usage
 
@@ -164,7 +168,8 @@ Run the game in an interactive CLI interface
 arena.launch_cli()
 ```
 
-[//]: # (TODO: put a CLI gif here)
+Check out this video to learn how to use
+CLI: [![cli demo video](https://img.shields.io/badge/CLI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816989884)
 
 ## Advanced Usage
 
