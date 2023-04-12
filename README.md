@@ -216,8 +216,8 @@ a multi-player language game environment that simulates a
   setting. The game is played in turns, and each turn a player can either ask a question or answer a question.
   The game ends when all players have asked and answered all questions.
 
-### [Moderator Conversation](chatarena/environments/conversation.py): Based on converstion, but with a moderator that
-  controls the game dynamics.
+### [Moderator Conversation](chatarena/environments/conversation.py)
+Based on converstion, but with a moderator that controls the game dynamics.
 * [Rock-paper-scissors](examples/rock-paper-scissors.json): a 2-player language game environment that simulates a
   rock-paper-scissors game with moderator conversation.
   Both player will act in parallel, and the game ends when one player wins 2 rounds.
