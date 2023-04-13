@@ -19,7 +19,7 @@ class TestHFTransformers(TestCase):
         ]
 
         response = backend.query(agent_name="Chatbot", history_messages=history_messages,
-                                 prompt="You are a chatbot that can talk to you about anything.",
+                                 role_desc="You are a chatbot that can talk to you about anything.",
                                  global_prompt="You are chatting with a human.")
         logging.info(response)
         self.assertTrue(True)
@@ -37,7 +37,7 @@ class TestHFTransformers(TestCase):
         ]
 
         response = backend.query(agent_name="Chatbot", history_messages=history_messages,
-                                 prompt="You are an expert in food.", global_prompt="You are chatting with a human.")
+                                 role_desc="You are an expert in food.", global_prompt="You are chatting with a human.")
         logging.info(response)
         self.assertTrue(True)
 

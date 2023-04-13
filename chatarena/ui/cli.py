@@ -24,6 +24,11 @@ visible_colors = [color for color in ANSI_COLOR_NAMES.keys() if
 
 MAX_STEPS = 5
 
+import logging
+
+# Set logging level to ERROR
+logging.getLogger().setLevel(logging.ERROR)
+
 
 class ArenaCLI:
     """

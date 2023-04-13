@@ -61,7 +61,7 @@ class Player(Agent):
         Call the agents to generate a response (equivalent to taking an action).
         """
         try:
-            response = self.backend.query(agent_name=self.name, prompt=self.role_desc,
+            response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,
                                           request_msg=None)
         except RetryError as e:
@@ -107,7 +107,7 @@ class Moderator(Player):
 
         try:
             request_msg = Message(agent_name=self.name, content=self.terminal_condition, turn=-1)
-            response = self.backend.query(agent_name=self.name, prompt=self.role_desc, history_messages=history,
+            response = self.backend.query(agent_name=self.name, role_desc=self.role_desc, history_messages=history,
                                           global_prompt=self.global_prompt, request_msg=request_msg, *args, **kwargs)
         except RetryError as e:
             logging.warning(f"Agent {self.name} failed to generate a response. "

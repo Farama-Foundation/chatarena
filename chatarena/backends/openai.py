@@ -58,7 +58,7 @@ class OpenAIChat(IntelligenceBackend):
         response = response.strip()
         return response
 
-    def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,
+    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
               request_msg: Message = None, *args, **kwargs) -> str:
         """
         format the input and call the ChatGPT/GPT-4 API
@@ -78,9 +78,9 @@ class OpenAIChat(IntelligenceBackend):
                 conversations.append({"role": "user", "content": f"[{message.agent_name}]: {message.content}"})
 
         if global_prompt:  # Prepend the global prompt if it exists
-            system_prompt_str = f"{global_prompt.strip()}\n{prompt}"
+            system_prompt_str = f"{global_prompt.strip()}\n{role_desc}"
         else:
-            system_prompt_str = prompt
+            system_prompt_str = role_desc
         system_prompt = {"role": "system", "content": system_prompt_str}
 
         if request_msg:

@@ -52,7 +52,7 @@ class Claude(IntelligenceBackend):
         response = response['completion'].strip()
         return response
 
-    def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,
+    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
               request_msg: Message = None, *args, **kwargs) -> str:
         """
         format the input and call the Claude API
@@ -63,14 +63,14 @@ class Claude(IntelligenceBackend):
             history_messages: the history of the conversation, or the observation for the agent
             request_msg: the request for the chatGPT
         """
-        prompt = ""
-        all_messages = [(SYSTEM, global_prompt), (SYSTEM, prompt)] if global_prompt else [(SYSTEM, prompt)]
+        all_messages = [(SYSTEM, global_prompt), (SYSTEM, role_desc)] if global_prompt else [(SYSTEM, role_desc)]
 
         for message in history_messages:
             all_messages.append((message.agent_name, message.content))
         if request_msg:
             all_messages.append((request_msg.agent_name, request_msg.content))
 
+        prompt = ""
         prev_is_human = False  # Whether the previous message is from human (in anthropic, the human is the user)
         for i, message in enumerate(all_messages):
             if i == 0:
@@ -88,6 +88,9 @@ class Claude(IntelligenceBackend):
                 else:
                     prompt = f"{prompt}{anthropic.HUMAN_PROMPT}\n[{message[0]}]: {message[1]}"
                 prev_is_human = True
+        assert prev_is_human  # The last message should be from the human
+        # Add the AI prompt for Claude to generate the response
+        prompt = f"{prompt}{anthropic.AI_PROMPT}"
 
         response = self._get_response(prompt, *args, **kwargs)
 

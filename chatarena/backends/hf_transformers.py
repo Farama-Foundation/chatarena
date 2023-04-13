@@ -40,10 +40,10 @@ class TransformersConversational(IntelligenceBackend):
     def _msg_template(agent_name, content):
         return f"[{agent_name}]: {content}"
 
-    def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,
+    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
               request_msg: Message = None, *args, **kwargs) -> str:
         user_inputs, generated_responses = [], []
-        all_messages = [(SYSTEM, global_prompt), (SYSTEM, prompt)] if global_prompt else [(SYSTEM, prompt)]
+        all_messages = [(SYSTEM, global_prompt), (SYSTEM, role_desc)] if global_prompt else [(SYSTEM, role_desc)]
 
         for msg in history_messages:
             all_messages.append((msg.agent_name, msg.content))

@@ -11,7 +11,8 @@ ALL_BACKENDS = [
     Human,
     OpenAIChat,
     CohereAIChat,
-    TransformersConversational
+    TransformersConversational,
+    Claude,
 ]
 
 BACKEND_REGISTRY = {backend.type_name: backend for backend in ALL_BACKENDS}
