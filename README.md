@@ -1,3 +1,9 @@
+<!--
+  Title: Chat Arena
+  Description: Chat Arena (or ChatArena) is a language game environment for large language models (LLMs) like GPT-3, GPT-4, ChatGPT, etc.
+  Author: Yuxiang Wu
+  -->
+
 <h1 align="center"> 🏟 <span style="color:orange">ChatArena</span> </h1>
 
 <h3 align="center">

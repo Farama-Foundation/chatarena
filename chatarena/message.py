@@ -5,6 +5,8 @@ from uuid import uuid1
 import hashlib
 
 
+SYSTEM_NAME="System"
+
 def _hash(input: str):
     hex_dig = hashlib.sha256(input.encode()).hexdigest()
     return hex_dig
