@@ -184,7 +184,7 @@ CLI: [![cli demo video](https://img.shields.io/badge/CLI%20Demo%20Video-Vimeo-bl
 We support a more advanced environment called `ModeratedConversation` that allows you to **control the game dynamics
 using an LLM**.
 The moderator is a special player that controls the game state transition and determines when the game ends.
-For example, you can define a moderator that tracks the board status of a board game, and end the game when a player
+For example, you can define a moderator that tracks the board status of a board game and ends the game when a player
 wins.
 You can try out our Tic-tac-toe and Rock-paper-scissors games to get a sense of how it works:
 
@@ -207,7 +207,7 @@ You can define your own environment by extending the `Environment` class. Here a
 3. Implement game mechanics in methods `step`
 4. Handle game states and rewards by implementing methods such as `reset`, `get_observation`, `is_terminal`,
    and `get_rewards`
-5. Develop role description prompts (and global prompt if necessary) for players using CLI or Web UI and save them to a
+5. Develop role description prompts (and a global prompt if necessary) for players using CLI or Web UI and save them to a
    config file.
 
 We provide [a detailed tutorial](docs/tutorials/create_your_environment.md) to demonstrate how to define a custom
