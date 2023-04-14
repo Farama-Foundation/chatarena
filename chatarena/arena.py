@@ -139,7 +139,7 @@ class Arena:
         """
         launch the command line interface
         """
-        from .ui.cli import ArenaCLI
+        from chatarena.ui.cli import ArenaCLI
         cli = ArenaCLI(self)
         cli.launch(max_steps=max_steps, interactive=interactive)
 
