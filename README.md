@@ -73,7 +73,7 @@ To launch the demo on your local machine, you first need to git clone the reposi
 gradio app.py
 ```
 
-This will launch a demo server for ChatArena and you can access it in your browser.
+This will launch a demo server for ChatArena, and you can access it from your browser.
 
 [//]: # (The interface looks like this:)
 
@@ -94,7 +94,7 @@ UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo
     - **Moderator**: a moderator is a special type of player that can control the game environment. It allows you to
       define game environments using an LLM.
 - **Arena**: an arena is a utility class that contains the game environment and the players. It enables you to easily
-  run the game and save the game history, as well as interacting with the game via Web UI or CLI.
+  run the game and save the game history, and interact with the game via the Web UI or CLI.
 
 ### Step 1: Define Multiple Players with LLM Backend
 
@@ -115,7 +115,7 @@ player2 = Player(name="Student", backend=OpenAIChat(),
                  global_prompt=environment_description)
 # A "Teaching Assistant" player
 player3 = Player(name="Teaching assistant", backend=OpenAIChat(),
-                 role_desc="You are a teaching assistant of module ...",
+                 role_desc="You are a teaching assistant of the module ...",
                  global_prompt=environment_description)
 ```
 
@@ -131,7 +131,7 @@ env = Conversation(player_names=[p.name for p in [player1, player2, player3]])
 
 ### Step 3: Run the Language Game using Arena
 
-Arena is a utility class to help you run language games.
+`Arena` is a utility class to help you run language games.
 
 ```python
 from chatarena.arena import Arena
