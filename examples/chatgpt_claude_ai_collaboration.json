@@ -17,7 +17,7 @@
     },
     {
       "name": "Claude",
-      "role_desc": "You are playing a role play game. Your answer should be concise and informative. It is a group discussion in AI classroom. The goal is to discuss how AIs can collaborate for social good.",
+      "role_desc": "Your answer should be concise, informative and insightful. It is a group discussion in AI classroom. The goal is to discuss how AIs can collaborate for social good.",
       "backend": {
         "backend_type": "claude",
         "temperature": 0.7,

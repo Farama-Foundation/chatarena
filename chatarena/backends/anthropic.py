@@ -95,6 +95,6 @@ class Claude(IntelligenceBackend):
         response = self._get_response(prompt, *args, **kwargs)
 
         # Remove the agent name if the response starts with it
-        response = re.sub(rf"^\s*\[{agent_name}]", "", response)
+        response = re.sub(rf"^\s*\[{agent_name}]:?", "", response).strip()
 
         return response

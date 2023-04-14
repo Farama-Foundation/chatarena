@@ -91,6 +91,6 @@ class OpenAIChat(IntelligenceBackend):
         response = self._get_response([system_prompt] + conversations + request_prompt, *args, **kwargs)
 
         # Remove the agent name if the response starts with it
-        response = re.sub(rf"^\s*\[{agent_name}]", "", response)
+        response = re.sub(rf"^\s*\[{agent_name}]:?", "", response).strip()
 
         return response
