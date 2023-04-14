@@ -1,17 +1,17 @@
 from typing import List
 import os
+import re
 import logging
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .base import IntelligenceBackend
 from ..message import Message
-from ..config import BackendConfig
 
 try:
     import openai
 except ImportError:
     is_openai_available = False
-    logging.warning("OpenAI package is not installed")
+    logging.warning("openai package is not installed")
 else:
     openai.api_key = os.environ.get("OPENAI_API_KEY")
     if openai.api_key is None:
@@ -37,7 +37,7 @@ class OpenAIChat(IntelligenceBackend):
 
     def __init__(self, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int = DEFAULT_MAX_TOKENS,
                  model: str = DEFAULT_MODEL, **kwargs):
-        assert is_openai_available, "OpenAI package is not installed or the API key is not set"
+        assert is_openai_available, "openai package is not installed or the API key is not set"
         super().__init__(temperature=temperature, max_tokens=max_tokens, model=model, **kwargs)
 
         self.temperature = temperature
@@ -58,7 +58,7 @@ class OpenAIChat(IntelligenceBackend):
         response = response.strip()
         return response
 
-    def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,
+    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
               request_msg: Message = None, *args, **kwargs) -> str:
         """
         format the input and call the ChatGPT/GPT-4 API
@@ -78,9 +78,9 @@ class OpenAIChat(IntelligenceBackend):
                 conversations.append({"role": "user", "content": f"[{message.agent_name}]: {message.content}"})
 
         if global_prompt:  # Prepend the global prompt if it exists
-            system_prompt_str = f"{global_prompt.strip()}\n{prompt}"
+            system_prompt_str = f"{global_prompt.strip()}\n{role_desc}"
         else:
-            system_prompt_str = prompt
+            system_prompt_str = role_desc
         system_prompt = {"role": "system", "content": system_prompt_str}
 
         if request_msg:
@@ -90,10 +90,7 @@ class OpenAIChat(IntelligenceBackend):
 
         response = self._get_response([system_prompt] + conversations + request_prompt, *args, **kwargs)
 
-        # Remove the prefix if the response starts with it
-        prefix = f"[{agent_name}]:"
-        if response.startswith(prefix):
-            response = response[len(prefix):].strip()
-        
+        # Remove the agent name if the response starts with it
+        response = re.sub(rf"^\s*\[{agent_name}]", "", response)
 
         return response
