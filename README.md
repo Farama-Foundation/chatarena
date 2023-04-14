@@ -73,7 +73,7 @@ To launch the demo on your local machine, you first need to git clone the reposi
 gradio app.py
 ```
 
-This will launch a demo server for ChatArena and you can access it in your browser.
+This will launch a demo server for ChatArena, and you can access it from your browser.
 
 [//]: # (The interface looks like this:)
 
@@ -94,7 +94,7 @@ UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo
     - **Moderator**: a moderator is a special type of player that can control the game environment. It allows you to
       define game environments using an LLM.
 - **Arena**: an arena is a utility class that contains the game environment and the players. It enables you to easily
-  run the game and save the game history, as well as interacting with the game via Web UI or CLI.
+  run the game and save the game history, and interact with the game via the Web UI or CLI.
 
 ### Step 1: Define Multiple Players with LLM Backend
 
@@ -115,7 +115,7 @@ player2 = Player(name="Student", backend=OpenAIChat(),
                  global_prompt=environment_description)
 # A "Teaching Assistant" player
 player3 = Player(name="Teaching assistant", backend=OpenAIChat(),
-                 role_desc="You are a teaching assistant of module ...",
+                 role_desc="You are a teaching assistant of the module ...",
                  global_prompt=environment_description)
 ```
 
@@ -131,7 +131,7 @@ env = Conversation(player_names=[p.name for p in [player1, player2, player3]])
 
 ### Step 3: Run the Language Game using Arena
 
-Arena is a utility class to help you run language games.
+`Arena` is a utility class to help you run language games:
 
 ```python
 from chatarena.arena import Arena
@@ -147,13 +147,13 @@ for _ in range(10):
     # Your code goes here ...
 ```
 
-You can easily save your game play history to file
+You can easily save your gameplay history to file:
 
 ```python
 arena.save_history(path=...)
 ```
 
-and save your game config to file
+and save your game config to file:
 
 ```python
 arena.save_config(path=...)
@@ -161,14 +161,14 @@ arena.save_config(path=...)
 
 ### Other Utilities
 
-Load Arena from config file (here we use `examples/nlp-classroom-3players.json` in this repository as an example)
+Load `Arena` from a config file -- here we use `examples/nlp-classroom-3players.json` in this repository as an example:
 
 ```python
 arena = Arena.from_config("examples/nlp-classroom-3players.json")
 arena.run(num_steps=10)
 ```
 
-Run the game in an interactive CLI interface
+Run the game in an interactive CLI interface:
 
 ```python
 arena.launch_cli()
@@ -184,7 +184,7 @@ CLI: [![cli demo video](https://img.shields.io/badge/CLI%20Demo%20Video-Vimeo-bl
 We support a more advanced environment called `ModeratedConversation` that allows you to **control the game dynamics
 using an LLM**.
 The moderator is a special player that controls the game state transition and determines when the game ends.
-For example, you can define a moderator that track the board status of a board game, and end the game when a player
+For example, you can define a moderator that tracks the board status of a board game and ends the game when a player
 wins.
 You can try out our Tic-tac-toe and Rock-paper-scissors games to get a sense of how it works:
 
@@ -207,7 +207,7 @@ You can define your own environment by extending the `Environment` class. Here a
 3. Implement game mechanics in methods `step`
 4. Handle game states and rewards by implementing methods such as `reset`, `get_observation`, `is_terminal`,
    and `get_rewards`
-5. Develop role description prompts (and global prompt if necessary) for players using CLI or Web UI and save them to a
+5. Develop role description prompts (and a global prompt if necessary) for players using CLI or Web UI and save them to a
    config file.
 
 We provide [a detailed tutorial](docs/tutorials/create_your_environment.md) to demonstrate how to define a custom
