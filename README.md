@@ -131,7 +131,7 @@ env = Conversation(player_names=[p.name for p in [player1, player2, player3]])
 
 ### Step 3: Run the Language Game using Arena
 
-`Arena` is a utility class to help you run language games.
+`Arena` is a utility class to help you run language games:
 
 ```python
 from chatarena.arena import Arena
@@ -147,13 +147,13 @@ for _ in range(10):
     # Your code goes here ...
 ```
 
-You can easily save your game play history to file
+You can easily save your gameplay history to file:
 
 ```python
 arena.save_history(path=...)
 ```
 
-and save your game config to file
+and save your game config to file:
 
 ```python
 arena.save_config(path=...)
@@ -161,14 +161,14 @@ arena.save_config(path=...)
 
 ### Other Utilities
 
-Load Arena from config file (here we use `examples/nlp-classroom-3players.json` in this repository as an example)
+Load `Arena` from a config file -- here we use `examples/nlp-classroom-3players.json` in this repository as an example:
 
 ```python
 arena = Arena.from_config("examples/nlp-classroom-3players.json")
 arena.run(num_steps=10)
 ```
 
-Run the game in an interactive CLI interface
+Run the game in an interactive CLI interface:
 
 ```python
 arena.launch_cli()
@@ -184,7 +184,7 @@ CLI: [![cli demo video](https://img.shields.io/badge/CLI%20Demo%20Video-Vimeo-bl
 We support a more advanced environment called `ModeratedConversation` that allows you to **control the game dynamics
 using an LLM**.
 The moderator is a special player that controls the game state transition and determines when the game ends.
-For example, you can define a moderator that track the board status of a board game, and end the game when a player
+For example, you can define a moderator that tracks the board status of a board game, and end the game when a player
 wins.
 You can try out our Tic-tac-toe and Rock-paper-scissors games to get a sense of how it works:
 
