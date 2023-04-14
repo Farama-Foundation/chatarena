@@ -1,6 +1,6 @@
 <!--
   Title: Chat Arena
-  Description: Chat Arena (or ChatArena) is a language game environment for large language models (LLMs) like GPT-3, GPT-4, ChatGPT, etc.
+  Description: Chat Arena (or ChatArena) is a language game environment for Large Language Models (LLMs) like GPT-3, GPT-4, ChatGPT, etc.
   Author: Yuxiang Wu
   -->
 
@@ -19,14 +19,14 @@
 
 ---
 
-ChatArena is a Python library designed to facilitate communication and collaboration between multiple large language
-models (LLMs).
+ChatArena is a Python library designed to facilitate communication and collaboration between multiple Large Language
+Models (LLMs).
 It provides the following features:
 
-- **Language Game Environments**: it provides a framework for creating multi-agent language game environments, and a set
+- **Language Game Environments**: it provides a framework for creating multi-agent language game environments and a set
   of general-purposed language-driven environments.
-- **Infrastructure for Multi-LLM Interaction**: it allows you to quickly create multiple LLM-powered player agents, and
-  enables seamlessly communication between them.
+- **Infrastructure for Multi-LLM Interaction**: it allows you to quickly create multiple LLM-powered player agents and
+  enables seamless communication between them.
 - **User-friendly Interfaces**: it provides both Web browser UI and command line interface (CLI) to develop (prompt
   engineer) your LLM players to succeed in the environment.
 
@@ -54,9 +54,7 @@ pip install chatarena
 or install from source:
 
 ```bash
-git clone https://github.com/chatarena/chatarena
-cd chatarena
-pip install .
+pip install git+https://github.com/chatarena/chatarena
 ```
 
 To use GPT-3 as an LLM agent, set your OpenAI API key:
