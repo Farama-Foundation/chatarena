@@ -86,15 +86,11 @@ UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo
 
 ### Key Concepts
 
-- **Player**: a player is an agent that can interact with other players in a game environment. A player is defined by
-  its name, its backend, and its role description.
-    - **Backend**: a backend is a class that actually processes queries and generates responses in a conversation. A
-      backend can be a human, a remote or local LLM, or any program you create.
-- **Environment**: an environment is a class that defines the rules of a game and the game state transition.
-    - **Moderator**: a moderator is a special type of player that can control the game environment. It allows you to
-      define game environments using an LLM.
-- **Arena**: an arena is a utility class that contains the game environment and the players. It enables you to easily
-  run the game and save the game history, and interact with the game via the Web UI or CLI.
+1. **Arena**: Arena encapsulates an environment and a collection of players. It drives the main loop of the game and provides HCI utilities like webUI, CLI, configuration loading and data storage.
+2. **Environment**: The environment stores the game state and executes game logics to make transitions between game states. It also renders observations for players, the observations are natural languages.
+    1. The game state is not directly visible to the players. Players can only see the observations.
+3. **Language Backend**: Language backends are the source of language intelligence. It takes text (or collection of text) as input and returns text in response.
+4. **Player**: The player is an agent that plays the game. In RL terminology, it’s a policy, a stateless function mapping from observations to actions.
 
 ### Step 1: Define Multiple Players with LLM Backend
 
@@ -195,6 +191,12 @@ Arena.from_config("examples/tic-tac-toe.json").launch_cli()
 # Rock-paper-scissors example
 Arena.from_config("examples/rock-paper-scissors.json").launch_cli()
 ```
+
+### General Custimization Guide
+1. **Arena**: Overriding Arena basically means one is going to write their own main loop. This can allow different interaction interfaces or drive games in a more automated manner, for example, running an online RL training loop
+2. **Environment**: A new environment corresponds to a new game, one can define the game dynamics here with hard-coded rules or a mixture of rules and language backend.
+3. **Backend**: If one needs to change the way of formatting observations (in terms of messages) into queries for the language model, the backend should be overridden.
+4. **Player**: By default, when a new observation is fed, players will query the language backend and return the response as actions. But one can also customize the way that players are interacting with the language backend.
 
 ### Creating your Custom Environment
 
