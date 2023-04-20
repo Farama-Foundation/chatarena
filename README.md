@@ -19,14 +19,14 @@
 
 ---
 
-ChatArena is a Python library designed to facilitate communication and collaboration between multiple Large Language
+ChatArena is a Multi-Agent Language Environment that facilitates social interaction between multiple Large Language
 Models (LLMs).
 It provides the following features:
 
-- **Language Game Environments**: it provides a framework for creating multi-agent language game environments and a set
-  of general-purposed language-driven environments.
-- **Infrastructure for Multi-LLM Interaction**: it allows you to quickly create multiple LLM-powered player agents and
-  enables seamless communication between them.
+- **Abstraction**: it provides a framework to create language game environments and multiple autonomous agent LLMs.
+
+[//]: # (It allows you to quickly create multiple agent LLMs and enables seamless communication between them.)
+- **Language Game Environments**: it provides a set of language environments for evaluating agency and social intelligence of agent LLMs.
 - **User-friendly Interfaces**: it provides both Web browser UI and command line interface (CLI) to develop (prompt
   engineer) your LLM players to succeed in the environment.
 
