@@ -19,13 +19,11 @@
 
 ---
 
-ChatArena is a Multi-Agent Language Environment that facilitates social interaction between multiple Large Language
-Models (LLMs).
+ChatArena is a library that provides multi-agent language game environments and facilitates research about autonomous LLM agents and social interaction between them.
 It provides the following features:
 
-- **Abstraction**: it provides a framework to create language game environments and multiple agent LLMs.
-- **Language Game Environments**: it provides a set of language environments for understanding social intelligence of
-  agent LLMs.
+- **Abstraction**: it provides a flexible framework to define multiple players, environments and the interactions between them, based on Markov Decision Process.
+- **Language Game Environments**: it provides a set of environments that can help understanding, benchmarking or training agent LLMs.
 - **User-friendly Interfaces**: it provides both Web UI and CLI to develop/prompt engineer your LLM agents to act in
   environments.
 
