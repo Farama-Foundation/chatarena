@@ -23,12 +23,11 @@ ChatArena is a Multi-Agent Language Environment that facilitates social interact
 Models (LLMs).
 It provides the following features:
 
-- **Abstraction**: it provides a framework to create language game environments and multiple autonomous agent LLMs.
-
-[//]: # (It allows you to quickly create multiple agent LLMs and enables seamless communication between them.)
-- **Language Game Environments**: it provides a set of language environments for evaluating agency and social intelligence of agent LLMs.
-- **User-friendly Interfaces**: it provides both Web browser UI and command line interface (CLI) to develop (prompt
-  engineer) your LLM players to succeed in the environment.
+- **Abstraction**: it provides a framework to create language game environments and multiple agent LLMs.
+- **Language Game Environments**: it provides a set of language environments for understanding social intelligence of
+  agent LLMs.
+- **User-friendly Interfaces**: it provides both Web UI and CLI to develop/prompt engineer your LLM agents to act in
+  environments.
 
 ![ChatArena Architecture](docs/images/chatarena_architecture.png)
 
@@ -86,11 +85,15 @@ UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo
 
 ### Key Concepts
 
-1. **Arena**: Arena encapsulates an environment and a collection of players. It drives the main loop of the game and provides HCI utilities like webUI, CLI, configuration loading and data storage.
-2. **Environment**: The environment stores the game state and executes game logics to make transitions between game states. It also renders observations for players, the observations are natural languages.
+1. **Arena**: Arena encapsulates an environment and a collection of players. It drives the main loop of the game and
+   provides HCI utilities like webUI, CLI, configuration loading and data storage.
+2. **Environment**: The environment stores the game state and executes game logics to make transitions between game
+   states. It also renders observations for players, the observations are natural languages.
     1. The game state is not directly visible to the players. Players can only see the observations.
-3. **Language Backend**: Language backends are the source of language intelligence. It takes text (or collection of text) as input and returns text in response.
-4. **Player**: The player is an agent that plays the game. In RL terminology, it’s a policy, a stateless function mapping from observations to actions.
+3. **Language Backend**: Language backends are the source of language intelligence. It takes text (or collection of
+   text) as input and returns text in response.
+4. **Player**: The player is an agent that plays the game. In RL terminology, it’s a policy, a stateless function
+   mapping from observations to actions.
 
 ### Step 1: Define Multiple Players with LLM Backend
 
@@ -193,10 +196,15 @@ Arena.from_config("examples/rock-paper-scissors.json").launch_cli()
 ```
 
 ### General Custimization Guide
-1. **Arena**: Overriding Arena basically means one is going to write their own main loop. This can allow different interaction interfaces or drive games in a more automated manner, for example, running an online RL training loop
-2. **Environment**: A new environment corresponds to a new game, one can define the game dynamics here with hard-coded rules or a mixture of rules and language backend.
-3. **Backend**: If one needs to change the way of formatting observations (in terms of messages) into queries for the language model, the backend should be overridden.
-4. **Player**: By default, when a new observation is fed, players will query the language backend and return the response as actions. But one can also customize the way that players are interacting with the language backend.
+
+1. **Arena**: Overriding Arena basically means one is going to write their own main loop. This can allow different
+   interaction interfaces or drive games in a more automated manner, for example, running an online RL training loop
+2. **Environment**: A new environment corresponds to a new game, one can define the game dynamics here with hard-coded
+   rules or a mixture of rules and language backend.
+3. **Backend**: If one needs to change the way of formatting observations (in terms of messages) into queries for the
+   language model, the backend should be overridden.
+4. **Player**: By default, when a new observation is fed, players will query the language backend and return the
+   response as actions. But one can also customize the way that players are interacting with the language backend.
 
 ### Creating your Custom Environment
 
@@ -209,7 +217,8 @@ You can define your own environment by extending the `Environment` class. Here a
 3. Implement game mechanics in methods `step`
 4. Handle game states and rewards by implementing methods such as `reset`, `get_observation`, `is_terminal`,
    and `get_rewards`
-5. Develop role description prompts (and a global prompt if necessary) for players using CLI or Web UI and save them to a
+5. Develop role description prompts (and a global prompt if necessary) for players using CLI or Web UI and save them to
+   a
    config file.
 
 We provide [a detailed tutorial](docs/tutorials/create_your_environment.md) to demonstrate how to define a custom
@@ -284,12 +293,13 @@ Please ensure your code follows the existing style and structure.
 If you find ChatArena useful for your research, please cite our repository (our arxiv paper is coming soon):
 
 ```bibtex
-@misc{ChatArena,
+@software{ChatArena,
   author = {Yuxiang Wu, Zhengyao Jiang, Akbir Khan, Yao Fu, Laura Ruis, Edward Grefenstette, and Tim Rocktäschel},
   title = {ChatArena: Multi-Agent Language Game Environments for Large Language Models},
   year = {2023},
   publisher = {GitHub},
   journal = {GitHub repository},
+  version = {0.1},
   howpublished = {\url{https://github.com/chatarena/chatarena}},
 }
 ```
@@ -303,4 +313,10 @@ to get the latest updates.
 
 Happy chatting!
 
+## Sponsors
+
+We would like to thank our sponsors for supporting this project:
+
+- [SEQUOIA](https://www.sequoiacap.com/)
+- [Shixiang Capital](https://sx.shixiangcap.com/home) 
 
