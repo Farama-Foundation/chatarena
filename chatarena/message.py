@@ -4,8 +4,10 @@ import time
 from uuid import uuid1
 import hashlib
 
+# Preserved roles
+SYSTEM_NAME = "System"
+MODERATOR_NAME = "Moderator"
 
-SYSTEM_NAME="System"
 
 def _hash(input: str):
     hex_dig = hashlib.sha256(input.encode()).hexdigest()

@@ -38,6 +38,14 @@ class TestArenaCLI(TestCase):
         arena = Arena.from_config("examples/chatgpt_claude_ai_collaboration.json")
         arena.launch_cli(max_steps=6, interactive=False)
 
+    def test_cli_8(self):
+        arena = Arena.from_config("examples/interview.json")
+        arena.launch_cli(max_steps=16, interactive=False)
+
+    def test_cli_9(self):
+        arena = Arena.from_config("examples/chatgpt_claude_ai_collaboration.json")
+        arena.launch_cli(max_steps=6, interactive=False)
+
 
 if __name__ == "__main__":
     unittest.main()
