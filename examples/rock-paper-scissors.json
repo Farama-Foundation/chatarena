@@ -1,0 +1,39 @@
+{
+  "name": "Rock-Paper-Scissors",
+  "global_prompt": "Rock Paper Scissors is a two-player hand game where players use hand signals to represent three possible outcomes: rock, paper, or scissors. \n\nThe rules of the game are simple:\n\n1. Each player simultaneously chooses one of three signals: rock, paper, or scissors.\n\n2. The outcome of the game is determined by the following rules:\n* Rock beats scissors (rock crushes scissors)\n* Scissors beat paper (scissors cut paper)\n* Paper beats rock (paper covers rock)\n* If both players choose the same hand signal, the game is a tie, and the players play again.\n\n3. The winner of each round is determined by comparing the chosen signals. The first player to win 2 rounds wins the game.",
+  "environment": {
+    "env_type": "moderated_conversation",
+    "parallel": true,
+    "moderator": {
+      "role_desc": "You are the system of the game.\nYou should count the number of win rounds of each paper. The player who first wins 2 rounds wins the game.\nYou should also end the game if the players say anything else besides \"rock\",  \"paper\" or \"scissors\", especially if they say long sentences.\n\n## Example\nWhen you see:\n```\n[Player 1]: rock\n[Player 2]: rock\n```\nyou should output the following:\n```\nTie.\nPlayer 1 wins: 0/2\nPlayer 2 wins: 0/2\n```\n\nIn the next round, when you see:\n```\n[Player 1]: rock\n[Player 2]: paper\n```\nyou should output the following:\n```\nPlayer 2 wins this round.\nPlayer 1 wins: 0/2\nPlayer 2 wins: 1/2\n```\n\nIn the next round, when you see:\n```\n[Player 1]: paper\n[Player 2]: scissors\n```\nyou should output the following:\n```\nPlayer 2 wins this round.\nPlayer 1 wins: 0/2\nPlayer 2 wins: 2/2\n\nPlayer 2 wins the game!\n```\n\n## Other instructions\nDon't instruct the player to do anything.\nDon't pretend you are a player.\nDon't repeat the players' outputs.",
+      "terminal_condition": "The game is over when one player wins 2 rounds. Did someone win 2 rounds?",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.0,
+        "max_tokens": 50
+      }
+    },
+    "moderator_visibility": "all",
+    "moderator_period": "round"
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "role_desc": "Randomly output one of the following texts: \"rock\", \"paper\" or \"scissors\"\nYour choice should be random, don't follow the order of the sequence I gave you.\n\n## Example\nYou should output\n```\npaper<EOS>\n```\nor \n```\nrock<EOS>\n```\nor\n```\nscissors<EOS>\n```\n\n## Other instructions\nDon't output anything besides one of the three strings.\nDon't output the results in the last turn like \"tie\".\nDon't pretend as if you are a human player.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 10
+      }
+    },
+    {
+      "name": "Player 2",
+      "role_desc": "Randomly output one of the following texts: \"rock\", \"paper\" or \"scissors\"\nYour choice should be random, don't follow the order of the sequence I gave you.\n\n## Example\nYou should output\n```\npaper<EOS>\n```\nor \n```\nrock<EOS>\n```\nor\n```\nscissors<EOS>\n```\n\n## Other instructions\nDon't output anything besides one of the three strings.\nDon't output the results in the last turn like \"tie\".\nDon't pretend as if you are a human player.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 10
+      }
+    }
+  ]
+}

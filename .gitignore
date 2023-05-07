@@ -20,6 +20,7 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -49,7 +50,10 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+<<<<<<< HEAD
 cover/
+=======
+>>>>>>> c8585d9ea9ca5043d8ec786b798f6c85356bc96f
 
 # Translations
 *.mo
@@ -72,7 +76,10 @@ instance/
 docs/_build/
 
 # PyBuilder
+<<<<<<< HEAD
 .pybuilder/
+=======
+>>>>>>> c8585d9ea9ca5043d8ec786b798f6c85356bc96f
 target/
 
 # Jupyter Notebook
@@ -83,9 +90,13 @@ profile_default/
 ipython_config.py
 
 # pyenv
+<<<<<<< HEAD
 #   For a library or package, you might want to ignore these files since the code is
 #   intended to run in multiple environments; otherwise, check them in:
 # .python-version
+=======
+.python-version
+>>>>>>> c8585d9ea9ca5043d8ec786b798f6c85356bc96f
 
 # pipenv
 #   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
@@ -94,6 +105,7 @@ ipython_config.py
 #   install all needed dependencies.
 #Pipfile.lock
 
+<<<<<<< HEAD
 # poetry
 #   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
 #   This is especially recommended for binary packages to ensure reproducibility, and is more
@@ -110,6 +122,9 @@ ipython_config.py
 .pdm.toml
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
+=======
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+>>>>>>> c8585d9ea9ca5043d8ec786b798f6c85356bc96f
 __pypackages__/
 
 # Celery stuff
@@ -144,6 +159,7 @@ venv.bak/
 dmypy.json
 
 # Pyre type checker
+<<<<<<< HEAD
 .pyre/
 
 # pytype static type analyzer
@@ -158,3 +174,10 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+=======
+.DS_Store
+.pyre/
+.idea
+hf-spaces/
+etc/
+>>>>>>> c8585d9ea9ca5043d8ec786b798f6c85356bc96f

@@ -1,0 +1,28 @@
+{
+  "name": "Chess",
+  "global_prompt": "",
+  "environment": {
+    "env_type": "pettingzoo:chess",
+    "parallel": false
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "role_desc": "You are playing chess, you are playing white. Only output the starting and ending position of the chess piece.\nThe format is \"Move (x1, y1) to (x2, y2)\". The bottom left corner piece has a position (0, 0)\n\nFor example:\n\n```\nMove (4, 1) to (4, 3) <EOS>\n\n```",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 50
+      }
+    },
+    {
+      "name": "Player 2",
+      "role_desc": "You are playing chess. You are playing black pieces. Only output the starting and ending position of the chess piece.\nThe format is \"Move (x1, y1) to (x2, y2)\". The bottom left corner piece has a position (0, 0)\n\nFor example:\n\n```\nMove (4, 6) to (4, 4) <EOS>\n```",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 50
+      }
+    }
+  ]
+}

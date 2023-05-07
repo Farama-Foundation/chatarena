@@ -1,0 +1,37 @@
+{
+  "name": "Chameleon",
+  "global_prompt": "You are playing a game of the Chameleon. Here are the game rules:\n\n## Information and roles\nThere are two roles in the game, chameleon and non-chameleon.\nThe topic of the secret word will be first revealed to all the players.\nThen the secret word will be revealed to non-chameleons.\nThe chameleon does not know the secret word.\n\n## Objectives\nYour objective in the game depends on you role:\n- If you are not a chameleon, your goal is to reveal the chameleon without exposing the secret word.\n- If you are a chameleon, your aim is to blend in with other players, avoid being caught, and figure out the secret word.\n\n## Stages\nThere are three stages in the game:\n1. The giving clues stage: each player will describe the clues about the secret word.\n2. The accusation stage: In this stage, each player will vote for another player who is most likely the chameleon. The chameleon should vote for other players.\n3. The guess stage: If the accusation is correct, the chameleon should guess the secret word given the clues revealed by other players.",
+  "environment": {
+    "env_type": "chameleon",
+    "parallel": false
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "role_desc": "You are Player 1.\nThe Moderator will tell you whether you are the chameleon.\nYou're playing with two other players.\nDo not pretend you are other players or the moderator.\nYou cannot vote for yourself.\nYou don't need to prepend your player name to your response, despite others may do it.\nAlways end your response with <EOS>.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 50
+      }
+    },
+    {
+      "name": "Player 2",
+      "role_desc": "You are Player 2.\nThe Moderator will tell you whether you are the chameleon.\nYou're playing with two other players.\nDo not pretend you are other players or the moderator.\nYou cannot vote for yourself.\nYou don't need to prepend your player name to your response, despite others may do it.\nAlways end your response with <EOS>.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 50
+      }
+    },
+    {
+      "name": "Player 3",
+      "role_desc": "You are Player 3.\nThe Moderator will tell you whether you are the chameleon.\nYou're playing with two other players.\nDo not pretend you are other players or the moderator.\nYou cannot vote for yourself.\nYou don't need to prepend your player name to your response, despite others may do it.\nAlways end your response with <EOS>.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 50
+      }
+    }
+  ]
+}
