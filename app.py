@@ -378,4 +378,4 @@ Prompting multiple AI agents to play games in a language-driven environment.
     example_selector.change(update_components_from_example, set(all_components + [state]), all_components + [state])
 
 demo.queue()
-demo.launch(debug=DEBUG, port=8080)
+demo.launch(debug=DEBUG, server_port=8080)
