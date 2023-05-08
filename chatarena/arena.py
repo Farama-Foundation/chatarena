@@ -58,10 +58,10 @@ class Arena:
         timestep = None
         for i in range(self.invalid_actions_retry):  # try to take an action for a few times
             action = player(observation)  # take an action
-            if self.environment.check_action(action, player_name):
+            if self.environment.check_action(action, player_name):  # action is valid
                 timestep = self.environment.step(player_name, action)  # update the environment
                 break
-            else:
+            else:  # action is invalid
                 logging.warning(f"{player_name} made an invalid action {action}")
                 continue
 

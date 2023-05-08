@@ -71,8 +71,7 @@ class OpenAIChat(IntelligenceBackend):
         return response
 
     def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
-              request_msg: Message = None,
-              *args, **kwargs) -> str:
+              request_msg: Message = None, *args, **kwargs) -> str:
         """
         format the input and call the ChatGPT/GPT-4 API
         args:

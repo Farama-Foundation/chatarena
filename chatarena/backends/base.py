@@ -30,6 +30,11 @@ class IntelligenceBackend(Configurable):
               request_msg: Message = None, *args, **kwargs) -> str:
         raise NotImplementedError
 
+    @abstractmethod
+    async def async_query(self, agent_name: str, role_desc: str, history_messages: List[Message],
+                          global_prompt: str = None, request_msg: Message = None, *args, **kwargs) -> str:
+        raise NotImplementedError
+
     # reset the state of the backend
     def reset(self):
         if self.stateful:
