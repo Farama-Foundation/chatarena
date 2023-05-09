@@ -81,7 +81,6 @@ class PettingzooChess(Environment):
             raise ValueError(f"Invalid action: {action}")
 
         obs_dict, reward, terminal, truncation, info = self.env.last()
-        print(obs_dict["action_mask"])
         self.env.step(alphazero_move)
         self._terminal = terminal  # Update the terminal state
         reward = reward  # TODO: bug here, reward needs to be a dict
