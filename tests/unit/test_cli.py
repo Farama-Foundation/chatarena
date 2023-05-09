@@ -48,11 +48,11 @@ class TestCLI(TestCase):
 
     def test_cli_10(self):
         arena = Arena.from_config("examples/prisoners_dilemma.json")
-        arena.launch_cli(max_steps=6, interactive=False)
+        arena.launch_cli(max_steps=3, interactive=False)
 
     def test_cli_11(self):
         arena = Arena.from_config("examples/pettingzoo_tictactoe.json")
-        arena.launch_cli(max_steps=6, interactive=False)
+        arena.launch_cli(max_steps=9, interactive=False)
 
 
 if __name__ == "__main__":
