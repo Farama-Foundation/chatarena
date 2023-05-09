@@ -78,7 +78,7 @@ class Player(Agent):
 
     async def async_act(self, observation: List[Message]) -> str:
         """
-        Call the agents to generate a response (equivalent to taking an action).
+        Async call the agents to generate a response (equivalent to taking an action).
         """
         try:
             response = self.backend.async_query(agent_name=self.name, role_desc=self.role_desc,
