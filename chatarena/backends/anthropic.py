@@ -61,14 +61,14 @@ class Claude(IntelligenceBackend):
             role_desc: the description of the role of the agent
             env_desc: the description of the environment
             history_messages: the history of the conversation, or the observation for the agent
-            request_msg: the request for the chatGPT
+            request_msg: the request from the system to guide the agent's next response
         """
         all_messages = [(SYSTEM, global_prompt), (SYSTEM, role_desc)] if global_prompt else [(SYSTEM, role_desc)]
 
         for message in history_messages:
             all_messages.append((message.agent_name, message.content))
         if request_msg:
-            all_messages.append((request_msg.agent_name, request_msg.content))
+            all_messages.append((SYSTEM, request_msg.content))
 
         prompt = ""
         prev_is_human = False  # Whether the previous message is from human (in anthropic, the human is the user)
