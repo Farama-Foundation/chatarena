@@ -2,7 +2,7 @@ import re
 from pettingzoo.classic import tictactoe_v3
 
 from chatarena.environments.base import Environment, TimeStep
-from typing import List, Dict, Union
+from typing import List, Union
 
 from ..message import Message, MessagePool
 
@@ -118,25 +118,3 @@ class PettingzooTicTacToe(Environment):
     def print(self):
         obs_dict, reward, terminal, truncation, info = self.env.last()
         print(self.render_ansi(obs_dict["observation"]))
-
-
-def test_chess_environment():
-    player_names = ["player1", "player2"]
-    env = PettingzooTicTacToe(player_names)
-
-    env.reset()
-    assert env.get_next_player() == "player1"
-    env.print()
-
-    moves = ["X: (3, 1)", "O: (2, 2)", "X: (1, 2)", "O: (1, 1)"]
-
-    for i, move in enumerate(moves):
-        assert env.check_action(move, env.get_next_player())
-        timestep = env.step(env.get_next_player(), move)
-        print(timestep.reward)
-        print(timestep.terminal)
-        env.print()
-
-
-if __name__ == "__main__":
-    test_chess_environment()

@@ -50,5 +50,6 @@ class TestArenaCLI(TestCase):
         arena = Arena.from_config("examples/pettingzoo_tictactoe.json")
         arena.launch_cli(max_steps=6, interactive=False)
 
+
 if __name__ == "__main__":
     unittest.main()
