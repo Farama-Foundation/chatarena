@@ -35,8 +35,8 @@ It provides the following features:
 ## Getting Started
 
 **Try our online demo:**
-[![demo](https://img.shields.io/badge/Demo-Huggingface%F0%9F%A4%97%20Space-orange?style=flat)](https://chatarena-chatarena-demo.hf.space)
-[![Demo video](https://img.shields.io/badge/Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816979419)
+[![demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face%20Spaces-Online%20Demo-orange?style=flat)](https://chatarena-chatarena-demo.hf.space)
+[![Demo video](https://img.shields.io/badge/Vimeo-Demo%20Video-blue?logo=vimeo)](https://vimeo.com/816979419)
 
 ### Installation
 
@@ -80,7 +80,7 @@ This will launch a demo server for ChatArena, and you can access it from your br
 [//]: # (![webui screenshot]&#40;docs/images/webui.png&#41;)
 
 Check out this video to learn how to use Web
-UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816979419)
+UI: [![Webui demo video](https://img.shields.io/badge/Vimeo-WebUI%20Demo%20Video-blue?logo=vimeo)](https://vimeo.com/816979419)
 
 ## Basic Usage
 
