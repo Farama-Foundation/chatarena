@@ -15,7 +15,7 @@ import string
 
 CHAR_SET = string.printable
 
-class PettingZooCompatibilityV1(pettingzoo.AECEnv):
+class PettingZooCompatibilityV0(pettingzoo.AECEnv):
     """This compatibility wrapper converts a ChatArena environment into a PettingZoo environment.
 
     ChatArena (or Chat Arena) is a Multi-Agent Language Game Environments for LLMs. The goal is to develop communication and collaboration capabilities of AIs.
@@ -23,7 +23,7 @@ class PettingZooCompatibilityV1(pettingzoo.AECEnv):
 
     metadata = {
         "render_modes": ["human"],
-        "name": "PettingZooCompatibilityV1",
+        "name": "PettingZooCompatibilityV0",
         "is_parallelizable": False,
     }
 
