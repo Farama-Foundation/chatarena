@@ -49,8 +49,8 @@ class PettingzooTicTacToe(Environment):
         self._terminal = terminal
         return TimeStep(observation=observation, reward=reward, terminal=terminal)
 
-    def get_next_player(self) -> str:
-        return self.player_names[self.current_player]
+    def get_next_players(self) -> List[str]:
+        return [self.player_names[self.current_player]]
 
     def get_observation(self, player_name=None) -> List[Message]:
         if player_name is None:
@@ -69,7 +69,7 @@ class PettingzooTicTacToe(Environment):
         return self._terminal
 
     def step(self, player_name: str, action: str) -> TimeStep:
-        assert player_name == self.get_next_player(), f"Wrong player! It is {self.get_next_player()} turn."
+        assert player_name == self.get_next_players()[0], f"Wrong player! It is {self.get_next_players()[0]} turn."
 
         message = Message(agent_name=player_name, content=action, turn=self.turn)
         self.message_pool.append_message(message)

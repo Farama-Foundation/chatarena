@@ -12,6 +12,7 @@ class TimeStep(AttributedDict):
     observation: List[Message]
     reward: Dict[str, float]
     terminal: bool
+    terminate_reason: str = None
 
 
 class Environment(Configurable):
@@ -52,7 +53,7 @@ class Environment(Configurable):
         return len(self.player_names)
 
     @abstractmethod
-    def get_next_player(self) -> str:
+    def get_next_players(self) -> List[str]:
         """
         get name of the next player
         """

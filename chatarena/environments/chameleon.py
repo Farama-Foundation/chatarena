@@ -79,14 +79,14 @@ class Chameleon(Environment):
 
         self.reset()  # To initialize the game (select topic, code, chameleon)
 
-    def get_next_player(self) -> str:
+    def get_next_players(self) -> List[str]:
         """
         get the next player
         """
         if self._current_phase != "guess":
-            return self.player_names[self._next_player_idx]
+            return [self.player_names[self._next_player_idx]]
         else:
-            return self.chameleon_name
+            return [self.chameleon_name]
 
     def reset(self):
         """
@@ -202,7 +202,7 @@ class Chameleon(Environment):
 
         # self.message_pool.print()
         # print(f"Chameleon: {self.chameleon_name}, Code: {self.code}, Topic: {self.topic}")
-        assert player_name == self.get_next_player(), f"Wrong player! It is {self.get_next_player()} turn."
+        assert player_name in self.get_next_players(), f"Wrong player! It is {self.get_next_players()} turn."
         if self._current_phase == "give clues":
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             self.message_pool.append_message(message)

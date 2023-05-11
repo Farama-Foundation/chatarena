@@ -25,7 +25,7 @@ class TestArena(TestCase):
     def test_arena_2(self):
         arena = Arena.from_config("examples/nlp-classroom.json")
 
-        arena.run(num_steps=10)
+        arena.run(max_steps=10)
         arena.environment.print()
 
         self.assertTrue(True)

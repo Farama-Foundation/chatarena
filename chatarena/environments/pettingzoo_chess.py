@@ -50,8 +50,8 @@ class PettingzooChess(Environment):
         self._terminal = terminal
         return TimeStep(observation=observation, reward=reward, terminal=terminal)
 
-    def get_next_player(self) -> str:
-        return self.player_names[self.current_player]
+    def get_next_players(self) -> List[str]:
+        return [self.player_names[self.current_player]]
 
     def get_observation(self, player_name=None) -> List[Message]:
         if player_name is None:
@@ -70,7 +70,7 @@ class PettingzooChess(Environment):
         return self._terminal
 
     def step(self, player_name: str, action: str) -> TimeStep:
-        assert player_name == self.get_next_player(), f"Wrong player! It is {self.get_next_player()} turn."
+        assert player_name == self.get_next_players()[0], f"Wrong player! It is {self.get_next_players()[0]} turn."
         self._moderator_speak("\n" + self.env.render())
 
         message = Message(agent_name=player_name, content=action, turn=self.turn)
@@ -103,34 +103,3 @@ class PettingzooChess(Environment):
 
     def print(self):
         print(self.env.render())
-
-
-def test_chess_environment():
-    player_names = ["player1", "player2"]
-    env = PettingzooChess(player_names)
-
-    env.reset()
-    assert env.get_next_player() == "player1"
-    env.print()
-
-    # Move sequence: 1. e4 e5 2. Nf3 Nc6
-    moves = ["Move (4, 1) to (4, 3)", "Move (4, 6) to (4, 4)",
-             "Move (6, 0) to (5, 2)", "Move (1, 7) to (2, 5)"]
-
-    for i, move in enumerate(moves):
-        assert env.check_action(move, env.get_next_player())
-        timestep = env.step(env.get_next_player(), move)
-        print(timestep.reward)
-        print(timestep.terminal)
-        env.print()
-
-
-if __name__ == "__main__":
-    env = chess_v5.env()
-
-    # Test the conversion function with an example action string
-    action = "Move (0, 1) to (0, 3)"
-    alphazero_move = action_string_to_alphazero_format(action, 0)
-    print(alphazero_move)
-
-    test_chess_environment()

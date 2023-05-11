@@ -115,7 +115,7 @@ class ArenaCLI:
                 timestep = self.arena.step()
             except HumanBackendError as e:
                 # Handle human input and recover with the game update
-                human_player_name = env.get_next_player()
+                human_player_name = env.get_next_players()
                 if interactive:
                     human_input = prompt(
                         [('class:user_prompt', f"Type your input for {human_player_name}: ")],

@@ -40,11 +40,11 @@ class Conversation(Environment):
     def print(self):
         self.message_pool.print()
 
-    def get_next_player(self) -> str:
+    def get_next_players(self) -> List[str]:
         """
         get the next player
         """
-        return self.player_names[self._next_player_idx]
+        return [self.player_names[self._next_player_idx]]
 
     def get_observation(self, player_name=None) -> List[Message]:
         """

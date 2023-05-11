@@ -3,6 +3,7 @@ import uuid
 import json
 import csv
 import logging
+import asyncio
 
 from .agent import Player
 from .environments import Environment, TimeStep, load_environment
@@ -47,45 +48,77 @@ class Arena:
         self.uuid = uuid.uuid4()
         return self.current_timestep
 
+    async def _act_check_and_retry(self, player_name: str):
+        player = self.name_to_player[player_name]
+        observation = self.environment.get_observation(player_name)
+
+        for i in range(self.invalid_actions_retry):  # try to take an action for a few times
+            action = await player.async_act(observation)  # take an action
+            if self.environment.check_action(action, player.name):  # action is valid
+                return player.name, action
+
+        raise TooManyInvalidActions(
+            f"{player.name} has made invalid actions for {self.invalid_actions_retry} times. Terminating the game.")
+
     def step(self) -> TimeStep:
         """
         Take a step in the game: one player takes an action and the environment updates
         """
-        player_name = self.environment.get_next_player()
-        player = self.name_to_player[player_name]  # get the player object
-        observation = self.environment.get_observation(player_name)  # get the observation for the player
+        player_names: List[str] = self.environment.get_next_players()
 
-        timestep = None
-        for i in range(self.invalid_actions_retry):  # try to take an action for a few times
-            action = player(observation)  # take an action
-            if self.environment.check_action(action, player_name):  # action is valid
-                timestep = self.environment.step(player_name, action)  # update the environment
-                break
-            else:  # action is invalid
-                logging.warning(f"{player_name} made an invalid action {action}")
-                continue
+        async def _players_act():
+            return await asyncio.gather(*[self._act_check_and_retry(player_name) for player_name in player_names])
 
-        if timestep is None:  # if the player made invalid actions for too many times, terminate the game
-            warning_msg = f"{player_name} has made invalid actions for {self.invalid_actions_retry} times. Terminating the game."
-            logging.warning(warning_msg)
-            raise TooManyInvalidActions(warning_msg)
+        try:
+            player_actions = asyncio.run(_players_act())
+        except TooManyInvalidActions as e:
+            logging.error(e)
+            timestep = TimeStep(observation=self.environment.get_observation(),
+                                reward=self.environment.get_zero_rewards(),
+                                terminal=True,
+                                terminate_reason=str(e))
+        else:
+            timestep = self.environment.step(player_actions)
+            # TODO: refactor the step methods to take a list of actions
 
         return timestep
 
-    def next_is_human(self):
+    async def async_step(self) -> TimeStep:
         """
-        check if the next player is human
+        Asynchronously take a step in the game: one player takes an action and the environment updates
         """
-        player_name = self.environment.get_next_player()
-        player = self.name_to_player[player_name]
-        return isinstance(player.backend, Human)
+        player_names: List[str] = self.environment.get_next_players()
 
-    def run(self, num_steps: int = 1):
+        try:
+            player_actions = await asyncio.gather(
+                *[self._act_check_and_retry(player_name) for player_name in player_names])
+        except TooManyInvalidActions as e:
+            logging.error(e)
+            timestep = TimeStep(observation=self.environment.get_observation(),
+                                reward=self.environment.get_zero_rewards(),
+                                terminal=True,
+                                terminate_reason=str(e))
+        else:
+            timestep = self.environment.step(player_actions)
+            # TODO: refactor the step methods to take a list of actions
+
+        return timestep
+
+    def run(self, max_steps: int = 1):
         """
-        run the game for num_turns
+        run the game for max_steps
         """
-        for i in range(num_steps):
+        for i in range(max_steps):
             timestep = self.step()
+            if timestep.terminal:
+                break
+
+    async def async_run(self, max_steps: int = 1):
+        """
+        run the game for max_steps asynchronously
+        """
+        for i in range(max_steps):
+            timestep = await self.async_step()
             if timestep.terminal:
                 break
 
@@ -124,16 +157,20 @@ class Arena:
         """
         convert the arena to a config
         """
-        # return {
-        #     "players": [player.to_config() for player in self.players],
-        #     "environment": self.environment.to_config(),
-        #     "global_prompt": self.global_prompt
-        # }
         return ArenaConfig(
             players=[player.to_config() for player in self.players],
             environment=self.environment.to_config(),
             global_prompt=self.global_prompt
         )
+
+    def next_is_human(self):
+        """
+        check if the next player is human
+        """
+        # TODO: we need to handle human players inputs better
+        player_names: List[str] = self.environment.get_next_players()
+        # if any of the next players is human, return True
+        return any([isinstance(self.name_to_player[player_name].backend, Human) for player_name in player_names])
 
     def launch_cli(self, max_steps: int = None, interactive: bool = True):
         """

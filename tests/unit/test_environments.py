@@ -12,14 +12,14 @@ class TestEnvironments(TestCase):
         env = PettingzooTicTacToe(player_names)
 
         env.reset()
-        assert env.get_next_player() == "player1"
+        assert env.get_next_players()[0] == "player1"
         env.print()
 
         moves = ["X: (3, 1)", "O: (2, 2)", "X: (1, 2)", "O: (1, 1)"]
 
         for i, move in enumerate(moves):
-            assert env.check_action(move, env.get_next_player())
-            timestep = env.step(env.get_next_player(), move)
+            assert env.check_action(move, env.get_next_players()[0])
+            timestep = env.step(env.get_next_players()[0], move)
             print(timestep.reward)
             print(timestep.terminal)
             env.print()

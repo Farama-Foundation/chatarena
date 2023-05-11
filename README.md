@@ -139,7 +139,7 @@ from chatarena.arena import Arena
 arena = Arena(players=[player1, player2, player3],
               environment=env, global_prompt=environment_description)
 # Run the game for 10 steps
-arena.run(num_steps=10)
+arena.run(max_steps=10)
 
 # Alternatively, you can run your own main loop
 for _ in range(10):
@@ -165,7 +165,7 @@ Load `Arena` from a config file -- here we use `examples/nlp-classroom-3players.
 
 ```python
 arena = Arena.from_config("examples/nlp-classroom-3players.json")
-arena.run(num_steps=10)
+arena.run(max_steps=10)
 ```
 
 Run the game in an interactive CLI interface:
