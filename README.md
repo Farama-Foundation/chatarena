@@ -175,7 +175,7 @@ arena.launch_cli()
 ```
 
 Check out this video to learn how to use
-CLI: [![cli demo video](https://img.shields.io/badge/CLI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816989884)
+CLI: [![cli demo video](https://img.shields.io/badge/Vimeo-CLI%20Demo%20Video-blue?logo=vimeo)](https://vimeo.com/816989884)
 
 ## Advanced Usage
 
@@ -316,7 +316,7 @@ Happy chatting!
 
 ## Sponsors
 
-We would like to thank our sponsors for supporting this project:
+We would like to thank donations from:
 
 - [SEQUOIA](https://www.sequoiacap.com/)
 - [Shixiang Capital](https://sx.shixiangcap.com/home) 
