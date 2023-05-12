@@ -30,7 +30,7 @@ It provides the following features:
 - **User-friendly Interfaces**: it provides both Web UI and CLI to develop/prompt engineer your LLM agents to act in
   environments.
 
-![ChatArena Architecture](docs/images/chatarena_architecture.png)
+![ChatArena Architecture](https://raw.githubusercontent.com/chatarena/chatarena/main/docs/images/chatarena_architecture.png)
 
 ## Getting Started
 
