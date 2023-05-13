@@ -4,6 +4,7 @@ from tenacity import RetryError
 import logging
 import uuid
 from abc import abstractmethod
+import asyncio
 
 from .backends import IntelligenceBackend, load_backend
 from .message import Message, SYSTEM_NAME
@@ -56,7 +57,7 @@ class Player(Agent):
             global_prompt=self.global_prompt,
         )
 
-    def __call__(self, observation: List[Message]) -> str:
+    def act(self, observation: List[Message]) -> str:
         """
         Call the agents to generate a response (equivalent to taking an action).
         """
@@ -64,6 +65,25 @@ class Player(Agent):
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,
                                           request_msg=None)
+        except RetryError as e:
+            logging.warning(f"Agent {self.name} failed to generate a response. "
+                            f"Error: {e.last_attempt.exception()}. "
+                            f"Sending signal to end the conversation.")
+            response = SIGNAL_END_OF_CONVERSATION
+
+        return response
+
+    def __call__(self, observation: List[Message]) -> str:
+        return self.act(observation)
+
+    async def async_act(self, observation: List[Message]) -> str:
+        """
+        Async call the agents to generate a response (equivalent to taking an action).
+        """
+        try:
+            response = self.backend.async_query(agent_name=self.name, role_desc=self.role_desc,
+                                                history_messages=observation, global_prompt=self.global_prompt,
+                                                request_msg=None)
         except RetryError as e:
             logging.warning(f"Agent {self.name} failed to generate a response. "
                             f"Error: {e.last_attempt.exception()}. "

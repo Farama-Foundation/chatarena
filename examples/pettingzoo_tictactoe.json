@@ -1,0 +1,28 @@
+{
+  "name": "Tic-Tac-Toe",
+  "global_prompt": "You are playing ti c-tac-toe. \nTic-tac-toe is played on a three-by-three grid by two players, who alternately place the marks X and O in one of the nine spaces in the grid. \nThe player who succeeds in placing three of their marks in a horizontal, vertical, or diagonal row is the winner.\n\nIn the following example, the first player (X) wins the game in seven steps:\n1. [Player 1]: X: (1, 3)\n| _ |_| X |\n| _ | _ |_|\n| _ | _ |_|\n      \n2. [Player 2]: O: (1, 1)\n| O | _ | X |\n| _ | _ |_|\n| _ |_| _ |\n\n3. [Player 1]: X: (3, 1)\n| O | _ | X |\n| _ |_| _ |\n| X | _ |_|\n\n4.  [Player 2]: O: (2, 2)\n| O | _ | X |\n| _ | O | _ |\n| X | _ |_|\n\n5. [Player 1]: X: (3, 3)\n| O | _ | X |\n| _ | O | _ |\n| X | _ | X |\n\n6. [Player 2]: O: (2, 3)\n| O | _ | X |\n| _ | O |O|\n| X | _ | X |\n\n7. [Player 1]: X: (3, 2)\n| O | _ | X |\n| _ | O |O|\n| X |X| X |\n\n\nX plays first. Players will specify the position of the stone and the moderator will plot the board status.\nIf a position has been marked, future marks cannot be put in the same position.\nOnly the moderator can decide who wins. Players shouldn't declare they win.\nThe players interact with the game by specifying the position of the stones (x, y), where x indicates the row and y indicates the column, so (1, 1) is the top left corner and (3, 3) is the bottom right corner.",
+  "environment": {
+    "env_type": "pettingzoo:tictactoe",
+    "parallel": false
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "role_desc": "You play X.\nYou should only output X and the position of the move, for example: \"X: (1, 3)<EOS>\"\nThe position you put the mark on must be empty.\n\nYou shouldn't act as a moderator.\nDo not output \"Moderator\" and the board status.\nDon't say anything besides mark position.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 15
+      }
+    },
+    {
+      "name": "Player 2",
+      "role_desc": "You play O.\nYou should only output O and the position of the move, for example: \"O: (2, 3)<EOS>\"\nThe position you put the mark on must be empty.\n\nYou shouldn't act as a moderator.\nDo not output \"Moderator\" and the board status.\nDon't say anything besides mark position.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 15
+      }
+    }
+  ]
+}
