@@ -8,6 +8,7 @@ from chatarena.environments.base import Environment, TimeStep
 from chatarena.message import Message, MessagePool
 from chatarena.agent import SIGNAL_END_OF_CONVERSATION
 from chatarena.arena import Arena
+import re
 import json
 
 def is_json(myjson):
@@ -17,16 +18,37 @@ def is_json(myjson):
         return False
     return True
 
+def is_json_inside(text):
+    text = re.sub('\s+', ' ', text)
+    matches = re.findall(r'\{.*?\}', text)
+    for match in matches:
+        if is_json(match):
+            return True
+    return False
+
+DEFAULT_ORDER_BOOK = {
+    "bids": [
+        {"price":3.98, "amount": 862},
+        {"price":3.99, "amount": 562},
+        {"price":4.00, "amount": 431},
+    ],
+    "asks": [
+        {"price":4.02, "amount": 12},
+        {"price":4.03, "amount": 285},
+        {"price":4.04, "amount": 210},
+    ]
+}
+
 class Trading(Environment):
     type_name = "trading"
 
     def __init__(self, doc:str=""):
-        super().__init__(player_names=["researcher", "trader"])
+        super().__init__(player_names=["researcher", "manager", "trader"])
 
         self.doc = doc
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
-        self.phase = "research" # "research" or "discussion"
+        self.phase = "research" # "research", "discussion", "trading"
         self._terminal = False
         self.reset()
 
@@ -50,9 +72,11 @@ class Trading(Environment):
             return "researcher"
         elif self.phase == "discussion":
             if self.current_player == "researcher":
-                return "trader"
-            elif self.current_player == "trader":
+                return "manager"
+            elif self.current_player == "manager":
                 return "researcher"
+        elif self.phase == "trading":
+            return "trader"
         else:
             raise ValueError(f"Unknown phase {self.phase}")
 
@@ -76,8 +100,11 @@ class Trading(Environment):
         assert player_name == self.get_next_player(), f"Wrong player! It is {self.get_next_player()} turn."
         message = Message(agent_name=player_name, content=action, turn=self.turn)
         self.message_pool.append_message(message)
-        if is_json(action) and player_name=="trader":
+        if self.phase == "trading":
             self._terminal = True
+        if is_json_inside(action) and self.phase=="discussion" and player_name=="manager":
+            self.phase = "trading"
+            self._moderator_speak(f"Here's the order book please put orders \n{DEFAULT_ORDER_BOOK}", visible_to="trader")
 
         self.turn += 1
         self.current_player = self.get_next_player()
@@ -92,7 +119,7 @@ if __name__ == "__main__":
     After finishing the reading, you'll dicuss with a trader, helping him to make a decision.
     """
 
-    trader_role_description = """
+    manager_role_description = """
     You are managing a crypto fund.
     You are going to discuss with a researcher about a new cryptocurrency called impt.io whose market cap is 5.2 million dollars.
     Try to figure out all the information you need to make a decision.
@@ -104,13 +131,27 @@ if __name__ == "__main__":
     }
     """
 
+    trader_role_description = """
+    You are a trader for crypto-fund.
+    You are going to follow the "long" or "short" decision of your manager and put limit orders accorrding to the information in the order book.
+    If the decision is "long", you should put a buy order otherwise you should put a sell order. The price should always be in favor of the fund.
+    You should a output a json with the following format:
+    {
+    "orders": [
+        {"price": price of the order, "amount": amount to buy or sell. positive means buy, negative means sell},
+    ]
+    }   
+    """
+
     loader = OnlinePDFLoader("https://impt.io/assets/documents/whitepaper/en.pdf")
     doc = loader.load()
 
     researcher = Player(name="researcher", role_desc=researcher_role_description,
                          global_prompt="", backend=Claude(max_tokens=1024, model="claude-v1.3-100k"))
+    manager = Player(name="manager", role_desc=manager_role_description,
+                            global_prompt="", backend=OpenAIChat(max_tokens=1024, model="gpt-4"))
     trader = Player(name="trader", role_desc=trader_role_description,
-                            global_prompt="", backend=OpenAIChat())
+                            global_prompt="", backend=OpenAIChat(max_tokens=1024))
     env = Trading(doc=str(doc))
-    arena = Arena([researcher, trader], env)
+    arena = Arena([researcher, manager, trader], env)
     arena.launch_cli()
