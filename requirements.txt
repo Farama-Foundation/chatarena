@@ -1,10 +1,10 @@
-cohere==4.1.0
 openai==0.27.2
-anthropic==0.2.6
-gradio==3.20.0
-transformers>=4.0
+anthropic==0.2.8
+cohere==4.3.1
+transformers>=4.27.4
 tenacity==8.2.2
-rich>=13.3.1
-prompt_toolkit>=3.0
+gradio==3.20.0
+rich==13.3.3
+prompt_toolkit==3.0.38
 pettingzoo==1.22.3
-chess
+chess==1.9.4

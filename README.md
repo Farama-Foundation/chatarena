@@ -19,11 +19,14 @@
 
 ---
 
-ChatArena is a library that provides multi-agent language game environments and facilitates research about autonomous LLM agents and their social interactions.
+ChatArena is a library that provides multi-agent language game environments and facilitates research about autonomous
+LLM agents and their social interactions.
 It provides the following features:
 
-- **Abstraction**: it provides a flexible framework to define multiple players, environments and the interactions between them, based on Markov Decision Process.
-- **Language Game Environments**: it provides a set of environments that can help understanding, benchmarking or training agent LLMs.
+- **Abstraction**: it provides a flexible framework to define multiple players, environments and the interactions
+  between them, based on Markov Decision Process.
+- **Language Game Environments**: it provides a set of environments that can help understanding, benchmarking or
+  training agent LLMs.
 - **User-friendly Interfaces**: it provides both Web UI and CLI to develop/prompt engineer your LLM agents to act in
   environments.
 
@@ -70,7 +73,7 @@ To launch the demo on your local machine, you first need to git clone the reposi
 gradio app.py
 ```
 
-This will launch a demo server for ChatArena, and you can access it from your browser.
+This will launch a demo server for ChatArena, and you can access it from your browser (port 8080).
 
 [//]: # (The interface looks like this:)
 

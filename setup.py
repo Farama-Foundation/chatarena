@@ -1,13 +1,16 @@
 from setuptools import setup, find_packages
 
 _deps = [
-    "cohere>=4.1.0",
-    "openai>=0.27.0",
-    "gradio>=3.20.0",
-    "transformers>=4.0",
+    "openai==0.27.2",
+    "anthropic==0.2.6",
+    "cohere==4.3.1",
+    "transformers>=4.27.4",
     "tenacity==8.2.2",
-    "rich>=13.3.1",
-    "prompt_toolkit>=3.0"
+    "gradio==3.20.0",
+    "rich==13.3.3",
+    "prompt_toolkit==3.0.38",
+    "pettingzoo==1.22.3",
+    "chess==1.9.4",
 ]
 
 with open("README.md", "r") as f:
@@ -17,7 +20,7 @@ requirements = _deps
 
 setup(
     name="chatarena",
-    version="0.1.8.dev0",
+    version="0.1.9",
     author="Yuxiang Wu",
     author_email="yuxiang.cs@gmail.com",
     description="",
