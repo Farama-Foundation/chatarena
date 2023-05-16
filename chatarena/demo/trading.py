@@ -134,7 +134,9 @@ if __name__ == "__main__":
     trader_role_description = """
     You are a trader for crypto-fund.
     You are going to follow the "long" or "short" decision of your manager and put limit orders accorrding to the information in the order book.
-    If the decision is "long", you should put a buy order (amount be position) otherwise you should put a sell order (amount be negative). The price should always be in favor of the fund.
+    If the decision is "long", you should put a buy order (amount be position) otherwise you should put a sell order (amount be negative).
+    The price should always be in favor of the fund this means if the decision is "long", the price should be lower than the lowest ask price in the order book,
+    otherwise the price should be higher than highest ask price in the order book.
     You should a output a json with the following format:
     {
     "orders": [
