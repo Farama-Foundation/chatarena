@@ -9,7 +9,7 @@ _deps = [
     "gradio==3.20.0",
     "rich==13.3.3",
     "prompt_toolkit==3.0.38",
-    "pettingzoo==1.22.3",
+    "pettingzoo==1.23.0",
     "chess==1.9.4",
 ]
 
