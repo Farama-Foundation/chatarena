@@ -261,14 +261,14 @@ Prompting multiple AI agents to play games in a language-driven environment.
             arena = cur_state["arena"]
 
         try:
-            timestep = arena.step()
+            timestep = arena.step(,
         except HumanBackendError as e:
             # Handle human input and recover with the game update
             human_input = all_comps[human_input_textbox]
             if human_input == "":
                 timestep = None  # Failed to get human input
             else:
-                timestep = arena.environment.step(e.agent_name, human_input)
+                timestep = arena.environment.step(e.agent_name)
         except TooManyInvalidActions as e:
             timestep = arena.current_timestep
             timestep.observation.append(

@@ -69,11 +69,11 @@ class PettingzooChess(Environment):
     def is_terminal(self) -> bool:
         return self._terminal
 
-    def step(self, player_name: str, action: str) -> TimeStep:
-        assert player_name == self.get_next_players()[0], f"Wrong player! It is {self.get_next_players()[0]} turn."
+    def step(self, player_actions: str) -> TimeStep:
+        assert player_actions == self.get_next_players()[0], f"Wrong player! It is {self.get_next_players()[0]} turn."
         self._moderator_speak("\n" + self.env.render())
 
-        message = Message(agent_name=player_name, content=action, turn=self.turn)
+        message = Message(agent_name=player_actions, content=action, turn=self.turn)
         self.message_pool.append_message(message)
         # Convert the action to the AlphaZero format
         alphazero_move = action_string_to_alphazero_format(action, self.current_player)

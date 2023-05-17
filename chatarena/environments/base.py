@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from abc import abstractmethod
 
 from ..message import Message
@@ -74,14 +74,13 @@ class Environment(Configurable):
         pass
 
     @abstractmethod
-    def step(self, player_name: str, action: str) -> TimeStep:
+    def step(self, player_actions: List[Tuple[str, str]]) -> TimeStep:
         """
         step function that is called by the arena
         Args:
-            player_name: the name of the player
-            action: the action that the agents wants to take
+            player_actions: list of tuples consisted by player_name and corresponding action
         Returns:
-            timestep: the timestep that contains the observation, reward and done
+            timestep: the Timestep object that contains the observation, reward and terminal
         """
         pass
 
@@ -90,7 +89,7 @@ class Environment(Configurable):
         """
         check whether the action is valid
         """
-        return True
+        pass
 
     @abstractmethod
     def is_terminal(self) -> bool:

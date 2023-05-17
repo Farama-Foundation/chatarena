@@ -122,7 +122,7 @@ class ArenaCLI:
                         style=Style.from_dict({'user_prompt': 'ansicyan underline'})
                     )
                     # If not, the conversation does not stop
-                    timestep = env.step(human_player_name, human_input)
+                    timestep = env.step(human_player_name)
                 else:
                     raise e  # cannot recover from this error in non-interactive mode
             except TooManyInvalidActions as e:

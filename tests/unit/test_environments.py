@@ -19,7 +19,7 @@ class TestEnvironments(TestCase):
 
         for i, move in enumerate(moves):
             assert env.check_action(move, env.get_next_players()[0])
-            timestep = env.step(env.get_next_players()[0], move)
+            timestep = env.step(env.get_next_players()[0])
             print(timestep.reward)
             print(timestep.terminal)
             env.print()

@@ -1,11 +1,10 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 import random
 import re
 
 from .base import Environment, TimeStep
 from ..message import Message, MessagePool
 from ..agent import SIGNAL_END_OF_CONVERSATION
-from ..config import EnvironmentConfig
 
 DEFAULT_TOPIC_CODES = {
     "Fruits": [
@@ -50,6 +49,11 @@ DEFAULT_TOPIC_CODES = {
     ],
 }
 
+# Three stages of the game
+CLUE_STAGE = "clue"
+ACCUSE_STAGE = "accuse"
+GUESS_STAGE = "guess"
+
 
 class Chameleon(Environment):
     type_name = "chameleon"
@@ -73,7 +77,7 @@ class Chameleon(Environment):
         # Game states
         self._current_turn = 0
         self._next_player_idx = 0
-        self._current_phase = "give clues"  # "give clues", "accuse", "guess"
+        self._current_phase = CLUE_STAGE
         self._players_votes = None
         self._initialized = False
 
@@ -83,10 +87,14 @@ class Chameleon(Environment):
         """
         get the next player
         """
-        if self._current_phase != "guess":
+        if self._current_phase == CLUE_STAGE:
             return [self.player_names[self._next_player_idx]]
-        else:
+        elif self._current_phase == ACCUSE_STAGE:
+            return self.player_names
+        elif self._current_phase == GUESS_STAGE:
             return [self.chameleon_name]
+        else:
+            raise ValueError(f"Invalid phase {self._current_phase}")
 
     def reset(self):
         """
@@ -99,7 +107,7 @@ class Chameleon(Environment):
 
         self._current_turn = 0
         self._next_player_idx = 0
-        self._current_phase = "give clues"
+        self._current_phase = CLUE_STAGE
 
         self.message_pool.reset()
 
@@ -189,86 +197,93 @@ class Chameleon(Environment):
         if self.message_pool.last_message.content == SIGNAL_END_OF_CONVERSATION:
             return True
 
-    def step(self, player_name: str, action: str) -> TimeStep:
-        """
-        step function that is called by the arena
-        Args:
-            player_name: the name of the player that takes the action
-            action: the action that the agents wants to take
-        """
+    def check_action(self, action: str, player_name: str) -> bool:
+        # TODO: implement check_action
+        return True
+
+    def step(self, player_actions: List[Tuple[str, str]]) -> TimeStep:
         # If not initialized, reset the environment
         if not self._initialized:
             self.reset()
 
-        # self.message_pool.print()
-        # print(f"Chameleon: {self.chameleon_name}, Code: {self.code}, Topic: {self.topic}")
-        assert player_name in self.get_next_players(), f"Wrong player! It is {self.get_next_players()} turn."
-        if self._current_phase == "give clues":
+        for player_name, _ in player_actions:
+            if player_name not in self.get_next_players():
+                raise ValueError(f"Wrong player! It is {self.get_next_players()} turn.")
+
+        if self._current_phase == CLUE_STAGE:
+            assert len(player_actions) == 1, "In giving clue stage, the players take turns to speak."
+            player_name, action = player_actions[0]
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             self.message_pool.append_message(message)
 
             # Update the counters
-            self._current_turn += 1
             if self._next_player_idx < len(self.player_names) - 1:
                 self._next_player_idx += 1
-            else:
+            else:  # all players have given a clue and now entering second stage
                 self._next_player_idx = 0
-                self._current_phase = "accuse"
+                self._current_phase = ACCUSE_STAGE
                 self._moderator_speak("Now vote which of the other players (excluding yourself) is the chameleon. "
-                                      "You cannot vote for yourself.")
-                self._current_turn += 1
+                                      "You cannot vote for yourself. You should follow the format: I vote for <fill-in>")
+                # self._current_turn += 1
 
             timestep = TimeStep(observation=self.get_observation(),
                                 reward=self.get_zero_rewards(),
                                 terminal=False)  # Return all the messages
-        elif self._current_phase == "accuse":
+        elif self._current_phase == ACCUSE_STAGE:
+            for player_name, action in player_actions:
+                message = Message(agent_name=player_name, content=action, turn=self._current_turn,
+                                  visible_to=[player_name])
+                self.message_pool.append_message(message)
+
+                vote = self._text2vote(action)
+                if vote in self.player_names:
+                    self._players_votes[vote] += 1
+
+            # if self._next_player_idx < len(self.player_names) - 1:
+            #     self._next_player_idx += 1
+            #     rewards = self.get_zero_rewards()
+            #     terminal = False
+            # else:
+
+            accuse_correct, even_vote = True, False
+            max_vote_player = max(self._players_votes, key=self._players_votes.get)
+            # detach if other players has the same number of votes
+            for name, vote in self._players_votes.items():
+                if name != max_vote_player and vote == self._players_votes[max_vote_player]:
+                    accuse_correct, even_vote = False, True
+            if max_vote_player != self.chameleon_name:
+                accuse_correct = False
+
+            if not accuse_correct:
+                if even_vote:
+                    self._moderator_speak(f"There are even votes. The accusation does not stand. "
+                                          f"{self.chameleon_name} is the chameleon. "
+                                          f"{self.chameleon_name} won the game!")
+                else:
+                    self._moderator_speak(
+                        f"The most-voted player is {max_vote_player}. The accusation is incorrect. "
+                        f"{self.chameleon_name} is the chameleon. {self.chameleon_name} won the game!"
+                    )
+                rewards = self.get_rewards(chameleon_win=True)
+                terminal = True
+            else:
+                self._moderator_speak(f"The accusation is correct! {self.chameleon_name} is the chameleon! "
+                                      f"Now {self.chameleon_name} can guess the secret code. "
+                                      "You should say: I guess the code is \"...\"")
+                self._current_phase = "guess"
+                rewards = self.get_zero_rewards()
+                terminal = False
+            # self._current_turn += 1
+
+            timestep = TimeStep(observation=self.get_observation(), reward=rewards, terminal=terminal)
+        elif self._current_phase == GUESS_STAGE:
+            assert len(player_actions) == 1
+            player_name, action = player_actions[0]
+
             message = Message(agent_name=player_name, content=action, turn=self._current_turn,
                               visible_to=[player_name])
             self.message_pool.append_message(message)
-            vote = self._text2vote(action)
-            if vote in self.player_names:
-                self._players_votes[vote] += 1
 
-            if self._next_player_idx < len(self.player_names) - 1:
-                self._next_player_idx += 1
-                rewards = self.get_zero_rewards()
-                terminal = False
-            else:
-                # print(self._players_votes)
-                accuse_correct, even_vote = True, False
-                max_vote_player = max(self._players_votes, key=self._players_votes.get)
-                # detach if other players has the same number of votes
-                for name, vote in self._players_votes.items():
-                    if name != max_vote_player and vote == self._players_votes[max_vote_player]:
-                        accuse_correct, even_vote = False, True
-                if max_vote_player != self.chameleon_name:
-                    accuse_correct = False
-
-                if not accuse_correct:
-                    if even_vote:
-                        self._moderator_speak(f"There are even votes. The accusation does not stand. "
-                                              f"{self.chameleon_name} is the chameleon. {self.chameleon_name} won the game!")
-                    else:
-                        self._moderator_speak(
-                            f"The most-voted player is {max_vote_player}. The accusation is incorrect. "
-                            f"{self.chameleon_name} is the chameleon. {self.chameleon_name} won the game!"
-                        )
-                    rewards = self.get_rewards(chameleon_win=True)
-                    terminal = True
-                else:
-                    self._moderator_speak(f"The accusation is correct! {self.chameleon_name} is the chameleon! "
-                                          f"Now {self.chameleon_name} can guess the secret code. "
-                                          "You should say: I guess the code is \"...\"")
-                    self._current_phase = "guess"
-                    rewards = self.get_zero_rewards()
-                    terminal = False
-                self._current_turn += 1
-
-            timestep = TimeStep(observation=self.get_observation(), reward=rewards, terminal=terminal)
-        elif self._current_phase == "guess":
-            message = Message(agent_name=player_name, content=action, turn=self._current_turn,
-                              visible_to=player_name)
-            self.message_pool.append_message(message)
             if self._is_true_code(action):
                 self._moderator_speak(f"{player_name} guessed the code correctly! The secret word is {self.code}. "
                                       f"{self.chameleon_name} won!")
@@ -277,11 +292,11 @@ class Chameleon(Environment):
                 self._moderator_speak(f"{player_name} guessed the code wrong! The secret word is {self.code}. "
                                       f"{self.non_chameleon_names} won!")
                 rewards = self.get_rewards(chameleon_win=False)
-            timestep = TimeStep(observation=self.get_observation(),
-                                reward=rewards,
-                                terminal=True)
+            timestep = TimeStep(observation=self.get_observation(), reward=rewards, terminal=True)
         else:
-            raise ValueError(f"Unknown phase: {self._current_phase}")
+            raise ValueError(f"Invalid phase: {self._current_phase}")
+
+        self._current_turn += 1
 
         # Check if the player signals the end of the conversation
         if self.is_terminal():
