@@ -186,7 +186,7 @@ class Chameleon(Environment):
         check if the conversation is over
         """
         # If the last message is the signal, then the conversation is over
-        if self.message_pool.last_message.content == SIGNAL_END_OF_CONVERSATION:
+        if self.message_pool.last_message.content.startswith(SIGNAL_END_OF_CONVERSATION):
             return True
 
     def step(self, player_name: str, action: str) -> TimeStep:

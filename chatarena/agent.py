@@ -66,10 +66,9 @@ class Player(Agent):
                                           history_messages=observation, global_prompt=self.global_prompt,
                                           request_msg=None)
         except RetryError as e:
-            logging.warning(f"Agent {self.name} failed to generate a response. "
-                            f"Error: {e.last_attempt.exception()}. "
-                            f"Sending signal to end the conversation.")
-            response = SIGNAL_END_OF_CONVERSATION
+            err_msg = f"Agent {self.name} failed to generate a response. Error: {e.last_attempt.exception()}. Sending signal to end the conversation."
+            logging.warning(err_msg)
+            response = SIGNAL_END_OF_CONVERSATION + err_msg
 
         return response
 
@@ -85,10 +84,9 @@ class Player(Agent):
                                                 history_messages=observation, global_prompt=self.global_prompt,
                                                 request_msg=None)
         except RetryError as e:
-            logging.warning(f"Agent {self.name} failed to generate a response. "
-                            f"Error: {e.last_attempt.exception()}. "
-                            f"Sending signal to end the conversation.")
-            response = SIGNAL_END_OF_CONVERSATION
+            err_msg = f"Agent {self.name} failed to generate a response. Error: {e.last_attempt.exception()}. Sending signal to end the conversation."
+            logging.warning(err_msg)
+            response = SIGNAL_END_OF_CONVERSATION + err_msg
 
         return response
 
