@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 _deps = [
     "openai==0.27.2",
-    "anthropic==0.2.6",
+    "anthropic==0.2.8",
     "cohere==4.3.1",
     "transformers>=4.27.4",
     "tenacity==8.2.2",
