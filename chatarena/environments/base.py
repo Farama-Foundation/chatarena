@@ -100,3 +100,6 @@ class Environment(Configurable):
 
     def get_zero_rewards(self) -> Dict[str, float]:
         return {player_name: 0. for player_name in self.player_names}
+
+    def get_one_rewards(self) -> Dict[str, float]:
+        return {player_name: 1. for player_name in self.player_names}

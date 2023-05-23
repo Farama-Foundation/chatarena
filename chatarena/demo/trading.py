@@ -8,23 +8,8 @@ from chatarena.environments.base import Environment, TimeStep
 from chatarena.message import Message, MessagePool
 from chatarena.agent import SIGNAL_END_OF_CONVERSATION
 from chatarena.arena import Arena
-import re
-import json
+from chatarena.utils import is_json_inside
 
-def is_json(myjson):
-    try:
-        json_object = json.loads(myjson)
-    except ValueError as e:
-        return False
-    return True
-
-def is_json_inside(text):
-    text = re.sub('\s+', ' ', text)
-    matches = re.findall(r'\{.*?\}', text)
-    for match in matches:
-        if is_json(match):
-            return True
-    return False
 
 DEFAULT_ORDER_BOOK = {
     "bids": [
