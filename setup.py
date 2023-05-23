@@ -2,14 +2,14 @@ from setuptools import setup, find_packages
 
 _deps = [
     "openai==0.27.2",
-    "anthropic==0.2.6",
+    "anthropic==0.2.8",
     "cohere==4.3.1",
     "transformers>=4.27.4",
     "tenacity==8.2.2",
     "gradio==3.20.0",
     "rich==13.3.3",
     "prompt_toolkit==3.0.38",
-    "pettingzoo==1.22.3",
+    "pettingzoo==1.23.0",
     "chess==1.9.4",
 ]
 

@@ -10,30 +10,30 @@ from chatarena.agent import SIGNAL_END_OF_CONVERSATION
 from chatarena.arena import Arena
 from chatarena.utils import is_json_inside
 
-
 DEFAULT_ORDER_BOOK = {
     "bids": [
-        {"price":3.98, "amount": 862},
-        {"price":3.99, "amount": 562},
-        {"price":4.00, "amount": 431},
+        {"price": 3.98, "amount": 862},
+        {"price": 3.99, "amount": 562},
+        {"price": 4.00, "amount": 431},
     ],
     "asks": [
-        {"price":4.02, "amount": 12},
-        {"price":4.03, "amount": 285},
-        {"price":4.04, "amount": 210},
+        {"price": 4.02, "amount": 12},
+        {"price": 4.03, "amount": 285},
+        {"price": 4.04, "amount": 210},
     ]
 }
+
 
 class Trading(Environment):
     type_name = "trading"
 
-    def __init__(self, doc:str=""):
+    def __init__(self, doc: str = ""):
         super().__init__(player_names=["researcher", "manager", "trader"])
 
         self.doc = doc
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
-        self.phase = "research" # "research", "discussion", "trading"
+        self.phase = "research"  # "research", "discussion", "trading"
         self._terminal = False
         self.reset()
 
@@ -50,7 +50,6 @@ class Trading(Environment):
         return TimeStep(observation=observation,
                         reward=self.get_zero_rewards(),
                         terminal=self._terminal)
-
 
     def get_next_player(self) -> str:
         if self.phase == "research":
@@ -87,15 +86,17 @@ class Trading(Environment):
         self.message_pool.append_message(message)
         if self.phase == "trading":
             self._terminal = True
-        if is_json_inside(action) and self.phase=="discussion" and player_name=="manager":
+        if is_json_inside(action) and self.phase == "discussion" and player_name == "manager":
             self.phase = "trading"
-            self._moderator_speak(f"Here's the order book please put orders \n{DEFAULT_ORDER_BOOK}", visible_to="trader")
+            self._moderator_speak(f"Here's the order book please put orders \n{DEFAULT_ORDER_BOOK}",
+                                  visible_to="trader")
 
         self.turn += 1
         self.current_player = self.get_next_player()
         return TimeStep(observation=self.get_observation(self.get_next_player()),
                         reward=self.get_zero_rewards(),
                         terminal=self._terminal)
+
 
 if __name__ == "__main__":
     researcher_role_description = """
@@ -134,11 +135,11 @@ if __name__ == "__main__":
     doc = loader.load()
 
     researcher = Player(name="researcher", role_desc=researcher_role_description,
-                         global_prompt="", backend=Claude(max_tokens=1024, model="claude-v1.3-100k"))
+                        global_prompt="", backend=Claude(max_tokens=1024, model="claude-v1.3-100k"))
     manager = Player(name="manager", role_desc=manager_role_description,
-                            global_prompt="", backend=OpenAIChat(max_tokens=1024, model="gpt-4"))
+                     global_prompt="", backend=OpenAIChat(max_tokens=1024, model="gpt-4"))
     trader = Player(name="trader", role_desc=trader_role_description,
-                            global_prompt="", backend=OpenAIChat(max_tokens=1024))
+                    global_prompt="", backend=OpenAIChat(max_tokens=1024))
     env = Trading(doc=str(doc))
     arena = Arena([researcher, manager, trader], env)
     arena.launch_cli()
