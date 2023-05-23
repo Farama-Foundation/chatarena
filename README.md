@@ -112,7 +112,7 @@ arena.launch_cli()
 
 Check out this video to learn how to use
 CLI: [![cli demo video](https://img.shields.io/badge/CLI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816989884)
-A more detailed guide about how to run the main interaction loop with finner-grained control can be found [here](docs/devdoc/mainloop.md)
+A more detailed guide about how to run the main interaction loop with finer-grained control can be found [here](docs/devdoc/mainloop.md)
 
 ### General Custimization Advice
 
