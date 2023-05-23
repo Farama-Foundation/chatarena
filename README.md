@@ -4,7 +4,7 @@
   Author: Yuxiang Wu
   -->
 
-<h1 align="center"> 🏟 <span style="color:orange">ChatArena</span> </h1>
+<h1 align="center"> 🏟 <span style="color:orange"><a href="https://www.chatarena.org/">ChatArena</a></span> </h1>
 
 <h3 align="center">
     <p>Multi-Agent Language Game Environments for LLMs</p>
@@ -82,7 +82,7 @@ This will launch a demo server for ChatArena, and you can access it from your br
 Check out this video to learn how to use Web UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816979419)
 
 ## For Developers
-For a introduction to the chatArena framework, please refer to [this document](docs/devdoc/design.md).
+For a introduction to the ChatArena framework, please refer to [this document](docs/devdoc/design.md).
 Here we provide a compact guide on minimal setup to run the game and some general advice on customization. 
 
 ### Key Concepts
@@ -112,7 +112,7 @@ arena.launch_cli()
 
 Check out this video to learn how to use
 CLI: [![cli demo video](https://img.shields.io/badge/CLI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816989884)
-A more detailed guide about how to run the main interaction loop with finner-grained control can be found [here](docs/devdoc/mainloop.md)
+A more detailed guide about how to run the main interaction loop with finer-grained control can be found [here](docs/devdoc/mainloop.md)
 
 ### General Custimization Advice
 
