@@ -11,6 +11,7 @@ _deps = [
     "prompt_toolkit==3.0.38",
     "pettingzoo==1.22.3",
     "chess==1.9.4",
+    "bardapi==0.1.11",
 ]
 
 with open("README.md", "r") as f:
