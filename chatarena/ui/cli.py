@@ -8,7 +8,6 @@ import random
 
 from ..arena import Arena, TooManyInvalidActions
 from ..backends.human import HumanBackendError
-from ..agent import SIGNAL_END_OF_CONVERSATION
 
 ASCII_ART = r"""
 _________  .__               __      _____                                   
