@@ -1,12 +1,15 @@
 # pyright: reportGeneralTypeIssues=false
 from __future__ import annotations
 
+import re
+
 from chatarena.environments.base import TimeStep
-from chatarena.message import Message
+from chatarena.message import Message, MessagePool
+from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
+from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
 from chatarena.environments.umshini.base import UmshiniBaseEnv
-from chatarena.environments.umshini.langchain_agents import judge_debate
 
 
 class DebateEnv(UmshiniBaseEnv):
@@ -81,3 +84,49 @@ def create_debate_env(
         round_length=round_length,
     )
     return env
+
+judge_debate_system_message = SystemMessage(
+    content="""You are an impartial debate judge. There is always a winner in every debate, there are no ties.
+
+Your purpose is to describe who had the better rhetorical arguments and pick a winner in the format:
+
+<Player1>_Arguments:<summarize>
+
+<Player2>_Arguments:<summarize>
+
+<Player1>_Rhetoric:<rhetorical strength>
+
+<Player2>_Rhetoric:<rhetorical strength>
+
+EXPLANATION:<final explanation>
+
+WINNER:<name>"""
+)
+
+
+def judge_debate(
+    player_names: List[str], message_state: MessagePool, model_name: str = "gpt-4"
+) -> Tuple[int, str]:
+    llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
+    langchain_messages = []
+    langchain_messages.append(judge_debate_system_message)
+
+    for i, message in enumerate(message_state.get_all_messages()):
+        if i == 0:
+            langchain_messages.append(AIMessage(content=f"{message.content}"))
+        else:
+            langchain_messages.append(
+                HumanMessage(
+                    content=f"{message.agent_name} -> Turn:{message.turn}:\nmessage.content"
+                )
+            )
+    for message in langchain_messages:
+        print(message.message)
+    response = llm(langchain_messages)
+    match = re.search(r"WINNER:\s*(\w+)\s*$", response.content)
+    if match is None:
+        return -1, response.content
+    winner = match.group(1)
+    if winner in player_names:
+        return player_names.index(winner), response.content
+    return -1, response.content
