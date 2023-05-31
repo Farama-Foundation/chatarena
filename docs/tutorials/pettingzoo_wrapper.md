@@ -22,8 +22,8 @@ print("ACT SPACE: ", env.action_space(env.agent_selection))
 3. **Run the environment**
 ```python
 agent_player_mapping = {agent: player_obj
-                         for agent in env.possible_agents
-                         for player_obj in env._env.players}
+                        for agent in env.possible_agents
+                        for player_obj in env._env.players}
 
 for agent in env.agent_iter():
     observation, reward, termination, truncation, info = env.last()
