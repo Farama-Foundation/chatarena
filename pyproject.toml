@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chatarena"
-version = "0.1.9"
+version = "0.1.10"
 authors = [
     { name = "Yuxiang Wu", email = "yuxiang.cs@gmail.com" },
 ]
-description = "Multi-Agent Language Game Environments for LLMs"
+description = "Multi-Agent Language Game Environments for Large Language Models"
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
