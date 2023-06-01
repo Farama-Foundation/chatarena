@@ -63,13 +63,26 @@ To use GPT-3 as an LLM agent, set your OpenAI API key:
 export OPENAI_API_KEY="your_api_key_here"
 ```
 
+#### Optional Dependencies
+
+By default `pip install chatarena` will only install dependencies necessary for ChatArena's core functionalities.
+You can install optional dependencies with the following commands:
+```bash
+pip install chatarena[all_backends] # install dependencies for all supported backends: anthropic, cohere, huggingface, etc.
+pip install chatarena[all_envs]     # install dependencies for all environments, such as pettingzoo
+pip install chatarena[all]          # install all optional dependencies for full functionality
+```
+
 ### Launch the Demo Locally
 
 The quickest way to see ChatArena in action is via the demo Web UI.
-To launch the demo on your local machine, you first need to git clone the repository and install it from source
-(see above instruction). Then run the following command in the root directory of the repository:
+To launch the demo on your local machine, you first pip install chatarena with extra gradio dependency, then git clone
+this repository to your local folder, and finally call the `app.py` in the root directory of the repository:
 
 ```shell
+pip install chatarena[gradio]
+git clone https://github.com/chatarena/chatarena.git
+cd chatarena
 gradio app.py
 ```
 
@@ -82,10 +95,12 @@ This will launch a demo server for ChatArena, and you can access it from your br
 Check out this video to learn how to use Web UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816979419)
 
 ## For Developers
+
 For a introduction to the ChatArena framework, please refer to [this document](docs/devdoc/design.md).
-Here we provide a compact guide on minimal setup to run the game and some general advice on customization. 
+Here we provide a compact guide on minimal setup to run the game and some general advice on customization.
 
 ### Key Concepts
+
 1. **Arena**: Arena encapsulates an environment and a collection of players. It drives the main loop of the game and
    provides HCI utilities like webUI, CLI, configuration loading and data storage.
 2. **Environment**: The environment stores the game state and executes game logics to make transitions between game
@@ -97,6 +112,7 @@ Here we provide a compact guide on minimal setup to run the game and some genera
    mapping from observations to actions.
 
 ### Run the Game with Python API
+
 Load `Arena` from a config file -- here we use `examples/nlp-classroom-3players.json` in this repository as an example:
 
 ```python
@@ -112,7 +128,8 @@ arena.launch_cli()
 
 Check out this video to learn how to use
 CLI: [![cli demo video](https://img.shields.io/badge/CLI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816989884)
-A more detailed guide about how to run the main interaction loop with finer-grained control can be found [here](docs/devdoc/mainloop.md)
+A more detailed guide about how to run the main interaction loop with finer-grained control can be
+found [here](docs/devdoc/mainloop.md)
 
 ### General Custimization Advice
 
@@ -196,7 +213,8 @@ The objective in the game depends on the role of the player:
 A two-player chess game environment that uses the PettingZoo Chess environment.
 
 ### [PettingZooTicTacTeo](chatarena/environments/pettingzoo_tictactoe.py)
-A two-player tic-tac-toe game environment that uses the PettingZoo TicTacToe environment. Differing from the 
+
+A two-player tic-tac-toe game environment that uses the PettingZoo TicTacToe environment. Differing from the
 `Moderator Conversation` environment, this environment is driven by hard-coded rules rather than a LLM moderator.
 
 ## Contributing

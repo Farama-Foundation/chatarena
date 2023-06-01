@@ -16,12 +16,13 @@ gradio_requirements = ["gradio==3.20.0"]
 pettingzoo_requirements = ["pettingzoo==1.23.0", "chess==1.9.4"]
 
 all_backends = anthropic_requirements + cohere_requirements + hf_requirements
+all_envs = pettingzoo_requirements
 all_requirements = anthropic_requirements + cohere_requirements + hf_requirements + \
                    gradio_requirements + pettingzoo_requirements
 
 setup(
     name="chatarena",
-    version="0.1.10.1",
+    version="0.1.10.2",
     author="Yuxiang Wu",
     author_email="yuxiang.cs@gmail.com",
     description="",
