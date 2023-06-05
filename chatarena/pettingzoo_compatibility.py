@@ -15,6 +15,7 @@ import string
 
 CHAR_SET = string.printable
 
+
 class PettingZooCompatibilityV0(pettingzoo.AECEnv):
     """This compatibility wrapper converts a ChatArena environment into a PettingZoo environment.
 
@@ -28,14 +29,14 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
     }
 
     def __init__(
-        self,
-        env: chatarena.arena.Arena | None = None,
-        arena_name: str | None = None,
-        string_observation: bool | None = True,
-        max_turns: int | None = 25,
-        render_mode: str | None = None,
+            self,
+            env: chatarena.arena.Arena | None = None,
+            arena_name: str | None = None,
+            string_observation: bool | None = True,
+            max_turns: int | None = 25,
+            render_mode: str | None = None,
     ):
-        """Wrapper to convert a OpenSpiel environment into a PettingZoo environment.
+        """Wrapper to convert a ChatArena environment into a PettingZoo environment.
 
         Args:
             env (chatarena.arena.Arena): chatarena arena to wrap
@@ -52,11 +53,10 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         else:
             raise ValueError("Arena not specified, please us env or arena_name arguments.")
 
-        self._env.reset() # this resets the underlying arena as well as each player
+        self._env.reset()  # this resets the underlying arena as well as each player
 
         self.possible_agents = list(self._env.name_to_player.keys())
         self.name_to_player_mapping = self._env.name_to_player
-
 
         self.string_observation = string_observation
         self.max_turns = max_turns
@@ -66,7 +66,6 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         self.truncations = {}
         self.rewards = {}
         self.infos = {a: {} for a in self.possible_agents}
-
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent: AgentID):
@@ -128,12 +127,13 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         Returns:
             observation
         """
-        messages = self._env.environment.get_observation(agent) # this will only return the messages this agent can see
+        messages = self._env.environment.get_observation(agent)  # this will only return the messages this agent can see
         if len(messages) > 0:
             self.current_turn = messages[-1].turn
         else:
             self.current_turn = 0
-        new_messages = [m for m in messages if m.turn == self.current_turn] # we only send the current timestep messages
+        new_messages = [m for m in messages if
+                        m.turn == self.current_turn]  # we only send the current timestep messages
 
         # string observation
         if self.string_observation == True:
@@ -149,7 +149,6 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
 
         return observation
 
-
     def close(self):
         """close."""
         pass
@@ -161,7 +160,8 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
             self.current_turn = messages[-1].turn
         else:
             self.current_turn = 0
-        new_messages = [m for m in messages if m.turn == self.current_turn]  # we only send the current timestep messages
+        new_messages = [m for m in messages if
+                        m.turn == self.current_turn]  # we only send the current timestep messages
 
         # string observation
         if self.string_observation == True:
@@ -172,7 +172,6 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         # dict observation
         else:
             observation = {m.agent_name: m.content for m in new_messages}
-
 
         # get rewards
         rewards = timestep.reward
@@ -186,15 +185,16 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         # get info
         player_idx = self.possible_agents.index(self.agent_selection)
         player_obj = self._env.players[player_idx]
-        info = {"turn": self.current_turn, "global_prompt": player_obj.global_prompt, "agent_desc": player_obj.role_desc}
+        info = {"turn": self.current_turn, "global_prompt": player_obj.global_prompt,
+                "agent_desc": player_obj.role_desc}
 
         return observation, rewards, termination, truncation, info
 
     def reset(
-        self,
-        return_info: bool | None = False,
-        seed: int | None = None,
-        options: dict | None = None,
+            self,
+            return_info: bool | None = False,
+            seed: int | None = None,
+            options: dict | None = None,
     ):
         """reset.
 
@@ -239,8 +239,8 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
             action (str): action
         """
         if (
-            self.terminations[self.agent_selection]
-            or self.truncations[self.agent_selection]
+                self.terminations[self.agent_selection]
+                or self.truncations[self.agent_selection]
         ):
             return self._was_dead_step(action)
 
@@ -262,6 +262,3 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
 
         if self.render_mode == "human":
             self.render()
-
-
-
