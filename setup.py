@@ -25,7 +25,7 @@ all_requirements = anthropic_requirements + cohere_requirements + hf_requirement
 
 setup(
     name="chatarena",
-    version="0.1.10.2",
+    version="0.1.11",
     author="Yuxiang Wu",
     author_email="yuxiang.cs@gmail.com",
     description="",
