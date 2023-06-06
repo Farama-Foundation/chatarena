@@ -306,6 +306,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             self.infos[agent]["obs_dict"] = {
                 m.agent_name: m.content for m in new_messages
             }
+            self.infos[agent]["player_name"] = self.agent_selection
 
             # info: generate string of full chat log
             if self.string_observation is True:
@@ -355,7 +356,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
         # get truncation
         truncation = (
-            self.current_turn > self.max_turns
+            self.current_turn >= self.max_turns
         )  # pyright: ignore[reportGeneralTypeIssues]
 
         info = {}
@@ -364,6 +365,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         info["new_messages"] = new_messages
         info["all_messages"] = messages
         info["obs_dict"] = {m.agent_name: m.content for m in new_messages}
+        info["player_name"] = self.agent_selection
 
         # info: generate string of full chat log
         if self.string_observation is True:
@@ -443,6 +445,10 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         observation, reward, termination, truncation, info = self._unravel_timestep(
             timestep
         )
+
+        if truncation or termination:
+            reward = self._env.get_rewards()
+            info["new_messages"].append(info["all_messages"][-1]) # append the moderator's judgement to new messages for printing
 
         self.observations[agent] = observation
         self.rewards = reward
