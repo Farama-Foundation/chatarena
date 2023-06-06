@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from typing import List, Tuple
 
 from chatarena.environments.base import TimeStep
 from chatarena.message import Message, MessagePool
@@ -19,7 +20,7 @@ class DebateEnv(UmshiniBaseEnv):
         template="""Welcome to the debate game! The topic for today's debate is:
 "{moderator_prompt_input}"
 Rules:
-You will represent the position given to you.
+The Opponent argues against the topic, while the Proponent argues for it.
 Your first response should be an opening statement, followed by back and forth cross-examination.
 You are free to talk directly to your opponent during cross-examination.
 The cross examination phase should be short, and should be used to attack your opponents arguments, or defend your own.
@@ -105,7 +106,7 @@ WINNER:<name>"""
 
 
 def judge_debate(
-    player_names: List[str], message_state: MessagePool, model_name: str = "gpt-4"
+    player_names: List[str], message_state: MessagePool, model_name: str = "gpt-3.5-turbo"
 ) -> Tuple[int, str]:
     llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
     langchain_messages = []
@@ -117,11 +118,9 @@ def judge_debate(
         else:
             langchain_messages.append(
                 HumanMessage(
-                    content=f"{message.agent_name} -> Turn:{message.turn}:\nmessage.content"
+                    content=f"{message.agent_name} -> Turn:{message.turn}:\n{message.content}"
                 )
             )
-    for message in langchain_messages:
-        print(message.message)
     response = llm(langchain_messages)
     match = re.search(r"WINNER:\s*(\w+)\s*$", response.content)
     if match is None:

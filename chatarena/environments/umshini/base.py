@@ -137,7 +137,7 @@ class UmshiniBaseEnv(Environment):
 
     def get_next_player(self) -> str:
         """Get the name of the next player."""
-        return self.player_names[self._next_player_idx]
+        return self.agent_selector.next()
 
     def get_rewards(self) -> Dict[str, float]:
         """Use langchain to analyze the conversation, pick a winner, and set the reward."""
