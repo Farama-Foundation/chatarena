@@ -25,6 +25,7 @@ classifiers = [
 anthropic = ["anthropic>=0.2.8"]
 cohere = ["cohere>=4.3.1"]
 huggingface = ["transformers>=4.27.4"]
+bard = ["bardapi==0.1.11"]
 gradio = ["gradio==3.20.0"]
 pettingzoo = ["pettingzoo==1.23.0", "chess==1.9.4"]
 all_backends = ["anthropic>=0.2.8", "cohere>=4.3.1", "transformers>=4.27.4"]
