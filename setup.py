@@ -1,5 +1,11 @@
 from setuptools import setup, find_packages
 
+
+# remove duplicate requirements
+def remove_duplicate_requirements(requirements):
+    return list(set(requirements))
+
+
 with open("README.md", "r") as f:
     long_description = f.read()
 
@@ -14,14 +20,15 @@ anthropic_requirements = ["anthropic>=0.2.8"]
 cohere_requirements = ["cohere>=4.3.1"]
 hf_requirements = ["transformers>=4.27.4"]
 bard_requirements = ["bardapi==0.1.11"]
+langchain_requirements = ["langchain>=0.0.170"]
 gradio_requirements = ["gradio==3.20.0"]
 pettingzoo_requirements = ["pettingzoo==1.23.0", "chess==1.9.4"]
+umshini_requirements = ["pygame==2.4.0"] + pettingzoo_requirements + langchain_requirements
 
-
-all_backends = anthropic_requirements + cohere_requirements + hf_requirements + bard_requirements
-all_envs = pettingzoo_requirements
-all_requirements = anthropic_requirements + cohere_requirements + hf_requirements + \
-                   gradio_requirements + pettingzoo_requirements + bard_requirements
+all_backends = anthropic_requirements + cohere_requirements + hf_requirements + bard_requirements + \
+               langchain_requirements
+all_envs = remove_duplicate_requirements(pettingzoo_requirements + umshini_requirements)
+all_requirements = all_backends + all_envs + gradio_requirements
 
 setup(
     name="chatarena",
@@ -45,7 +52,9 @@ setup(
         "cohere": cohere_requirements,
         "huggingface": hf_requirements,
         "bard": bard_requirements,
+        "langchain": langchain_requirements,
         "pettingzoo": pettingzoo_requirements,
+        "umshini": umshini_requirements,
         "gradio": gradio_requirements,
         "all_backends": all_backends,
         "all": all_requirements,
