@@ -11,11 +11,11 @@ try:
     import openai
 except ImportError:
     is_openai_available = False
-    logging.warning("openai package is not installed")
+    # logging.warning("openai package is not installed")
 else:
     openai.api_key = os.environ.get("OPENAI_API_KEY")
     if openai.api_key is None:
-        logging.warning("OpenAI API key is not set. Please set the environment variable OPENAI_API_KEY")
+        # logging.warning("OpenAI API key is not set. Please set the environment variable OPENAI_API_KEY")
         is_openai_available = False
     else:
         is_openai_available = True
