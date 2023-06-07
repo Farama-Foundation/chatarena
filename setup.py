@@ -22,8 +22,8 @@ hf_requirements = ["transformers>=4.27.4"]
 bard_requirements = ["bardapi==0.1.11"]
 langchain_requirements = ["langchain>=0.0.135"]
 gradio_requirements = ["gradio==3.20.0"]
-pettingzoo_requirements = ["pettingzoo==1.23.0", "chess==1.9.4"]
-umshini_requirements = ["pygame==2.4.0"] + pettingzoo_requirements + langchain_requirements
+pettingzoo_requirements = ["pettingzoo[classic]>=1.23.1", "chess==1.9.4"]
+umshini_requirements = ["pettingzoo[classic]>=1.23.1", "pygame-ce>=2.2.1", "langchain>=0.0.135"]
 
 all_backends = anthropic_requirements + cohere_requirements + hf_requirements + bard_requirements + \
                langchain_requirements
@@ -32,7 +32,7 @@ all_requirements = all_backends + all_envs + gradio_requirements
 
 setup(
     name="chatarena",
-    version="0.1.12",
+    version="0.1.12.2",
     author="Yuxiang Wu",
     author_email="yuxiang.cs@gmail.com",
     description="",
