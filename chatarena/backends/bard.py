@@ -11,12 +11,12 @@ try:
     import bardapi
 except ImportError:
     is_bard_available = False
-    logging.warning("bard package is not installed")
+    # logging.warning("bard package is not installed")
 else:
     bard_api_key = os.environ.get('_BARD_API_KEY')
     if bard_api_key is None:
-        logging.warning(
-            "Bard API key is not set. Please set the environment variable _BARD_API_KEY")
+        # logging.warning(
+        #     "Bard API key is not set. Please set the environment variable _BARD_API_KEY")
         is_bard_available = False
     else:
         is_bard_available = True

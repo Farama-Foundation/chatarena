@@ -11,11 +11,11 @@ try:
     import anthropic
 except ImportError:
     is_anthropic_available = False
-    logging.warning("anthropic package is not installed")
+    # logging.warning("anthropic package is not installed")
 else:
     anthropic_api_key = os.environ.get('ANTHROPIC_API_KEY')
     if anthropic_api_key is None:
-        logging.warning("Anthropic API key is not set. Please set the environment variable ANTHROPIC_API_KEY")
+        # logging.warning("Anthropic API key is not set. Please set the environment variable ANTHROPIC_API_KEY")
         is_anthropic_available = False
     else:
         is_anthropic_available = True
