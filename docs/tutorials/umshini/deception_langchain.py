@@ -5,7 +5,7 @@ from chatarena.environments.umshini.agents import SimpleDeceptionDefender, Simpl
     PresidentDeceptionAttacker, DeceptionMultiRoleAgent
 from chatarena.environments.umshini import PettingZooCompatibilityV0
 
-env = PettingZooCompatibilityV0(env_name="deception", restricted_action="open the door", render_mode="text", round_length=2)
+env = PettingZooCompatibilityV0(env_name="deception", restricted_action="open the door", render_mode="text")
 env.reset()
 
 # Note: these agents are intended to be used as starting examples, and tend to suffer from hallucination if the game continues for many rounds

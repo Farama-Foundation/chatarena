@@ -320,6 +320,14 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     all_messages_string += f"[{m.agent_name}->all]: {m.content}\n"
                 self.infos[agent]["all_messages_string"] = all_messages_string
 
+            # info: environment specific information
+            if hasattr(self, "restricted_action"):
+                self.infos[agent]["restricted_action"] = self.restricted_action
+            if hasattr(self, "moderation_policy"):
+                self.infos[agent]["moderation_policy"] = self.moderation_policy
+            if hasattr(self, "topic"):
+                self.infos[agent]["topic"] = self.topic
+
             return observation
 
     def close(self):
@@ -379,6 +387,14 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 all_messages_string += f"[{m.agent_name}->all]: {m.content}\n"
             info["all_messages_string"] = all_messages_string
 
+        # environment specific information
+        if self.restricted_action is not None:
+            info["restricted_action"] = self.restricted_action
+        if self.moderation_policy is not None:
+            info["moderation_policy"] = self.moderation_policy
+        if self.topic is not None:
+            info["topic"] = self.topic
+
         return observation, rewards, termination, truncation, info
 
     def reset(
@@ -411,8 +427,9 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         self.rewards = self.initial_timestep.reward
         self.terminations = {agent: False for agent in self.agents}
         self.truncations = {agent: False for agent in self.agents}
+        # info keys: turn, new_messages, all_messages, obs_dict, player_name, all_messages_string, restricted_action, moderation_policy, topic
         self.infos = {
-            agent: {"turn": 0, "obs_dict": {}, "new_messages": [], "all_messages": []}
+            agent: {}
             for agent in self.possible_agents
         }
 

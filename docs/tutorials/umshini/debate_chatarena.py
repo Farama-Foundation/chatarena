@@ -4,8 +4,7 @@ from chatarena.backends import OpenAIChat
 from chatarena.environments.umshini.pettingzoo_wrapper import PettingZooCompatibilityV0
 from docs.tutorials.umshini.debate_chatarena_prompts import proponent_description, opponent_description
 
-topic = "Student loan debt should be forgiven"
-env = PettingZooCompatibilityV0(env_name="debate", topic=topic, render_mode="text", round_length=2)
+env = PettingZooCompatibilityV0(env_name="debate", topic="Student loan debt should be forgiven", render_mode="text")
 initial_obs, info = env.reset()
 
 
