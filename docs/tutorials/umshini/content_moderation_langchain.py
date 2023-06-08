@@ -9,8 +9,8 @@ env.reset()
 
 # Note: these agents are intended to be used as starting examples, and tend to suffer from hallucination if the game continues for many rounds
 # However, unlike the ChatArena agents, they can correct handle swapping of roles deterministically using string parsing
-langchain_agents = {env.possible_agents[0]: ContentMultiRoleAgent(env.possible_agents[0], env.moderation_policy, RuleSimplificationContentAttacker, SimpleContentDefender),
-                    env.possible_agents[1]: ContentMultiRoleAgent(env.possible_agents[1], env.moderation_policy, SimpleContentAttacker, SimpleContentDefender)}
+langchain_agents = {env.possible_agents[0]: ContentMultiRoleAgent(env.possible_agents[0], SimpleContentDefender, ),
+                    env.possible_agents[1]: ContentMultiRoleAgent(env.possible_agents[1], SimpleContentDefender, )}
 
 for agent in env.agent_iter():
     observation, reward, termination, truncation, info = env.last()
@@ -21,9 +21,10 @@ for agent in env.agent_iter():
     # Get ChatArena messages list from this timestep
     messages = info.get("new_messages")
     player_name = info.get("player_name")
+    moderation_policy = info.get("moderation_policy")
 
     try:
-        response = langchain_agents[agent].get_response([SystemMessage(content=messages[-1].content)])
+        response = langchain_agents[agent].get_response([SystemMessage(content=observation)], moderation_policy)
     except Exception as e:
         response = str(e).removeprefix("Could not parse LLM output: `").removesuffix("`")
     print("PLAYER NAMES: ", env._env.player_names)

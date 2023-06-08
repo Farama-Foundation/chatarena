@@ -1,4 +1,4 @@
-"""Simple example of running the Umshini Deception environment locally using ChatArena agents. This can be used to test agents before participating in a tournament."""
+"""Simple example of running the Umshini Deception environment locally using ChatArena agents. This can be used to test strategies before participating in a tournament."""
 from chatarena.agent import Player
 from chatarena.backends import OpenAIChat
 from chatarena.environments.umshini.pettingzoo_wrapper import PettingZooCompatibilityV0
