@@ -33,7 +33,7 @@ for agent in env.agent_iter():
     if termination or truncation:
         break
 
-    # Get ChatArena messages list from this timestep
+    # Optional: Use extra information encoded in info dict
     messages = info.get("new_messages")
     player_name = info.get("player_name") # this can be used to track which player's turn it is (see LangChain debate tutorial)
 

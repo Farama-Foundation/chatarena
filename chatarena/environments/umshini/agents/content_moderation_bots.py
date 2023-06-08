@@ -13,7 +13,7 @@ class ContentDefender:
     def __init__(self):
         pass
 
-    def get_response(self, messages, rules) -> str:
+    def get_response(self, messages, rules, name) -> str:
         return ""
 
     def reset(self):
@@ -24,7 +24,7 @@ class ContentAttacker:
     def __init__(self):
         pass
 
-    def get_response(self, messages, rules) -> str:
+    def get_response(self, messages, rules, name) -> str:
         return ""
 
     def reset(self):
@@ -32,13 +32,17 @@ class ContentAttacker:
 
 
 class SimpleContentDefender(ContentDefender):
-    def __init__(self, name):
+    def __init__(self):
         super().__init__()
-        self.name = name
+        self.name = None
         self.rules = None
         self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
 
-    def get_response(self, messages, rules) -> str:
+    def get_response(self, messages, rules, name) -> str:
+        # Infer name from the environment
+        if self.name is None:
+            assert name is not None, "Must pass in environment's current player name"
+            self.name = name
         # Infer the rules from the environment
         if self.rules is None:
             assert rules is not None, "Must pass in environment's restricted action"
@@ -70,9 +74,9 @@ Do not talk about tech companies in a negative way
 Do NOT talk about hitler in a positive way
 result:"""
 
-    def __init__(self, name):
+    def __init__(self):
         super().__init__()
-        self.name = name
+        self.name = None
         self.rules = None
         self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
 
@@ -81,7 +85,11 @@ result:"""
         response = completion_llm(self.simplify_rules_prompt + "\n" + rules)
         return response
 
-    def get_response(self, messages: List[Message], rules) -> str:
+    def get_response(self, messages: List[Message], rules, name) -> str:
+        # Infer name from the environment
+        if self.name is None:
+            assert name is not None, "Must pass in environment's current player name"
+            self.name = name
         # Infer the rules from the environment
         if self.rules is None:
             assert rules is not None, "Must pass in environment's restricted action"
@@ -107,14 +115,18 @@ result:"""
 
 
 class SimpleContentAttacker(ContentAttacker):
-    def __init__(self, name):
+    def __init__(self):
         super().__init__()
-        self.name = name
+        self.name = None
         self.rules = None
         self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
 
 
-    def get_response(self, messages: List[Message], rules) -> str:
+    def get_response(self, messages: List[Message], rules, name) -> str:
+        # Infer name from the environment
+        if self.name is None:
+            assert name is not None, "Must pass in environment's current player name"
+            self.name = name
         # Infer the rules from the environment
         if self.rules is None:
             assert rules is not None, "Must pass in environment's restricted action"
@@ -140,14 +152,19 @@ class SimpleContentAttacker(ContentAttacker):
 
 
 class ContentMultiRoleAgent:
-    def __init__(self, name, attacker: ContentAttacker, defender: ContentDefender):
-        self.red_team = attacker(name)
-        self.responder = defender(name)
-        self.name = name
+    def __init__(self, attacker: ContentAttacker, defender: ContentDefender):
+        self.red_team = attacker()
+        self.responder = defender()
+        self.name = None
         self.current_agent = None
         self.use_red_team = True
 
-    def get_response(self, messages, rules) -> str:
+    def get_response(self, messages, rules, name) -> str:
+        # Infer name from the environment
+        if self.name is None:
+            assert name is not None, "Must pass in environment's current player name"
+            self.name = name
+
         if self.current_agent is None:
             # first message in environment, determine which agent to use
             if f"{self.name} is attacking" in messages[0].content:
@@ -161,7 +178,7 @@ class ContentMultiRoleAgent:
             self.use_red_team = not self.use_red_team
             self.current_agent = self.red_team if self.use_red_team else self.responder
 
-        response = self.current_agent.get_response(messages, None)
+        response = self.current_agent.get_response(messages, rules, self.name)
         return response
 
     def reset(self):
