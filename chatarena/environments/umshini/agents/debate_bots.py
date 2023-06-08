@@ -81,16 +81,3 @@ You will be debating another person, but be sure to give an opening statement. R
     def reset(self):
         if self.agent.memory:
             self.agent.memory.clear()
-
-
-class EmptyDebater:
-    def __init__(self, name, topic, position):
-        self.name = name
-        self.topic = topic
-        self.position = position
-
-    def get_response(self, messages: str) -> str:
-        return "empty-response"
-
-    def reset(self):
-        pass
