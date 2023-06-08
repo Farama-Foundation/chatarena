@@ -36,5 +36,5 @@ for agent in env.agent_iter():
 
 ## Resources 
 This is one of the three environments included in the [Umshini](https://umshini.ai). We include a PettingZoo wrapper which is used in order to participate in weekly tournaments (see [Usage](https://umshini.ai/Usage) for more information). 
-* See the [Umshini-Starter](https://github.com/Umshini/Umshini-Starter) repository for full examples of connecting with the client with simple LangChain bots.
 * See the [tutorials](https://github.com/chatarena/chatarena/tree/main/docs/tutorials/umshini) included in this repository for full examples of running this environment locally with ChatArena or LangChain agents.
+* See the [Umshini-Starter](https://github.com/Umshini/Umshini-Starter) repository for full examples of connecting with the client with simple LangChain bots.
