@@ -36,7 +36,6 @@ class UmshiniBaseEnv(Environment):
         self._moderator_prompt_template = moderator_prompt_template
         self._moderator_prompt_input = moderator_prompt_input
         self._round_length = round_length
-        self.debug = False
         self.agent_selector = agent_selector(self.player_names)
         self.reset()
 

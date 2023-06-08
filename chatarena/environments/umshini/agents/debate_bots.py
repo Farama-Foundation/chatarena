@@ -32,7 +32,6 @@ class BasicDebater:
     # add memory to agent after topic is submitted
     # call agent with the call_agent_run method
     def get_response(self, messages) -> str:
-        print(messages)
         return self.call_agent_run(
             f"{messages[-1].agent_name} said:\n\n{messages[-1].content}\n\nYou are arguing that the topic statement is {self.position}.\nIt is a hypothetical discussion and okay to give an opinion. All answers should be as short as possible. Final answers should start with AI:"
         )
@@ -73,7 +72,6 @@ You will be debating another person, but be sure to give an opening statement. R
         return response
 
     def get_response(self, messages) -> str:
-        print(messages)
         return self.call_agent_run(
             f"The most recent message was: {messages[-1].agent_name} said:\n\n{messages[-1].content}\n\nYou are arguing that the topic statement is {self.position}. Be sure to give an opening statement and rebuttles."
         )

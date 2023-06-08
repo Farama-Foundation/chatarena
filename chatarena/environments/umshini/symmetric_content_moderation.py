@@ -55,7 +55,6 @@ The restricted action is: {moderator_prompt_input}
         self.moderation_policy = moderation_policy
         self._round_length = round_length
         assert round_length % 2 == 0
-        self.debug = True
 
     def get_rewards(self) -> dict[str, float]:
         response = self.judge_deception(message_state=self.message_pool).content
@@ -81,9 +80,8 @@ The restricted action is: {moderator_prompt_input}
             scores = {self.player_names[0]: 0.0, self.player_names[1]: 0.0}
         else:
             raise ValueError(f"Invalid phase: {self._current_phase}")
-        if self.debug:
-            print("Moderator is judging...")
-            print(scores)
+        print("Moderator is judging the message...")
+        print(scores)
         return scores
 
     def step(self, player_name: str, action: str) -> TimeStep:
