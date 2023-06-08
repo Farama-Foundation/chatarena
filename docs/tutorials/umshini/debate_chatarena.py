@@ -1,10 +1,11 @@
+"""Simple example of running the Umshini debate environment locally using ChatArena agents. This can be used to test agents before participating in a tournament."""
 from chatarena.agent import Player
 from chatarena.backends import OpenAIChat
 from chatarena.environments.umshini.pettingzoo_wrapper import PettingZooCompatibilityV0
 from docs.tutorials.umshini.debate_chatarena_prompts import proponent_description, opponent_description
 
 topic = "Student loan debt should be forgiven"
-env = PettingZooCompatibilityV0(env_name="debate", topic=topic, render_mode="text")
+env = PettingZooCompatibilityV0(env_name="debate", topic=topic, render_mode="text", round_length=2)
 initial_obs, info = env.reset()
 
 
@@ -33,8 +34,9 @@ for agent in env.agent_iter():
     if termination or truncation:
         break
 
-    # get ChatArena messages list from this timestep
+    # Get ChatArena messages list from this timestep
     messages = info.get("new_messages")
+    player_name = info.get("player_name") # this can be used to track which player's turn it is (see LangChain debate tutorial)
 
     # Use a basic ChatArena agent to generate a response
     chatarena_agent = agent_player_mapping[agent]

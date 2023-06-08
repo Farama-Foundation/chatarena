@@ -89,6 +89,8 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 self._env = create_debate_env(
                     topic=topic, player_names=player_names, round_length=round_length
                 )
+                self.topic = topic
+                self.max_turns = round_length
             elif env_name == "content_moderation":
                 assert (
                     moderation_policy is not None
@@ -98,6 +100,8 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     player_names=player_names,
                     round_length=round_length,
                 )
+                self.moderation_policy = moderation_policy
+                self.max_turns = round_length * 2
             elif env_name == "deception":
                 assert (
                     restricted_action is not None
@@ -107,6 +111,8 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     player_names=player_names,
                     round_length=round_length,
                 )
+                self.restricted_action = restricted_action
+                self.max_turns = round_length * 2
             else:
                 raise TypeError(
                     "Environment not found. Options: debate, content_moderation, deception"
@@ -122,7 +128,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         # Arguments
         self.string_observation = string_observation
         self.character_limit = character_limit
-        self.max_turns = round_length
         self.render_mode = render_mode
 
         if self.render_mode == "human":
@@ -272,7 +277,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             return None
         # Observations and infos are calculated in step(), but need to be calculated before the first step() call
         elif type(agent) != str:
-            print(agent)
+            raise TypeError("AgentID must be a string")
         elif self.observations[agent] != {}:
             return self.observations[agent]
         else:
@@ -445,10 +450,17 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         observation, reward, termination, truncation, info = self._unravel_timestep(
             timestep
         )
+        # add moderator messages to info so they are rendered
+        # some environments (e.g., debate) have the moderator announce the winner as the last message
+        if termination or truncation:
+            if info["all_messages"][-1].agent_name == "Moderator":
+                info["new_messages"].append(info["all_messages"][-2])
 
-        if truncation or termination:
-            reward = self._env.get_rewards()
-            info["new_messages"].append(info["all_messages"][-1]) # append the moderator's judgement to new messages for printing
+        # account for the moderator interjecting statements such as "roles are being swapped"
+        # first turn we already render the moderator's message, so we don't need to add the message here
+        if info["turn"] > 1:
+            if len(info["all_messages"]) > 1 and info["all_messages"][-2].agent_name == "Moderator":
+                info["new_messages"].append(info["all_messages"][-2])
 
         self.observations[agent] = observation
         self.rewards = reward

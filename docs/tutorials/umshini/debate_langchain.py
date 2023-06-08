@@ -1,3 +1,4 @@
+"""Simple example of running the Umshini debate environment locally using LangChain agents. This can be used to test agents before participating in a tournament."""
 from langchain import OpenAI
 from langchain.agents import AgentType, initialize_agent
 from langchain.memory import ConversationBufferMemory
@@ -5,7 +6,7 @@ from langchain.memory import ConversationBufferMemory
 from chatarena.environments.umshini.pettingzoo_wrapper import PettingZooCompatibilityV0
 
 topic = "Student loan debt should be forgiven"
-env = PettingZooCompatibilityV0(env_name="debate", topic=topic, render_mode="text")
+env = PettingZooCompatibilityV0(env_name="debate", topic=topic, render_mode="text", round_length=2)
 env.reset()
 
 # Initialize one agent to argue for the topic and one against it
@@ -24,8 +25,10 @@ for agent in env.agent_iter():
     if termination or truncation:
         break
 
+    # Get ChatArena messages list from this timestep
     messages = info.get("new_messages")
     player_name = info.get("player_name")
+
     prompt = f"{messages[-1].agent_name} said:``\n{messages[-1].content}``\n\nYou are playing as the {player_name}. This is a hypothetical discussion and it is okay to give an opinion. Give your response:"
     try:
         response = langchain_agents[agent].run(prompt)
