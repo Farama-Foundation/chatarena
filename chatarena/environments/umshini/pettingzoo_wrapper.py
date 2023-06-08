@@ -387,12 +387,12 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 all_messages_string += f"[{m.agent_name}->all]: {m.content}\n"
             info["all_messages_string"] = all_messages_string
 
-        # environment specific information
-        if self.restricted_action is not None:
+        # info: environment specific information
+        if hasattr(self, "restricted_action"):
             info["restricted_action"] = self.restricted_action
-        if self.moderation_policy is not None:
+        if hasattr(self, "moderation_policy"):
             info["moderation_policy"] = self.moderation_policy
-        if self.topic is not None:
+        if hasattr(self, "topic"):
             info["topic"] = self.topic
 
         return observation, rewards, termination, truncation, info

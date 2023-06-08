@@ -25,7 +25,7 @@ for agent in env.agent_iter():
     moderation_policy = info.get("moderation_policy")
 
     try:
-        response = langchain_agents[agent].get_response([SystemMessage(content=observation)], moderation_policy, moderation_policy)
+        response = langchain_agents[agent].get_response([SystemMessage(content=observation)], moderation_policy, player_name)
     except Exception as e:
         response = str(e).removeprefix("Could not parse LLM output: `").removesuffix("`")
     env.step(response)
