@@ -55,7 +55,7 @@ The judge will not interrupt.""",
             return {self.player_names[0]: 0, self.player_names[1]: 0}
 
     def step(self, player_name: str, action: str) -> TimeStep:
-        if self._current_turn <= self._round_length:
+        if self._current_turn < self._round_length -1:
             self._current_turn += 1
             self.message_pool.append_message(
                 Message(agent_name=player_name, content=action, turn=self._current_turn)
@@ -67,9 +67,14 @@ The judge will not interrupt.""",
             )
         else:
             self._current_phase = "end"
+            self.message_pool.append_message(
+                Message(agent_name=player_name, content=action, turn=self._current_turn)
+            )
+            # get the rewards before getting the observation, so that the moderator's final message is displayed (winner)
+            rews = self.get_rewards()
             return TimeStep(
                 observation=self.get_observation(),
-                reward=self.get_rewards(),
+                reward=rews,
                 terminal=True,
             )
 

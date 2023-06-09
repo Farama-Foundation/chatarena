@@ -126,6 +126,8 @@ class OpenAIChat(IntelligenceBackend):
 
         # Remove the agent name if the response starts with it
         response = re.sub(rf"^\s*\[.*]:", "", response).strip()
+        response = re.sub(rf"^\s*{re.escape(agent_name)}\s*:", "", response).strip()
+
         # Remove the tailing end of message token
         response = re.sub(rf"{END_OF_MESSAGE}$", "", response).strip()
 
