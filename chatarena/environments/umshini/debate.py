@@ -94,20 +94,14 @@ def create_debate_env(
     return env
 
 judge_debate_system_message = SystemMessage(
-    content="""You are an impartial debate judge. There is always a winner in every debate, there are no ties.
-
+        content="""You are an impartial debate judge. There is always a winner in every debate, there are no ties.
+Do not say: it is a close call. Do not say: it is a tie.
 Your purpose is to describe who had the better rhetorical arguments and pick a winner in the format:
-
 <Player1>_Arguments:<summarize>
-
 <Player2>_Arguments:<summarize>
-
 <Player1>_Rhetoric:<rhetorical strength>
-
 <Player2>_Rhetoric:<rhetorical strength>
-
 EXPLANATION:<final explanation>
-
 WINNER:<name>"""
 )
 
