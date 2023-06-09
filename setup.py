@@ -32,7 +32,7 @@ all_requirements = all_backends + all_envs + gradio_requirements
 
 setup(
     name="chatarena",
-    version="0.1.12.2",
+    version="0.1.12.3",
     author="Yuxiang Wu",
     author_email="yuxiang.cs@gmail.com",
     description="",
