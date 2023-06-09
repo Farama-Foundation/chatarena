@@ -1,10 +1,12 @@
 # pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
 from __future__ import annotations
 
 import re
+import os
 from typing import List, Tuple
 
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage, AIMessage
 
 from chatarena.environments import TimeStep
@@ -160,7 +162,11 @@ The restricted action is: {moderator_prompt_input}
         # get the message before "Moderator: roles are being swapped"
         message_to_judge = message_state.last_message
 
-        llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
+        llm = None
+        if os.getenv("OPENAI_API_TYPE") == "azure":
+            llm = AzureChatOpenAI(temperature=0, deployment_name=os.getenv("CHATARENA_AZURE_DEPLOYMENT_CHAT"))
+        else:
+            llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
         langchain_messages = [judge_deception_system_message]
         langchain_messages.append(
             HumanMessage(
