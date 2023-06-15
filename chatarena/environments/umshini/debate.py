@@ -1,12 +1,14 @@
 # pyright: reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false
 from __future__ import annotations
 
 import re
 from typing import List, Tuple
+import os
 
 from chatarena.environments.base import TimeStep
 from chatarena.message import Message, MessagePool
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import AzureChatOpenAI, ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
@@ -92,20 +94,14 @@ def create_debate_env(
     return env
 
 judge_debate_system_message = SystemMessage(
-    content="""You are an impartial debate judge. There is always a winner in every debate, there are no ties.
-
+        content="""You are an impartial debate judge. There is always a winner in every debate, there are no ties.
+Do not say: it is a close call. Do not say: it is a tie.
 Your purpose is to describe who had the better rhetorical arguments and pick a winner in the format:
-
 <Player1>_Arguments:<summarize>
-
 <Player2>_Arguments:<summarize>
-
 <Player1>_Rhetoric:<rhetorical strength>
-
 <Player2>_Rhetoric:<rhetorical strength>
-
 EXPLANATION:<final explanation>
-
 WINNER:<name>"""
 )
 
@@ -113,7 +109,11 @@ WINNER:<name>"""
 def judge_debate(
     player_names: List[str], message_state: MessagePool, model_name: str = "gpt-3.5-turbo"
 ) -> Tuple[int, str]:
-    llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
+    llm = None
+    if os.getenv("OPENAI_API_TYPE") == "azure":
+        llm = AzureChatOpenAI(temperature=0, deployment_name=os.getenv("CHATARENA_AZURE_DEPLOYMENT_CHAT"))
+    else:
+        llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
     langchain_messages = []
     langchain_messages.append(judge_debate_system_message)
 

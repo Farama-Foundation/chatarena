@@ -43,7 +43,10 @@ def load_examples():
     for example_file in example_files:
         with open(example_file, 'r') as f:
             example = json.load(f)
-            example_configs[example["name"]] = example
+            try:
+                example_configs[example["name"]] = example
+            except KeyError:
+                print(f"Example {example_file} is missing a name field. Skipping.")
     return example_configs
 
 
