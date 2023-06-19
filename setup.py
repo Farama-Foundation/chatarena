@@ -21,7 +21,7 @@ cohere_requirements = ["cohere>=4.3.1"]
 hf_requirements = ["transformers>=4.27.4"]
 bard_requirements = ["bardapi==0.1.11"]
 langchain_requirements = ["langchain>=0.0.135"]
-gradio_requirements = ["gradio==3.34.0"]
+gradio_requirements = ["gradio>=3.34.0"]
 pettingzoo_requirements = ["pettingzoo[classic]>=1.23.1", "chess==1.9.4"]
 umshini_requirements = ["pettingzoo[classic]>=1.23.1", "pygame-ce>=2.2.1", "langchain>=0.0.135"]
 
