@@ -23,7 +23,7 @@ bard_requirements = ["bardapi==0.1.11"]
 langchain_requirements = ["langchain>=0.0.135"]
 gradio_requirements = ["gradio>=3.34.0"]
 pettingzoo_requirements = ["pettingzoo[classic]>=1.23.1", "chess==1.9.4"]
-umshini_requirements = ["pettingzoo[classic]>=1.23.1", "pygame-ce>=2.2.1", "langchain>=0.0.135"]
+umshini_requirements = ["pettingzoo>=1.23.1", "pygame-ce>=2.2.1", "langchain>=0.0.135"]
 
 all_backends = anthropic_requirements + cohere_requirements + hf_requirements + bard_requirements + \
                langchain_requirements

@@ -82,7 +82,17 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 "ChatArena Environment or environment name must be specified"
             )
         elif env is not None:
+            # TODO: test that human rendering works with this
             self._env = env
+            if hasattr(env, "topic"):
+                self.topic = topic
+                self.max_turns = round_length
+            elif hasattr(env, "moderation_policy"):
+                self.moderation_policy = env.moderation_policy
+                self.max_turns = round_length * 2
+            elif hasattr(env, "restricted_action"):
+                self.restricted_action = env.restricted_action
+                self.max_turns = round_length * 2
         elif env_name is not None:
             if env_name == "debate":
                 assert topic is not None, "topic must be specified for debate env"
@@ -115,7 +125,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 self.max_turns = round_length * 2
             else:
                 raise TypeError(
-                    "Environment not found. Options: debate, content_moderation, deception"
+                    f"Environment not found: {env_name}. Options: debate, content_moderation, deception"
                 )
         else:
             raise TypeError(
@@ -216,7 +226,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             self.clock.tick(self.metadata["render_fps"])
 
             self.screen.fill("black")
-            font = pygame.Font(None, 32)  # default font
+            font = pygame.font.Font(None, 32)  # default font
             self.line_spacing = 10
             self.border_padding = 10
 
