@@ -338,6 +338,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             if new_messages is None:
                 raise Exception("New messages not found")
             else:
+                print("new message!")
                 for message in new_messages:
                     print(
                         f"[{message.agent_name}->{message.visible_to}]: {message.content}\n"

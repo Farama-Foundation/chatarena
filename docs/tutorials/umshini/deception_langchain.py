@@ -33,3 +33,14 @@ for agent in env.agent_iter():
     env.step(response)
 
 
+import os
+from chatarena.message import Message
+import json
+from typing import List
+msg_lst:List[Message] = env._env.message_pool.get_all_messages()
+print(msg_lst)
+os.chdir("env_logs")
+files = os.listdir()
+files = [f for f in files if f.startswith("deception") and f.endswith(".json")]
+formatted_state = [{"name":m.agent_name,"turn":m.turn,"text":m.content} for m in msg_lst]
+json.dump(formatted_state, open("deception"+str(len(files))+".json", "w"))

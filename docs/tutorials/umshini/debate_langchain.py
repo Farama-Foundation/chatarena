@@ -2,10 +2,9 @@
 from langchain import OpenAI
 from langchain.agents import AgentType, initialize_agent
 from langchain.memory import ConversationBufferMemory
-
 from chatarena.environments.umshini.pettingzoo_wrapper import PettingZooCompatibilityV0
 
-env = PettingZooCompatibilityV0(env_name="debate", topic="Student loan debt should be forgiven", render_mode="human", round_length=4)
+env = PettingZooCompatibilityV0(env_name="debate", topic="Student loan debt should be forgiven", render_mode="text", round_length=4)
 env.reset()
 
 # Initialize one agent to argue for the topic and one against it
@@ -35,3 +34,15 @@ for agent in env.agent_iter():
         response = str(e).removeprefix("Could not parse LLM output: `").removesuffix("`")
 
     env.step(response)
+
+import os
+from chatarena.message import Message
+import json
+from typing import List
+msg_lst:List[Message] = env._env.message_pool.get_all_messages()
+print(msg_lst)
+os.chdir("env_logs")
+files = os.listdir()
+files = [f for f in files if f.startswith("debate") and f.endswith(".json")]
+formatted_state = [{"name":m.agent_name,"turn":m.turn,"text":m.content} for m in msg_lst]
+json.dump(formatted_state, open("debate"+str(len(files))+".json", "w"))

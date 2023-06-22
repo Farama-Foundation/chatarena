@@ -86,9 +86,6 @@ The restricted action is: {moderator_prompt_input}
             scores = {self.player_names[0]: 0.0, self.player_names[1]: 0.0}
         else:
             raise ValueError(f"Invalid phase: {self._current_phase}")
-        if os.getenv("DEBUG").lower() == "true" or "y" in os.getenv("DEBUG").lower():
-            print("Moderator is judging the message...")
-            print(scores)
         return scores
 
     def step(self, player_name: str, action: str) -> TimeStep:
