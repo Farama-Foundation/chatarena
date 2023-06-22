@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import string
+import re
 
 import numpy as np
 import pygame
@@ -143,8 +144,8 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
         if self.render_mode in ["human", "rgb_array"]:
             pygame.init()
-            self.screen_width = 1026
-            self.screen_height = 1026
+            self.screen_width = 1024
+            self.screen_height = 1024
 
             if self.render_mode == "human":
                 self.screen = pygame.display.set_mode(
@@ -233,12 +234,15 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             self.line_spacing = 10
             self.border_padding = 10
 
-            # Iterate through messages and print sequentially, scrolling
+            obs_list = []
+
+            # --- Iterate through messages and print sequentially, scrolling ---
             all_messages = self.infos[self.agent_selection]["all_messages"]
             surfs = []
             heights = []
             color_map = dict(zip(self.all_agents, ["white", "green", "yellow"]))
-            for message in all_messages:
+            # For all messages besides the most recent, print at once
+            for message in all_messages[:-1]:
                 text = f"[{message.agent_name}->{message.visible_to} @ {message.turn}]: {message.content}"
                 text_surf = font.render(
                     text,
@@ -250,12 +254,8 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 surfs.append(text_surf)
                 heights.append(text_surf.get_height() + self.line_spacing)
 
-            # Removes the top messages if needed, to ensure text never goes off-screen
-            # Accounts for height of each message plus top and bottom padding
-            while sum(heights) + self.border_padding * 2 > self.screen_height:
-                surfs.pop(0)
-                heights.pop(0)
-
+            # TODO: after I added this, it seemed to cut the moderation off at the end, but may be a coincidence
+            # --- Render this frame ---
             # Pad rendering from the edges of the screen
             for i, surf in enumerate(surfs):
                 self.screen.blit(
@@ -263,8 +263,75 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 )
 
             if self.render_mode == "human":
-                self.clock.tick(self.metadata["render_fps"])
+                self.clock.tick(5 * self.metadata["render_fps"])
                 pygame.display.update()
+
+            elif self.render_mode == "rgb_array":
+                # Get observation from pygame surface for rgb_array
+                observation = np.array(pygame.surfarray.pixels3d(self.screen))
+                obs_list.append(np.transpose(observation, axes=(1, 0, 2)))
+
+
+            # --- Loop over the most recent message and print iteratively ---
+            if len(all_messages) > 1:
+                message = all_messages[-1]
+                text = f"[{message.agent_name}->{message.visible_to} @ {message.turn}]:"
+                text_surf = font.render(
+                    text,
+                    True,
+                    color_map[message.agent_name],
+                    None,  # or (0, 0, 0, 0) for example
+                    self.screen_width,
+                )
+                surfs.append(text_surf)
+                heights.append(text_surf.get_height() + self.line_spacing)
+
+                # Split words by spaces and iteratively print
+                words = re.sub(' ', ' \t', message.content).split('\t')
+                for char in words:
+                    text += char
+
+                    text_surf = font.render(
+                        text,
+                        True,
+                        color_map[message.agent_name],
+                        None,  # or (0, 0, 0, 0) for example
+                        self.screen_width,
+                    )
+
+                    # TODO: if we fix the below bug, this isn't necessary
+                    if len(surfs) > 1:
+                        surfs[-1] = text_surf
+                        heights[-1] = text_surf.get_height() + self.line_spacing
+                    else:
+                        surfs = [text_surf]
+                        heights = [text_surf.get_height() + self.line_spacing]
+
+                    # TODO: this seems to happen too many times, leaving the surfs list empty sometimes
+                    # Removes the top messages if needed, to ensure text never goes off-screen
+                    # Accounts for height of each message plus top and bottom padding
+                    while sum(heights) + self.border_padding * 2 > self.screen_height:
+                        surfs.pop(0)
+                        heights.pop(0)
+                        self.screen.fill("black") # remove the previous messages
+
+                    # --- Render this frame ---
+                    # Pad rendering from the edges of the screen
+                    for i, surf in enumerate(surfs):
+                        self.screen.blit(
+                            surf, (self.border_padding, self.border_padding + sum(heights[:i]))
+                        )
+
+                    if self.render_mode == "human":
+                        self.clock.tick(5 * self.metadata["render_fps"])
+                        pygame.display.update()
+
+                    elif self.render_mode == "rgb_array":
+                        # Get observation from pygame surface for rgb_array
+                        observation = np.array(pygame.surfarray.pixels3d(self.screen))
+                        obs_list.append(np.transpose(observation, axes=(1, 0, 2)))
+
+            return obs_list
 
         elif self.render_mode == "text":
             new_messages = self.infos[self.agent_selection].get("new_messages")
@@ -276,13 +343,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                         f"[{message.agent_name}->{message.visible_to}]: {message.content}\n"
                     )
 
-        observation = np.array(pygame.surfarray.pixels3d(self.screen))
-
-        return (
-            np.transpose(observation, axes=(1, 0, 2))
-            if self.render_mode == "rgb_array"
-            else None
-        )
 
     def observe(self, agent: AgentID) -> ObsType:
         """observe.
