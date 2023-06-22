@@ -5,6 +5,7 @@ from __future__ import annotations
 import functools
 import string
 
+import numpy as np
 import pygame
 from chatarena.environments import Environment
 from chatarena.environments.base import TimeStep
@@ -29,7 +30,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
     """
 
     metadata = {
-        "render_modes": ["human", "text"],
+        "render_modes": ["human", "rgb_array", "text"],
         "name": "PettingZooCompatibilityV0",
         "is_parallelizable": False,
         "render_fps": 2,
@@ -140,14 +141,18 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         self.character_limit = character_limit
         self.render_mode = render_mode
 
-        if self.render_mode == "human":
+        if self.render_mode in ["human", "rgb_array"]:
             pygame.init()
             self.screen_width = 1026
             self.screen_height = 1026
-            self.screen = pygame.display.set_mode(
-                (self.screen_width, self.screen_height)
-            )
-            self.clock = pygame.time.Clock()
+
+            if self.render_mode == "human":
+                self.screen = pygame.display.set_mode(
+                    (self.screen_width, self.screen_height)
+                )
+                self.clock = pygame.time.Clock()
+            elif self.render_mode == "rgb_array":
+                self.screen = pygame.Surface((self.screen_width, self.screen_height))
 
         # PettingZoo arguments
         self.possible_agents = list(self._env.player_names)
@@ -222,9 +227,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 "You must reset the environment using reset() before calling render()."
             )
 
-        if self.render_mode == "human":
-            self.clock.tick(self.metadata["render_fps"])
-
+        if self.render_mode in ["human", "rgb_array"] :
             self.screen.fill("black")
             font = pygame.font.Font(None, 32)  # default font
             self.line_spacing = 10
@@ -259,8 +262,9 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     surf, (self.border_padding, self.border_padding + sum(heights[:i]))
                 )
 
-            pygame.display.flip()
-            pygame.display.update()
+            if self.render_mode == "human":
+                self.clock.tick(self.metadata["render_fps"])
+                pygame.display.update()
 
         elif self.render_mode == "text":
             new_messages = self.infos[self.agent_selection].get("new_messages")
@@ -271,7 +275,14 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     print(
                         f"[{message.agent_name}->{message.visible_to}]: {message.content}\n"
                     )
-        pass
+
+        observation = np.array(pygame.surfarray.pixels3d(self.screen))
+
+        return (
+            np.transpose(observation, axes=(1, 0, 2))
+            if self.render_mode == "rgb_array"
+            else None
+        )
 
     def observe(self, agent: AgentID) -> ObsType:
         """observe.
@@ -342,8 +353,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
     def close(self):
         """close."""
-        if self.render_mode != "human":
-            return
         if self.screen is not None:
             pygame.quit()
             self.screen = None
@@ -507,7 +516,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         # Reset PettingZoo cumulative_rewards attribute (tracks accumulated rewards for an agent since its previous action)
         self._cumulative_rewards[agent] = 0
 
-        if self.render_mode is not None:
+        if self.render_mode == "human":
             self.render()
 
         # Get the next agent in PettingZoo, and iterate the underlying environment (used for reward calculations)

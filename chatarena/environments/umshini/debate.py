@@ -48,6 +48,7 @@ The judge will not interrupt.""",
     def get_rewards(self) -> dict[str, float]:
         """Uses langchain to analyze the conversation, pick a winner, and set the reward."""
         winner, winner_text = judge_debate(self.player_names, self.message_pool)
+        self._current_turn += 1
         self._moderator_speak(winner_text)
         if winner == 0:
             return {self.player_names[0]: 1, self.player_names[1]: 0}
@@ -68,6 +69,7 @@ The judge will not interrupt.""",
                 terminal=False,
             )
         else:
+            self._current_turn += 1
             self._current_phase = "end"
             self.message_pool.append_message(
                 Message(agent_name=player_name, content=action, turn=self._current_turn)
