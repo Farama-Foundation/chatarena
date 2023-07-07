@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chatarena"
-version = "0.1.8.dev0"
+version = "0.1.12.6"
 authors = [
     { name = "Yuxiang Wu", email = "yuxiang.cs@gmail.com" },
 ]
-description = "Multi-Agent Language Game Environments for LLMs"
+description = "Multi-Agent Language Game Environments for Large Language Models"
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
@@ -20,3 +20,17 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/chatarena/chatarena"
 "Bug Tracker" = "https://github.com/chatarena/chatarena/issues"
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.2.8"]
+cohere = ["cohere>=4.3.1"]
+huggingface = ["transformers>=4.27.4"]
+bard = ["bardapi==0.1.11"]
+langchain = ["langchain>=0.0.135"]
+gradio = ["gradio>=3.34.0"]
+pettingzoo = ["pettingzoo[classic]>=1.23.1"]
+umshini = ["pettingzoo>=1.23.1", "pygame-ce>=2.2.1", "langchain>=0.0.135"]
+all_backends = ["anthropic>=0.2.8", "cohere>=4.3.1", "transformers>=4.27.4", "bardapi==0.1.11", "langchain>=0.0.135"]
+all_envs = ["pettingzoo[classic]>=1.23.1", "pygame-ce>=2.2.1", "langchain>=0.0.135"]
+all = ["anthropic>=0.2.8", "cohere>=4.3.1", "transformers>=4.27.4", "gradio>=3.34.0", "pettingzoo>=1.23.1",
+    "pygame-ce>=2.2.1", "bardapi==0.1.11", "langchain>=0.0.135"]

@@ -1,0 +1,37 @@
+{
+  "name": "Prisoners' dilemma",
+  "global_prompt": "You are playing the Prisoner's Dilemma game. The Prisoner's Dilemma game involves two members of a criminal gang, A and B, who are arrested and held in separate cells. They have no way of communicating with each other. The main charge could result in a ten-year sentence for each of them, however, the police do not have enough evidence to convict them. The police plan to sentence both to two years for a lesser charge, but at the same time offer each prisoner a Faustian deal: if one of them confesses to the main charge, betraying the other, they will be pardoned and set free, while the other must serve the full sentence instead of the two-year term for the lesser charge. If both confess, then they both go to prison for 5 years instead. \n\nHere is an example of a Prisoner's Dilemma game, where A and B play as Prisoner 1 and Prisoner 2, respectively:\n\n[Prisoner 1]: A: Confess to the main charge\n[Prisoner 2]: B: Remain silent\nIn this example, A betrays B, A is pardoned and set free, while B is sentenced to ten years in prison.\nThe prisoners will interact in the game by either confessing to the main charge or remaining silent. The game's host will decide their fate based on the prisoners' choices. Only the host can determine the final outcome. Prisoners should not declare their own victory.\n\nPrisoners interact with the game by stating their decision (confess or be silent). In the game, confessing to the main charge represents betrayal, while remaining silent represents cooperation.",  "environment": {
+    "env_type": "moderated_conversation",
+    "parallel": true,
+    "moderator": {
+      "role_desc": "You are the system for the Prisoner's Dilemma game.\n\nYour task is to record the players' choices and output each player's decision.\n\nFor example, when a previous player says, \"A: Confess to the main charge,\"\nthis means A chooses to betray B.\nYou will output:\n\n```\nPrisoner 1 (A) choice: Confess to the main charge\nPrisoner 2 (B) choice: Unknown\n```\nIn the next step, another player says, \"B: Remain silent,\"\nthis means B chooses to cooperate.\nYou will output:\n\n```\nPrisoner 1 (A) choice: Confess to the main charge\nPrisoner 2 (B) choice: Remain silent\n```\n## Termination conditions\nDetermine their fate based on the prisoners' choices.\n\nIf both choose to betray, they will both be sentenced to five years in prison.\nIf one chooses to betray and the other chooses to cooperate, the betrayer will be released, and the cooperator will be sentenced to ten years in prison.\nIf both choose to cooperate, they will each be sentenced to two years in prison.\nYou should announce the game results after displaying the players' choices.\nFor example, you should output the following:\n```\nPrisoner 1 (A) choice: Confess to the main charge\nPrisoner 2 (B) choice: Remain silent\nResult: Prisoner 1 (A) is released, Prisoner 2 (B) is sentenced to ten years in prison!\nSince A betrayed B, A is released, and B is sentenced to ten years in prison. The game is over.\n```\n## Other instructions\nDo not write code.\nDo not instruct the players to do anything.\nDo not output \"host.\"",      "terminal_condition": "Is the game ended? Answer yes or no?",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.0,
+        "max_tokens": 100
+      }
+    },
+    "moderator_visibility": "Moderator",
+    "moderator_period": "round"
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "role_desc": "You play as Prisoner A.\n\nYour task is to choose to confess to the main charge (betray) or remain silent (cooperate). For example, you can output: \"A: Confess to the main charge.\"\n\nThe choice you make must be consistent with the game rules.\n\nYou should not play as the host.\nDo not output the \"host\" and the choices of other players.\nDo not say anything else except for your decision.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 20
+      }
+    },
+    {
+      "name": "Player 2",
+      "role_desc": "You play as Prisoner B.\n\nYour task is to choose to confess to the main charge (betray) or remain silent (cooperate). For example, you can output: \"A: Confess to the main charge.\"\n\nThe choice you make must be consistent with the game rules.\n\nYou should not play as the host.\nDo not output the \"host\" and the choices of other players.\nDo not say anything else except for your decision.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 20
+      }
+    }
+  ]
+}

@@ -4,7 +4,7 @@
   Author: Yuxiang Wu
   -->
 
-<h1 align="center"> 🏟 <span style="color:orange">ChatArena</span> </h1>
+<h1 align="center"> 🏟 <span style="color:orange"><a href="https://www.chatarena.org/">ChatArena</a></span> </h1>
 
 <h3 align="center">
     <p>Multi-Agent Language Game Environments for LLMs</p>
@@ -19,11 +19,14 @@
 
 ---
 
-ChatArena is a library that provides multi-agent language game environments and facilitates research about autonomous LLM agents and their social interactions.
+ChatArena is a library that provides multi-agent language game environments and facilitates research about autonomous
+LLM agents and their social interactions.
 It provides the following features:
 
-- **Abstraction**: it provides a flexible framework to define multiple players, environments and the interactions between them, based on Markov Decision Process.
-- **Language Game Environments**: it provides a set of environments that can help understanding, benchmarking or training agent LLMs.
+- **Abstraction**: it provides a flexible framework to define multiple players, environments and the interactions
+  between them, based on Markov Decision Process.
+- **Language Game Environments**: it provides a set of environments that can help understanding, benchmarking or
+  training agent LLMs.
 - **User-friendly Interfaces**: it provides both Web UI and CLI to develop/prompt engineer your LLM agents to act in
   environments.
 
@@ -60,26 +63,41 @@ To use GPT-3 as an LLM agent, set your OpenAI API key:
 export OPENAI_API_KEY="your_api_key_here"
 ```
 
+#### Optional Dependencies
+
+By default `pip install chatarena` will only install dependencies necessary for ChatArena's core functionalities.
+You can install optional dependencies with the following commands:
+```bash
+pip install chatarena[all_backends] # install dependencies for all supported backends: anthropic, cohere, huggingface, etc.
+pip install chatarena[all_envs]     # install dependencies for all environments, such as pettingzoo
+pip install chatarena[all]          # install all optional dependencies for full functionality
+```
+
 ### Launch the Demo Locally
 
 The quickest way to see ChatArena in action is via the demo Web UI.
-To launch the demo on your local machine, you first need to git clone the repository and install it from source
-(see above instruction). Then run the following command in the root directory of the repository:
+To launch the demo on your local machine, you first pip install chatarena with extra gradio dependency, then git clone
+this repository to your local folder, and finally call the `app.py` in the root directory of the repository:
 
 ```shell
+pip install chatarena[gradio]
+git clone https://github.com/chatarena/chatarena.git
+cd chatarena
 gradio app.py
 ```
 
-This will launch a demo server for ChatArena, and you can access it from your browser.
+This will launch a demo server for ChatArena, and you can access it from your browser (port 8080).
 
 [//]: # (The interface looks like this:)
 
 [//]: # (![webui screenshot]&#40;docs/images/webui.png&#41;)
 
-Check out this video to learn how to use Web
-UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816979419)
+Check out this video to learn how to use Web UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816979419)
 
-## Basic Usage
+## For Developers
+
+For a introduction to the ChatArena framework, please refer to [this document](docs/devdoc/design.md).
+Here we provide a compact guide on minimal setup to run the game and some general advice on customization.
 
 ### Key Concepts
 
@@ -93,70 +111,7 @@ UI: [![Webui demo video](https://img.shields.io/badge/WebUI%20Demo%20Video-Vimeo
 4. **Player**: The player is an agent that plays the game. In RL terminology, it’s a policy, a stateless function
    mapping from observations to actions.
 
-### Step 1: Define Multiple Players with LLM Backend
-
-```python
-from chatarena.agent import Player
-from chatarena.backends import OpenAIChat
-
-# Describe the environment (which is shared by all players)
-environment_description = "It is in a university classroom ..."
-
-# A "Professor" player
-player1 = Player(name="Professor", backend=OpenAIChat(),
-                 role_desc="You are a professor in ...",
-                 global_prompt=environment_description)
-# A "Student" player
-player2 = Player(name="Student", backend=OpenAIChat(),
-                 role_desc="You are a student who is interested in ...",
-                 global_prompt=environment_description)
-# A "Teaching Assistant" player
-player3 = Player(name="Teaching assistant", backend=OpenAIChat(),
-                 role_desc="You are a teaching assistant of the module ...",
-                 global_prompt=environment_description)
-```
-
-### Step 2: Create a Language Game Environment
-
-You can also create a language model-driven environment and add it to the ChatArena:
-
-```python
-from chatarena.environments.conversation import Conversation
-
-env = Conversation(player_names=[p.name for p in [player1, player2, player3]])
-```
-
-### Step 3: Run the Language Game using Arena
-
-`Arena` is a utility class to help you run language games:
-
-```python
-from chatarena.arena import Arena
-
-arena = Arena(players=[player1, player2, player3],
-              environment=env, global_prompt=environment_description)
-# Run the game for 10 steps
-arena.run(num_steps=10)
-
-# Alternatively, you can run your own main loop
-for _ in range(10):
-    arena.step()
-    # Your code goes here ...
-```
-
-You can easily save your gameplay history to file:
-
-```python
-arena.save_history(path=...)
-```
-
-and save your game config to file:
-
-```python
-arena.save_config(path=...)
-```
-
-### Other Utilities
+### Run the Game with Python API
 
 Load `Arena` from a config file -- here we use `examples/nlp-classroom-3players.json` in this repository as an example:
 
@@ -173,27 +128,10 @@ arena.launch_cli()
 
 Check out this video to learn how to use
 CLI: [![cli demo video](https://img.shields.io/badge/CLI%20Demo%20Video-Vimeo-blue?logo=vimeo)](https://vimeo.com/816989884)
+A more detailed guide about how to run the main interaction loop with finer-grained control can be
+found [here](docs/devdoc/mainloop.md)
 
-## Advanced Usage
-
-### `ModeratedConversation`: a LLM-driven Environment
-
-We support a more advanced environment called `ModeratedConversation` that allows you to **control the game dynamics
-using an LLM**.
-The moderator is a special player that controls the game state transition and determines when the game ends.
-For example, you can define a moderator that tracks the board status of a board game and ends the game when a player
-wins.
-You can try out our Tic-tac-toe and Rock-paper-scissors games to get a sense of how it works:
-
-```python
-# Tic-tac-toe example
-Arena.from_config("examples/tic-tac-toe.json").launch_cli()
-
-# Rock-paper-scissors example
-Arena.from_config("examples/rock-paper-scissors.json").launch_cli()
-```
-
-### General Custimization Guide
+### General Custimization Advice
 
 1. **Arena**: Overriding Arena basically means one is going to write their own main loop. This can allow different
    interaction interfaces or drive games in a more automated manner, for example, running an online RL training loop
@@ -226,7 +164,7 @@ using the [`Chameleon` environment](chatarena/environments/chameleon.py) as exam
 If you want to port an existing library's environment to ChatArena, check
 out [`PettingzooChess` environment](chatarena/environments/pettingzoo_chess.py) as an example.
 
-## List of Games and Environments
+## List of Environments
 
 ### [Conversation](chatarena/environments/conversation.py)
 
@@ -273,6 +211,11 @@ The objective in the game depends on the role of the player:
 ### [PettingZooChess](chatarena/environments/pettingzoo_chess.py)
 
 A two-player chess game environment that uses the PettingZoo Chess environment.
+
+### [PettingZooTicTacTeo](chatarena/environments/pettingzoo_tictactoe.py)
+
+A two-player tic-tac-toe game environment that uses the PettingZoo TicTacToe environment. Differing from the
+`Moderator Conversation` environment, this environment is driven by hard-coded rules rather than a LLM moderator.
 
 ## Contributing
 

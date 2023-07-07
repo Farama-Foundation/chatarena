@@ -1,12 +1,10 @@
-from pettingzoo.classic.chess.chess_utils import *
 import re
 from pettingzoo.classic import tictactoe_v3
 
 from chatarena.environments.base import Environment, TimeStep
-from typing import List, Dict, Union
+from typing import List, Union
 
 from ..message import Message, MessagePool
-from ..config import EnvironmentConfig
 
 
 def action_string_to_action(action: str) -> int:
@@ -23,13 +21,13 @@ def action_string_to_action(action: str) -> int:
     if column not in [1, 2, 3]:
         return -1
 
-    row = row-1
-    column = column-1
-    return row + column*3
+    row = row - 1
+    column = column - 1
+    return row + column * 3
 
 
-class PettingzooTicTacTeo(Environment):
-    type_name = "pettingzoo:tictacteo"
+class PettingzooTicTacToe(Environment):
+    type_name = "pettingzoo:tictactoe"
 
     def __init__(self, player_names: List[str], **kwargs):
         super().__init__(player_names=player_names, **kwargs)
@@ -112,34 +110,12 @@ class PettingzooTicTacTeo(Environment):
                 symbol = "_"
                 if column[self.current_player] == 1:
                     symbol = "X"
-                elif column[1-self.current_player] == 1:
+                elif column[1 - self.current_player] == 1:
                     symbol = "O"
-                string += " "+symbol+" |"
+                string += " " + symbol + " |"
             string += "\n"
         return string
 
     def print(self):
         obs_dict, reward, terminal, truncation, info = self.env.last()
         print(self.render_ansi(obs_dict["observation"]))
-
-def test_chess_environment():
-    player_names = ["player1", "player2"]
-    env = PettingzooTicTacTeo(player_names)
-
-    env.reset()
-    assert env.get_next_player() == "player1"
-    env.print()
-
-    # Move sequence: 1. e4 e5 2. Nf3 Nc6
-    moves = ["X: (3, 1)", "O: (2, 2)", "X: (1, 2)", "O: (1, 1)"]
-
-    for i, move in enumerate(moves):
-        assert env.check_action(move, env.get_next_player())
-        timestep = env.step(env.get_next_player(), move)
-        print(timestep.reward)
-        print(timestep.terminal)
-        env.print()
-
-
-if __name__ == "__main__":
-    test_chess_environment()

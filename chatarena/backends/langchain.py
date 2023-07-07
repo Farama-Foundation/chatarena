@@ -8,17 +8,17 @@ from .base import IntelligenceBackend
 from ..message import Message, SYSTEM_NAME, MODERATOR_NAME
 
 try:
-    import openai
+    from langchain.llms import OpenAI
 except ImportError:
-    is_openai_available = False
+    is_langchain_openai_available = False
     # logging.warning("openai package is not installed")
 else:
-    openai.api_key = os.environ.get("OPENAI_API_KEY")
-    if openai.api_key is None:
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if api_key is None:
         # logging.warning("OpenAI API key is not set. Please set the environment variable OPENAI_API_KEY")
-        is_openai_available = False
+        is_langchain_openai_available = False
     else:
-        is_openai_available = True
+        is_langchain_openai_available = True
 
 # Default config follows the OpenAI playground
 DEFAULT_TEMPERATURE = 0.7
@@ -30,7 +30,7 @@ STOP = ("<|endoftext|>", END_OF_MESSAGE)  # End of sentence token
 BASE_PROMPT = f"The messages always end with the token {END_OF_MESSAGE}."
 
 
-class OpenAIChat(IntelligenceBackend):
+class LangChainOpenAIChat(IntelligenceBackend):
     """
     Interface to the ChatGPT style model with system, user, assistant roles separation
     """
@@ -47,7 +47,7 @@ class OpenAIChat(IntelligenceBackend):
             model: the model to use
             merge_other_agents_as_one_user: whether to merge messages from other agents as one user message
         """
-        assert is_openai_available, "openai package is not installed or the API key is not set"
+        assert is_langchain_openai_available, "langchain package is not installed or the API key is not set"
         super().__init__(temperature=temperature, max_tokens=max_tokens, model=model,
                          merge_other_agents_as_one_user=merge_other_agents_as_one_user, **kwargs)
 
@@ -55,19 +55,11 @@ class OpenAIChat(IntelligenceBackend):
         self.max_tokens = max_tokens
         self.model = model
         self.merge_other_agent_as_user = merge_other_agents_as_one_user
+        self.llm = OpenAI(model_name=model, temperature=temperature, max_tokens=max_tokens, openai_api_key=api_key)
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, messages):
-        completion = openai.ChatCompletion.create(
-            model=self.model,
-            messages=messages,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            stop=STOP
-        )
-
-        response = completion.choices[0]['message']['content']
-        response = response.strip()
+        response = self.llm(prompt=messages, stop=STOP)
         return response
 
     def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
