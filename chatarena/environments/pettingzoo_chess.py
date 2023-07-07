@@ -84,7 +84,8 @@ class PettingzooChess(Environment):
         print(obs_dict["action_mask"])
         self.env.step(alphazero_move)
         self._terminal = terminal  # Update the terminal state
-        reward = reward  # TODO: bug here, reward needs to be a dict
+        reward = {self.player_names[self.current_player]: reward,
+                  self.player_names[1 - self.current_player]: 0}
 
         self.current_player = 1 - self.current_player
         self.turn += 1

@@ -84,7 +84,8 @@ class PettingzooTicTacTeo(Environment):
         obs_dict, reward, terminal, truncation, info = self.env.last()
 
         self._terminal = terminal  # Update the terminal state
-        reward = reward  # TODO: bug here, reward needs to be a dict
+        reward = {self.player_names[self.current_player]: reward,
+                  self.player_names[1 - self.current_player]: 0}
 
         self.current_player = 1 - self.current_player
         self.turn += 1
