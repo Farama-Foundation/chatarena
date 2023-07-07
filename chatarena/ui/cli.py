@@ -8,7 +8,6 @@ import random
 
 from ..arena import Arena, TooManyInvalidActions
 from ..backends.human import HumanBackendError
-from ..agent import SIGNAL_END_OF_CONVERSATION
 
 ASCII_ART = r"""
 _________  .__               __      _____                                   
@@ -23,6 +22,11 @@ visible_colors = [color for color in ANSI_COLOR_NAMES.keys() if
                   color not in ["black", "white", "red", "green"] and "grey" not in color]
 
 MAX_STEPS = 5
+
+import logging
+
+# Set logging level to ERROR
+logging.getLogger().setLevel(logging.ERROR)
 
 
 class ArenaCLI:
@@ -116,7 +120,8 @@ class ArenaCLI:
                         [('class:user_prompt', f"Type your input for {human_player_name}: ")],
                         style=Style.from_dict({'user_prompt': 'ansicyan underline'})
                     )
-                    env.step(human_player_name, human_input)
+                    # If not, the conversation does not stop
+                    timestep = env.step(human_player_name, human_input)
                 else:
                     raise e  # cannot recover from this error in non-interactive mode
             except TooManyInvalidActions as e:

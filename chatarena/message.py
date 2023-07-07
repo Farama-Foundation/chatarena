@@ -4,6 +4,10 @@ import time
 from uuid import uuid1
 import hashlib
 
+# Preserved roles
+SYSTEM_NAME = "System"
+MODERATOR_NAME = "Moderator"
+
 
 def _hash(input: str):
     hex_dig = hashlib.sha256(input.encode()).hexdigest()
@@ -30,7 +34,7 @@ class Message:
 class MessagePool():
     """
     A message pool to manage the messages. This allows a unified treatment of the visibility of the messages.
-    Draft design:
+    Draft design.md:
     The message pool is a list of (named) tuples, where each tuple has (turn, role, content).
 
     There should be two potential configurations for step definition: multiple players can act in the same turn (rock-paper-scissors).

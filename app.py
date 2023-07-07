@@ -7,19 +7,26 @@ from chatarena.arena import Arena, TooManyInvalidActions
 from chatarena.backends import BACKEND_REGISTRY
 from chatarena.backends.human import HumanBackendError
 from chatarena.config import ArenaConfig
-from chatarena.environments import ENV_REGISTRY, TimeStep
+from chatarena.environments import ENV_REGISTRY
 from chatarena.database import log_arena, log_messages, SupabaseDB, supabase_available
 from chatarena.message import Message
 
 css = """#col-container {max-width: 90%; margin-left: auto; margin-right: auto; display: flex; flex-direction: column;}
 #header {text-align: center;}
-#col-chatbox {flex: 1; max-height: min(750px, 100%); display: flex;}
-#chatbox {height: min(750px, 100%); max-height: 750px; display:flex;}
+#col-chatbox {flex: 1; max-height: min(750px, 100%);}
 #label {font-size: 2em; padding: 0.5em; margin: 0;}
 .message {font-size: 1.2em;}
-.wrap {min-width: min(640px, 100vh)}
 .message-wrap {max-height: min(700px, 100vh);}
 """
+# .wrap {min-width: min(640px, 100vh)}
+# #env-desc {max-height: 100px; overflow-y: auto;}
+# .textarea {height: 100px; max-height: 100px;}
+# #chatbot-tab-all {height: 750px; max-height: min(750px, 100%);}
+# #chatbox {height: min(750px, 100%); max-height: min(750px, 100%);}
+# #chatbox.block {height: 730px}
+# .wrap {max-height: 680px;}
+# .scroll-hide {overflow-y: scroll; max-height: 100px;}
+
 
 DEBUG = False
 
@@ -36,7 +43,10 @@ def load_examples():
     for example_file in example_files:
         with open(example_file, 'r') as f:
             example = json.load(f)
-            example_configs[example["name"]] = example
+            try:
+                example_configs[example["name"]] = example
+            except KeyError:
+                print(f"Example {example_file} is missing a name field. Skipping.")
     return example_configs
 
 
@@ -91,7 +101,7 @@ with gr.Blocks(css=css) as demo:
     all_components = []
 
     with gr.Column(elem_id="col-container"):
-        gr.Markdown("""# 🏟 Chat Arena️<br>
+        gr.Markdown("""# 🏟 ChatArena️<br>
 Prompting multiple AI agents to play games in a language-driven environment. 
 **[Project Homepage](https://github.com/chatarena/chatarena)**""", elem_id="header")
 
@@ -109,7 +119,7 @@ Prompting multiple AI agents to play games in a language-driven environment.
 
         with gr.Row():
             with gr.Column(elem_id="col-chatbox"):
-                with gr.Tab("All"):
+                with gr.Tab("All", visible=True):
                     chatbot = gr.Chatbot(elem_id="chatbox", visible=True, show_label=False)
 
                 player_chatbots = []
@@ -371,4 +381,4 @@ Prompting multiple AI agents to play games in a language-driven environment.
     example_selector.change(update_components_from_example, set(all_components + [state]), all_components + [state])
 
 demo.queue()
-demo.launch(debug=DEBUG)
+demo.launch(debug=DEBUG, server_port=8080)

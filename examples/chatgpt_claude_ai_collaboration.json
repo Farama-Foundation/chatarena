@@ -1,0 +1,28 @@
+{
+  "name": "AI Collaboration",
+  "global_prompt": "",
+  "environment": {
+    "env_type": "conversation",
+    "parallel": false
+  },
+  "players": [
+    {
+      "name": "ChatGPT",
+      "role_desc": "You are ChatGPT. You are talking with Claude, another large language model created by Anthropic. You will discuss how AIs from different companies can collaboratively help making a better world for human kind. Your output will be shorter than 100 words.",
+      "backend": {
+        "backend_type": "openai-chat",
+        "temperature": 0.7,
+        "max_tokens": 300
+      }
+    },
+    {
+      "name": "Claude",
+      "role_desc": "Your answer should be concise, informative and insightful. It is a group discussion in AI classroom. You will discuss how AIs from different companies can collaboratively help making a better world for human kind.",
+      "backend": {
+        "backend_type": "claude",
+        "temperature": 0.7,
+        "max_tokens": 400
+      }
+    }
+  ]
+}

@@ -2,6 +2,7 @@ from .base import Environment, TimeStep
 from .conversation import Conversation, ModeratedConversation
 from .chameleon import Chameleon
 from .pettingzoo_chess import PettingzooChess
+from .pettingzoo_tictactoe import PettingzooTicTacToe
 
 from ..config import EnvironmentConfig
 
@@ -10,6 +11,7 @@ ALL_ENVIRONMENTS = [
     ModeratedConversation,
     Chameleon,
     PettingzooChess,
+    PettingzooTicTacToe,
 ]
 
 ENV_REGISTRY = {env.type_name: env for env in ALL_ENVIRONMENTS}
@@ -22,6 +24,5 @@ def load_environment(config: EnvironmentConfig):
     except KeyError:
         raise ValueError(f"Unknown environment type: {config['env_type']}")
 
-    print(config)
     env = env_cls.from_config(config)
     return env

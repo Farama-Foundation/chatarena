@@ -4,9 +4,10 @@ from tenacity import RetryError
 import logging
 import uuid
 from abc import abstractmethod
+import asyncio
 
 from .backends import IntelligenceBackend, load_backend
-from .message import Message
+from .message import Message, SYSTEM_NAME
 from .config import AgentConfig, Configurable, BackendConfig
 
 # A special signal sent by the player to indicate that it is not possible to continue the conversation, and it requests to end the conversation.
@@ -40,6 +41,8 @@ class Player(Agent):
         else:
             raise ValueError(f"backend must be a BackendConfig or an IntelligenceBackend, but got {type(backend)}")
 
+        assert name != SYSTEM_NAME, f"Player name cannot be {SYSTEM_NAME}, which is reserved for the system."
+
         # Register the fields in the _config
         super().__init__(name=name, role_desc=role_desc, backend=backend_config,
                          global_prompt=global_prompt, **kwargs)
@@ -54,19 +57,36 @@ class Player(Agent):
             global_prompt=self.global_prompt,
         )
 
-    def __call__(self, observation: List[Message]) -> str:
+    def act(self, observation: List[Message]) -> str:
         """
         Call the agents to generate a response (equivalent to taking an action).
         """
         try:
-            response = self.backend.query(agent_name=self.name, prompt=self.role_desc,
+            response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,
                                           request_msg=None)
         except RetryError as e:
-            logging.warning(f"Agent {self.name} failed to generate a response. "
-                            f"Error: {e.last_attempt.exception()}. "
-                            f"Sending signal to end the conversation.")
-            response = SIGNAL_END_OF_CONVERSATION
+            err_msg = f"Agent {self.name} failed to generate a response. Error: {e.last_attempt.exception()}. Sending signal to end the conversation."
+            logging.warning(err_msg)
+            response = SIGNAL_END_OF_CONVERSATION + err_msg
+
+        return response
+
+    def __call__(self, observation: List[Message]) -> str:
+        return self.act(observation)
+
+    async def async_act(self, observation: List[Message]) -> str:
+        """
+        Async call the agents to generate a response (equivalent to taking an action).
+        """
+        try:
+            response = self.backend.async_query(agent_name=self.name, role_desc=self.role_desc,
+                                                history_messages=observation, global_prompt=self.global_prompt,
+                                                request_msg=None)
+        except RetryError as e:
+            err_msg = f"Agent {self.name} failed to generate a response. Error: {e.last_attempt.exception()}. Sending signal to end the conversation."
+            logging.warning(err_msg)
+            response = SIGNAL_END_OF_CONVERSATION + err_msg
 
         return response
 
@@ -105,7 +125,7 @@ class Moderator(Player):
 
         try:
             request_msg = Message(agent_name=self.name, content=self.terminal_condition, turn=-1)
-            response = self.backend.query(agent_name=self.name, prompt=self.role_desc, history_messages=history,
+            response = self.backend.query(agent_name=self.name, role_desc=self.role_desc, history_messages=history,
                                           global_prompt=self.global_prompt, request_msg=request_msg, *args, **kwargs)
         except RetryError as e:
             logging.warning(f"Agent {self.name} failed to generate a response. "

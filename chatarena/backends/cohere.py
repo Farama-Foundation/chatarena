@@ -3,7 +3,6 @@ import os
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .base import IntelligenceBackend
-from ..config import BackendConfig
 from ..message import Message
 
 # Try to import the cohere package and check whether the API key is set
@@ -62,7 +61,7 @@ class CohereAIChat(IntelligenceBackend):
         self.session_id = response.session_id  # Update the session id
         return response.reply
 
-    def query(self, agent_name: str, prompt: str, history_messages: List[Message], global_prompt: str = None,
+    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
               request_msg: Message = None, *args, **kwargs) -> str:
         """
         format the input and call the Cohere API
@@ -95,7 +94,7 @@ class CohereAIChat(IntelligenceBackend):
 
         # Concatenate all new messages into one message because the Cohere API only accepts one message
         new_message = "\n".join(new_conversations)
-        persona_prompt = f"Environment:\n{global_prompt}\n\nYour role:\n{prompt}"
+        persona_prompt = f"Environment:\n{global_prompt}\n\nYour role:\n{role_desc}"
 
         response = self._get_response(new_message, persona_prompt)
 

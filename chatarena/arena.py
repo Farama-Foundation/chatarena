@@ -4,7 +4,7 @@ import json
 import csv
 import logging
 
-from .agent import Player, SIGNAL_END_OF_CONVERSATION
+from .agent import Player
 from .environments import Environment, TimeStep, load_environment
 from .backends import Human
 from .config import ArenaConfig
@@ -58,10 +58,10 @@ class Arena:
         timestep = None
         for i in range(self.invalid_actions_retry):  # try to take an action for a few times
             action = player(observation)  # take an action
-            if self.environment.check_action(action, player_name):
+            if self.environment.check_action(action, player_name):  # action is valid
                 timestep = self.environment.step(player_name, action)  # update the environment
                 break
-            else:
+            else:  # action is invalid
                 logging.warning(f"{player_name} made an invalid action {action}")
                 continue
 
@@ -139,7 +139,7 @@ class Arena:
         """
         launch the command line interface
         """
-        from .ui.cli import ArenaCLI
+        from chatarena.ui.cli import ArenaCLI
         cli = ArenaCLI(self)
         cli.launch(max_steps=max_steps, interactive=interactive)
 

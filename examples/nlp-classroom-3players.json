@@ -1,6 +1,6 @@
 {
   "name": "NLP Classroom 3 Players",
-  "global_prompt": "You are in a university classroom and it is Natural Language Processing module. You start by introducing themselves. Your answer will end with <EOS>.",
+  "global_prompt": "You are in a university classroom and it is Natural Language Processing module. You start by introducing themselves.",
   "environment": {
     "env_type": "conversation",
     "parallel": false
