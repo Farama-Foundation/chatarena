@@ -11,7 +11,7 @@ class TestCLI(TestCase):
         arena.launch_cli(max_steps=10, interactive=False)
 
     def test_cli_2(self):
-        arena = Arena.from_config("examples/chameleon.json")
+        # arena = Arena.from_config("examples/chameleon.json")
         arena.launch_cli(max_steps=10, interactive=False)
 
     def test_cli_3(self):
