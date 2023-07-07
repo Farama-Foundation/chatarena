@@ -16,9 +16,19 @@ SIGNAL_END_OF_CONVERSATION = f"<<<<<<END_OF_CONVERSATION>>>>>>{uuid.uuid4()}"
 
 
 class Agent(Configurable):
-
+    """
+        An abstract base class for all the agents in the chatArena environment.
+    """
     @abstractmethod
     def __init__(self, name: str, role_desc: str, global_prompt: str = None, *args, **kwargs):
+        """
+        Initialize the agent.
+
+        Parameters:
+            name (str): The name of the agent.
+            role_desc (str): Description of the agent's role.
+            global_prompt (str): A universal prompt that applies to all agents. Defaults to None.
+        """
         super().__init__(name=name, role_desc=role_desc, global_prompt=global_prompt, **kwargs)
         self.name = name
         self.role_desc = role_desc
@@ -27,11 +37,21 @@ class Agent(Configurable):
 
 class Player(Agent):
     """
-    Player of the game. It can takes the observation from the environment and return an action
+    The Player class represents a player in the chatArena environment. A player can observe the environment
+    and perform an action (generate a response) based on the observation.
     """
 
     def __init__(self, name: str, role_desc: str, backend: Union[BackendConfig, IntelligenceBackend],
                  global_prompt: str = None, **kwargs):
+        """
+        Initialize the player with a name, role description, backend, and a global prompt.
+
+        Parameters:
+            name (str): The name of the player.
+            role_desc (str): Description of the player's role.
+            backend (Union[BackendConfig, IntelligenceBackend]): The backend that will be used for decision making. It can be either a LLM backend or a Human backend.
+            global_prompt (str): A universal prompt that applies to all players. Defaults to None.
+        """
 
         if isinstance(backend, BackendConfig):
             backend_config = backend
@@ -59,7 +79,13 @@ class Player(Agent):
 
     def act(self, observation: List[Message]) -> str:
         """
-        Call the agents to generate a response (equivalent to taking an action).
+        Take an action based on the observation (Generate a response), which can later be parsed to actual actions that affect the game dyanmics.
+
+        Parameters:
+            observation (List[Message]): The messages that the player has observed from the environment.
+
+        Returns:
+            str: The action (response) of the player.
         """
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
@@ -77,7 +103,13 @@ class Player(Agent):
 
     async def async_act(self, observation: List[Message]) -> str:
         """
-        Async call the agents to generate a response (equivalent to taking an action).
+        Async version of act(). This is used when you want to generate a response asynchronously.
+
+        Parameters:
+            observation (List[Message]): The messages that the player has observed from the environment.
+
+        Returns:
+            str: The action (response) of the player.
         """
         try:
             response = self.backend.async_query(agent_name=self.name, role_desc=self.role_desc,
@@ -91,16 +123,30 @@ class Player(Agent):
         return response
 
     def reset(self):
+        """
+        Reset the player's backend in case they are not stateless.
+        This is usually called at the end of each episode.
+        """
         self.backend.reset()
 
 
 class Moderator(Player):
     """
-    A special type of player that moderates the conversation (usually used as a component of environment).
+    The Moderator class represents a special type of player that moderates the conversation.
+    It is usually used as a component of the environment when the transition dynamics is conditioned on natural language that are not easy to parse programatically.
     """
 
     def __init__(self, role_desc: str, backend: Union[BackendConfig, IntelligenceBackend],
                  terminal_condition: str, global_prompt: str = None, **kwargs):
+        """
+        Initialize the moderator with a role description, backend, terminal condition, and a global prompt.
+
+        Parameters:
+            role_desc (str): Description of the moderator's role.
+            backend (Union[BackendConfig, IntelligenceBackend]): The backend that will be used for decision making.
+            terminal_condition (str): The condition that signifies the end of the conversation.
+            global_prompt (str): A universal prompt that applies to the moderator. Defaults to None.
+       """
         name = "Moderator"
         super().__init__(name=name, role_desc=role_desc, backend=backend, global_prompt=global_prompt, **kwargs)
 
@@ -117,7 +163,13 @@ class Moderator(Player):
 
     def is_terminal(self, history: List[Message], *args, **kwargs) -> bool:
         """
-        check whether the conversation is over
+        Check whether an episode is terminated based on the terminal condition.
+
+        Parameters:
+            history (List[Message]): The conversation history.
+
+        Returns:
+            bool: True if the conversation is over, otherwise False.
         """
         # If the last message is the signal, then the conversation is over
         if history[-1].content == SIGNAL_END_OF_CONVERSATION:
