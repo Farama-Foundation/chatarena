@@ -31,7 +31,7 @@ class TransformersConversational(IntelligenceBackend):
         self.chatbot = pipeline(task="conversational", model=self.model, device=self.device)
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
-    def _get_response(self, conversation: Conversation):
+    def _get_response(self, conversation):
         conversation = self.chatbot(conversation)
         response = conversation.generated_responses[-1]
         return response
