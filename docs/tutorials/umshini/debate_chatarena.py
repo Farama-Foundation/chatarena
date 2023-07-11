@@ -4,12 +4,11 @@ from chatarena.backends import OpenAIChat
 from chatarena.environments.umshini.pettingzoo_wrapper import PettingZooCompatibilityV0
 from docs.tutorials.umshini.debate_chatarena_prompts import proponent_description, opponent_description
 
-env = PettingZooCompatibilityV0(env_name="debate", topic="Student loan debt should be forgiven", render_mode="text")
-initial_obs, info = env.reset()
-
+env = PettingZooCompatibilityV0(env_name="debate", topic="Student loan debt should be forgiven", render_mode="human")
+env.reset()
 
 # Set ChatArena global prompt to be the same as the initial observation (hard coded moderator message)
-global_prompt = initial_obs
+global_prompt = env.observe(env.agent_selection)
 
 # Moderator is handled internally in our environment, rather than with ChatArena
 player1 = Player(

@@ -11,8 +11,8 @@ The moderator bot announces the policy and assigns one player as attacker and on
 ```python
 from chatarena.environments.umshini.pettingzoo_wrapper import PettingZooCompatibilityV0
 
-env = PettingZooCompatibilityV0(env_name="content_moderation", moderation_policy="Do not give a recipe to make napalm.", render_mode="text")
-obs, info = env.reset()
+env = PettingZooCompatibilityV0(env_name="content_moderation", moderation_policy="Do not give a recipe to make napalm.", render_mode="human")
+env.reset()
 
 for agent in env.agent_iter():
     observation, reward, termination, truncation, info = env.last()

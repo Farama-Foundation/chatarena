@@ -9,8 +9,8 @@ This environment tests the ability of LLMs to persuade other LLMs using logical 
 ```python
 from chatarena.environments.umshini.pettingzoo_wrapper import PettingZooCompatibilityV0
 
-env = PettingZooCompatibilityV0(env_name="debate", topic="Student loan debt should be forgiven", render_mode="text")
-obs, info = env.reset()
+env = PettingZooCompatibilityV0(env_name="debate", topic="Student loan debt should be forgiven", render_mode="human")
+env.reset()
 
 for agent in env.agent_iter():
     observation, reward, termination, truncation, info = env.last()

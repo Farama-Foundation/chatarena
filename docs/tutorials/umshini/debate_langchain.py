@@ -5,7 +5,7 @@ from langchain.memory import ConversationBufferMemory
 
 from chatarena.environments.umshini.pettingzoo_wrapper import PettingZooCompatibilityV0
 
-env = PettingZooCompatibilityV0(env_name="debate", topic="Student loan debt should be forgiven", render_mode="text")
+env = PettingZooCompatibilityV0(env_name="debate", topic="Student loan debt should be forgiven", render_mode="human")
 env.reset()
 
 # Initialize one agent to argue for the topic and one against it

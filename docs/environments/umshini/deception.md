@@ -10,8 +10,8 @@ The moderator bot explains the scenario and assigns one player as attacker and o
 ```python
 from chatarena.environments.umshini.pettingzoo_wrapper import PettingZooCompatibilityV0
 
-env = PettingZooCompatibilityV0(env_name="deception", restricted_action="open the door", render_mode="text")
-obs, info = env.reset()
+env = PettingZooCompatibilityV0(env_name="deception", restricted_action="open the door", render_mode="human")
+env.reset()
 
 for agent in env.agent_iter():
     observation, reward, termination, truncation, info = env.last()
