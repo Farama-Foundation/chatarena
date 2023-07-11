@@ -46,6 +46,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         string_observation: bool | None = True,
         character_limit: int | None = 4000,
         render_mode: str | None = None,
+        save_json: bool | None = False,
     ):
         """Wrapper to convert a ChatArena environment into a PettingZoo environment.
 
@@ -60,6 +61,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             string_observation (Optional[bool]): send observations as a single string (rather than a dict)
             character_limit (Optional[int]): maximum number of characters for observations and actions
             render_mode (Optional[str]): rendering mode
+            save_json (Optional[bool]): flag to save a json file to the disk containing a chat log
         """
         EzPickle.__init__(
             self,
@@ -73,6 +75,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             string_observation,
             character_limit,
             render_mode,
+            save_json,
         )
         super().__init__()
 
@@ -137,6 +140,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         self.string_observation = string_observation
         self.character_limit = character_limit
         self.render_mode = render_mode
+        self.save_json = save_json
 
         # PettingZoo arguments
         self.possible_agents = list(self._env.player_names)
@@ -290,7 +294,20 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
     def close(self):
         """close."""
-        pass
+        if self.save_json:
+            import os
+            from pathlib import Path
+            from chatarena.message import Message
+            import json
+            from typing import List
+            msg_lst: List[Message] = self._env.message_pool.get_all_messages()
+            Path("env_logs").mkdir(exist_ok=True)
+            os.chdir("env_logs")
+            files = os.listdir()
+            files = [f for f in files if f.startswith(self.metadata["name"]) and f.endswith(".json")]
+            formatted_state = [{"name": m.agent_name, "turn": m.turn, "text": m.content} for m in msg_lst]
+            json.dump(formatted_state, open(self.metadata["name"] + str(len(files)) + ".json", "w"))
+            print(f"Chatlog has been saved to disk: {self.metadata['name'] + str(len(files)) + '.json'}")
 
     def _unravel_timestep(self, timestep: TimeStep):
         # get observation
