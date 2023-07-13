@@ -5,7 +5,6 @@ from __future__ import annotations
 import functools
 import string
 
-import pygame
 from chatarena.environments import Environment
 from chatarena.environments.base import TimeStep
 from gymnasium import spaces
@@ -29,7 +28,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
     """
 
     metadata = {
-        "render_modes": ["human", "text"],
+        "render_modes": ["human"],
         "name": "PettingZooCompatibilityV0",
         "is_parallelizable": False,
         "render_fps": 2,
@@ -47,6 +46,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         string_observation: bool | None = True,
         character_limit: int | None = 4000,
         render_mode: str | None = None,
+        save_json: bool | None = False,
     ):
         """Wrapper to convert a ChatArena environment into a PettingZoo environment.
 
@@ -61,6 +61,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             string_observation (Optional[bool]): send observations as a single string (rather than a dict)
             character_limit (Optional[int]): maximum number of characters for observations and actions
             render_mode (Optional[str]): rendering mode
+            save_json (Optional[bool]): flag to save a json file to the disk containing a chat log
         """
         EzPickle.__init__(
             self,
@@ -74,6 +75,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             string_observation,
             character_limit,
             render_mode,
+            save_json,
         )
         super().__init__()
 
@@ -82,7 +84,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 "ChatArena Environment or environment name must be specified"
             )
         elif env is not None:
-            # TODO: test that human rendering works with this
             self._env = env
             if hasattr(env, "topic"):
                 self.topic = topic
@@ -139,15 +140,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         self.string_observation = string_observation
         self.character_limit = character_limit
         self.render_mode = render_mode
-
-        if self.render_mode == "human":
-            pygame.init()
-            self.screen_width = 1026
-            self.screen_height = 1026
-            self.screen = pygame.display.set_mode(
-                (self.screen_width, self.screen_height)
-            )
-            self.clock = pygame.time.Clock()
+        self.save_json = save_json
 
         # PettingZoo arguments
         self.possible_agents = list(self._env.player_names)
@@ -223,46 +216,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             )
 
         if self.render_mode == "human":
-            self.clock.tick(self.metadata["render_fps"])
-
-            self.screen.fill("black")
-            font = pygame.font.Font(None, 32)  # default font
-            self.line_spacing = 10
-            self.border_padding = 10
-
-            # Iterate through messages and print sequentially, scrolling
-            all_messages = self.infos[self.agent_selection]["all_messages"]
-            surfs = []
-            heights = []
-            color_map = dict(zip(self.all_agents, ["white", "green", "yellow"]))
-            for message in all_messages:
-                text = f"[{message.agent_name}->{message.visible_to} @ {message.turn}]: {message.content}"
-                text_surf = font.render(
-                    text,
-                    True,
-                    color_map[message.agent_name],
-                    None,  # or (0, 0, 0, 0) for example
-                    self.screen_width,
-                )
-                surfs.append(text_surf)
-                heights.append(text_surf.get_height() + self.line_spacing)
-
-            # Removes the top messages if needed, to ensure text never goes off-screen
-            # Accounts for height of each message plus top and bottom padding
-            while sum(heights) + self.border_padding * 2 > self.screen_height:
-                surfs.pop(0)
-                heights.pop(0)
-
-            # Pad rendering from the edges of the screen
-            for i, surf in enumerate(surfs):
-                self.screen.blit(
-                    surf, (self.border_padding, self.border_padding + sum(heights[:i]))
-                )
-
-            pygame.display.flip()
-            pygame.display.update()
-
-        elif self.render_mode == "text":
             new_messages = self.infos[self.agent_selection].get("new_messages")
             if new_messages is None:
                 raise Exception("New messages not found")
@@ -271,7 +224,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     print(
                         f"[{message.agent_name}->{message.visible_to}]: {message.content}\n"
                     )
-        pass
 
     def observe(self, agent: AgentID) -> ObsType:
         """observe.
@@ -342,11 +294,20 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
     def close(self):
         """close."""
-        if self.render_mode != "human":
-            return
-        if self.screen is not None:
-            pygame.quit()
-            self.screen = None
+        if self.save_json:
+            import os
+            from pathlib import Path
+            from chatarena.message import Message
+            import json
+            from typing import List
+            msg_lst: List[Message] = self._env.message_pool.get_all_messages()
+            Path("env_logs").mkdir(exist_ok=True)
+            os.chdir("env_logs")
+            files = os.listdir()
+            files = [f for f in files if f.startswith(self.metadata["name"]) and f.endswith(".json")]
+            formatted_state = [{"name": m.agent_name, "turn": m.turn, "text": m.content} for m in msg_lst]
+            json.dump(formatted_state, open(self.metadata["name"] + str(len(files)) + ".json", "w"))
+            print(f"Chatlog has been saved to disk: {self.metadata['name'] + str(len(files)) + '.json'}")
 
     def _unravel_timestep(self, timestep: TimeStep):
         # get observation
@@ -451,11 +412,9 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         observation = self.observe(self.agent_selection)
         info = self.infos[self.agent_selection]
 
-        # render the environment (print the initial scenario text, or render with pygame)
+        # render the environment (print the initial scenario text)
         if self.render_mode is not None:
             self.render()
-
-        return observation, info
 
     def step(self, action: str):
         """Steps.
