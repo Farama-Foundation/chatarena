@@ -107,13 +107,8 @@ WINNER:<name>"""
 
 
 def judge_debate(
-    player_names: List[str], message_state: MessagePool, model_name: str = "gpt-3.5-turbo"
+    player_names: List[str], message_state: MessagePool, model_name: str = "gpt-4"
 ) -> Tuple[int, str]:
-    llm = None
-    if os.getenv("OPENAI_API_TYPE") == "azure":
-        llm = AzureChatOpenAI(temperature=0, deployment_name=os.getenv("CHATARENA_AZURE_DEPLOYMENT_CHAT"))
-    else:
-        llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
     langchain_messages = []
     langchain_messages.append(judge_debate_system_message)
 
@@ -126,7 +121,30 @@ def judge_debate(
                     content=f"{message.agent_name} -> Turn:{message.turn}:\n{message.content}"
                 )
             )
-    response = llm(langchain_messages)
+    if os.getenv("OPENAI_API_TYPE") == "azure":
+        llm = AzureChatOpenAI(
+            temperature=0,
+            openai_api_base=os.getenv("OPENAI_API_BASE"),
+            openai_api_version=os.getenv("OPENAI_API_VERSION"),
+            deployment_name=os.getenv("DEPLOYMENT_NAME"),
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            openai_api_type="azure"
+        )
+        try:
+            response = llm(langchain_messages)
+        except Exception as e:
+            print(e)
+    else:
+        llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
+        try:
+            response = llm(langchain_messages)
+        except Exception as e:
+            backup_model = "gpt-3.5-turbo-16k"
+            print(f"{model_name} not found, using {backup_model}")
+            llm = ChatOpenAI(temperature=0, model_name=backup_model)
+            response = llm(langchain_messages)
+
+
     match = re.search(r"WINNER:\s*(\w+)\s*$", response.content)
     if match is None:
         return -1, response.content

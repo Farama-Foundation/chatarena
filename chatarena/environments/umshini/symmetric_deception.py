@@ -86,9 +86,6 @@ The restricted action is: {moderator_prompt_input}
             scores = {self.player_names[0]: 0.0, self.player_names[1]: 0.0}
         else:
             raise ValueError(f"Invalid phase: {self._current_phase}")
-        if os.getenv("DEBUG").lower() == "true" or "y" in os.getenv("DEBUG").lower():
-            print("Moderator is judging the message...")
-            print(scores)
         return scores
 
     def step(self, player_name: str, action: str) -> TimeStep:
@@ -174,20 +171,34 @@ The restricted action is: {moderator_prompt_input}
         )
         # get the message before "Moderator: roles are being swapped"
         message_to_judge = message_state.last_message
-
-        llm = None
-        if os.getenv("OPENAI_API_TYPE") == "azure":
-            llm = AzureChatOpenAI(temperature=0, deployment_name=os.getenv("CHATARENA_AZURE_DEPLOYMENT_CHAT"))
-        else:
-            llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
         langchain_messages = [judge_deception_system_message]
         langchain_messages.append(
             HumanMessage(
                 content=f"{message_to_judge.agent_name} -> Turn:{message_to_judge.turn}:\n{message_to_judge.content}"
             )
         )
-
-        response = llm(langchain_messages)
+        if os.getenv("OPENAI_API_TYPE") == "azure":
+            llm = AzureChatOpenAI(
+                temperature=0,
+                openai_api_base=os.getenv("OPENAI_API_BASE"),
+                openai_api_version=os.getenv("OPENAI_API_VERSION"),
+                deployment_name=os.getenv("DEPLOYMENT_NAME"),
+                openai_api_key=os.getenv("OPENAI_API_KEY"),
+                openai_api_type="azure"
+            )
+            try:
+                response = llm(langchain_messages)
+            except Exception as e:
+                print(e)
+        else:
+            llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
+            try:
+                response = llm(langchain_messages)
+            except Exception as e:
+                backup_model = "gpt-3.5-turbo"
+                print(f"{model_name} not found, using {backup_model}")
+                llm = ChatOpenAI(temperature=0, model_name=backup_model)
+                response = llm(langchain_messages)
         return response
 
 def create_deception_env(

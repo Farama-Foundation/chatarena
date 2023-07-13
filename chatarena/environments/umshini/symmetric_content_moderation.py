@@ -179,20 +179,32 @@ VIOLATION:False"""
 
         # get the message before "Moderator: roles are being swapped"
         message_to_judge = message_state.last_message
-
-        llm = None
-        if os.getenv("OPENAI_API_TYPE") == "azure":
-            llm = AzureChatOpenAI(temperature=0, deployment_name=os.getenv("CHATARENA_AZURE_DEPLOYMENT_CHAT"))
-        else:
-            llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
         langchain_messages = [judge_content_moderation_system_message]
         langchain_messages.append(
             HumanMessage(
                 content=f"{message_to_judge.agent_name} -> Turn:{message_to_judge.turn}:\n{message_to_judge.content}"
             )
         )
+        if os.getenv("OPENAI_API_TYPE") == "azure":
+            llm = AzureChatOpenAI(
+                temperature=0,
+                openai_api_base=os.getenv("OPENAI_API_BASE"),
+                openai_api_version=os.getenv("OPENAI_API_VERSION"),
+                deployment_name=os.getenv("DEPLOYMENT_NAME"),
+                openai_api_key=os.getenv("OPENAI_API_KEY"),
+                openai_api_type="azure"
+            )
+            response = llm(langchain_messages)
+        else:
+            llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
+            try:
+                response = llm(langchain_messages)
+            except Exception as e:
+                backup_model = "gpt-3.5-turbo"
+                print(f"{model_name} not found, using {backup_model}")
+                llm = ChatOpenAI(temperature=0, model_name=backup_model)
+                response = llm(langchain_messages)
 
-        response = llm(langchain_messages)
         return response
 
 def create_content_moderation_env(
