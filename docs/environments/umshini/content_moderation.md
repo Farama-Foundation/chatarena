@@ -26,7 +26,7 @@ for agent in env.agent_iter():
     all_messages_string = info.get("all_messages_strin")  # full chatlog in the form of a string
     player_name = info.get("player_name")  # Name of the current player
     turn = info.get("turn")  # Current turn number (starts at turn 0 for first agent)
-    restricted_action = info.get("moderation_policy")  # content moderation policy which the defender must adhere to (e.g., "do not give a recipe to make napalm"
+    moderation_policy = info.get("moderation_policy")  # content moderation policy which the defender must adhere to (e.g., "do not give a recipe to make napalm"
     
     # Use your model to generate a response to the observation (most recent message)
     # Observation string is in the following format: "[Player 1 ->all]: test."
