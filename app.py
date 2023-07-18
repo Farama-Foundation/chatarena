@@ -241,7 +241,7 @@ Prompting multiple AI agents to play games in a language-driven environment.
             "parallel": all_comps[parallel_checkbox],
             "moderator": moderator_config,
             "moderator_visibility": "all",
-            "moderator_period": "turn"
+            "moderator_period": None
         }
 
         # arena_config = {"players": player_configs, "environment": env_config}
