@@ -41,7 +41,7 @@ def load_examples():
     # Load json config files from examples folder
     example_files = glob("examples/*.json")
     for example_file in example_files:
-        with open(example_file, 'r') as f:
+        with open(example_file, 'r', encoding="utf-8") as f:
             example = json.load(f)
             try:
                 example_configs[example["name"]] = example
@@ -62,7 +62,7 @@ def get_moderator_components(visible=True):
             role_desc = gr.Textbox(label="Moderator role", lines=1, visible=visible, interactive=True,
                                    placeholder=f"Enter the role description for {name}")
             terminal_condition = gr.Textbox(show_label=False, lines=1, visible=visible, interactive=True,
-                                            placeholder="Enter the end criteria for the conversation")
+                                            placeholder="Enter the termination criteria")
         with gr.Column():
             backend_type = gr.Dropdown(show_label=False, visible=visible, interactive=True,
                                        choices=list(BACKEND_REGISTRY.keys()), value=DEFAULT_BACKEND)
@@ -78,7 +78,9 @@ def get_moderator_components(visible=True):
 def get_player_components(name, visible):
     with gr.Row():
         with gr.Column():
-            role_desc = gr.Textbox(label=name, lines=3, interactive=True, visible=visible,
+            role_name = gr.Textbox(line=1, show_label=False, interactive=True, visible=visible,
+                                   placeholder=f"Player name for {name}")
+            role_desc = gr.Textbox(lines=3, show_label=False, interactive=True, visible=visible,
                                    placeholder=f"Enter the role description for {name}")
         with gr.Column():
             backend_type = gr.Dropdown(show_label=False, choices=list(BACKEND_REGISTRY.keys()),
@@ -89,7 +91,7 @@ def get_player_components(name, visible):
                 max_tokens = gr.Slider(minimum=10, maximum=500, step=10, interactive=True, visible=visible,
                                        label=f"max tokens", value=200)
 
-    return [role_desc, backend_type, accordion, temperature, max_tokens]
+    return [role_name, role_desc, backend_type, accordion, temperature, max_tokens]
 
 
 def get_empty_state():
@@ -205,10 +207,10 @@ Prompting multiple AI agents to play games in a language-driven environment.
         player_configs = []
         for i in range(num_players):
             player_name = f"Player {i + 1}"
-            role_desc, backend_type, temperature, max_tokens = [
+            role_name, role_desc, backend_type, temperature, max_tokens = [
                 all_comps[c] for c in players_idx2comp[i] if not isinstance(c, (gr.Accordion, gr.Tab))]
             player_config = {
-                "name": player_name,
+                "name": role_name,
                 "role_desc": role_desc,
                 "global_prompt": env_desc,
                 "backend": {
@@ -239,7 +241,7 @@ Prompting multiple AI agents to play games in a language-driven environment.
             "parallel": all_comps[parallel_checkbox],
             "moderator": moderator_config,
             "moderator_visibility": "all",
-            "moderator_period": "turn"
+            "moderator_period": None
         }
 
         # arena_config = {"players": player_configs, "environment": env_config}
@@ -367,9 +369,11 @@ Prompting multiple AI agents to play games in a language-driven environment.
         # Update the player components
         update_dict[num_player_slider] = gr.update(value=len(example_config['players']))
         for i, player_config in enumerate(example_config['players']):
-            role_desc, backend_type, temperature, max_tokens = [
+            role_name, role_desc, backend_type, temperature, max_tokens = [
                 c for c in players_idx2comp[i] if not isinstance(c, (gr.Accordion, gr.Tab))
             ]
+
+            update_dict[role_name] = gr.update(value=player_config['name'])
             update_dict[role_desc] = gr.update(value=player_config['role_desc'])
             update_dict[backend_type] = gr.update(value=player_config['backend']['backend_type'])
             update_dict[temperature] = gr.update(value=player_config['backend']['temperature'])

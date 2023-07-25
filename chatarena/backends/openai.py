@@ -23,7 +23,8 @@ else:
 # Default config follows the OpenAI playground
 DEFAULT_TEMPERATURE = 0.7
 DEFAULT_MAX_TOKENS = 256
-DEFAULT_MODEL = "gpt-3.5-turbo"
+# DEFAULT_MODEL = "gpt-3.5-turbo"
+DEFAULT_MODEL = "gpt-4-0613"
 
 END_OF_MESSAGE = "<EOS>"  # End of message token specified by us not OpenAI
 STOP = ("<|endoftext|>", END_OF_MESSAGE)  # End of sentence token
@@ -84,9 +85,9 @@ class OpenAIChat(IntelligenceBackend):
 
         # Merge the role description and the global prompt as the system prompt for the agent
         if global_prompt:  # Prepend the global prompt if it exists
-            system_prompt = f"{global_prompt.strip()}\n{BASE_PROMPT}\n\nYour name: {agent_name}\n\nYour role:{role_desc}"
+            system_prompt = f"You are a helpful assistant.\n{global_prompt.strip()}\n{BASE_PROMPT}\n\nYour name is {agent_name}.\n\nYour role:{role_desc}"
         else:
-            system_prompt = f"You are {agent_name}.\n\nYour role:{role_desc}\n\n{BASE_PROMPT}"
+            system_prompt = f"You are a helpful assistant. Your name is {agent_name}.\n\nYour role:{role_desc}\n\n{BASE_PROMPT}"
 
         all_messages = [(SYSTEM_NAME, system_prompt)]
         for msg in history_messages:

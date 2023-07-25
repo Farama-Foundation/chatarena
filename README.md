@@ -16,6 +16,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
 [![twitter](https://img.shields.io/twitter/follow/_chatarena?style=social&label=Follow%20ChatArena)](https://twitter.com/_chatarena)
 [![slack](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/chatarena/shared_invite/zt-1t5fpbiep-CbKucEHdJ5YeDLEpKWxDOg)
+[![Open In Colab](https://img.shields.io/badge/Colab-Open%20Notebook-blue?logo=google-colab)](https://colab.research.google.com/drive/1vKaskNMBtuGOVgn8fQxMgjCevn2wp1Ml?authuser=0#scrollTo=P5DCC0Y0Zbxi)
 
 ---
 
@@ -96,7 +97,9 @@ Check out this video to learn how to use Web UI: [![Webui demo video](https://im
 
 ## For Developers
 
-For a introduction to the ChatArena framework, please refer to [this document](docs/devdoc/design.md).
+For an introduction to the ChatArena framework, please refer to [this document](docs/devdoc/design.md).
+For a walkthrough of building a new environment, check [![Open In Colab](https://img.shields.io/badge/Colab-Open%20Notebook-blue?logo=google-colab)](https://colab.research.google.com/drive/1vKaskNMBtuGOVgn8fQxMgjCevn2wp1Ml?authuser=0#scrollTo=P5DCC0Y0Zbxi)
+
 Here we provide a compact guide on minimal setup to run the game and some general advice on customization.
 
 ### Key Concepts

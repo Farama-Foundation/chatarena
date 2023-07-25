@@ -3,7 +3,8 @@ anthropic>=0.2.8
 cohere>=4.3.1
 transformers>=4.27.4
 tenacity==8.2.2
-gradio>=3.34.0
+gradio==3.34.0
+ffmpy==0.3.0
 rich==13.3.3
 prompt_toolkit==3.0.38
 pettingzoo>=1.23.1

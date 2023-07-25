@@ -94,7 +94,7 @@ class ModeratedConversation(Conversation):
     type_name = "moderated_conversation"
 
     def __init__(self, player_names: List[str], moderator: Union[Moderator, AgentConfig],
-                 parallel: bool = False, moderator_visibility="all", moderator_period="turn", **kwargs):
+                 parallel: bool = False, moderator_visibility="all", moderator_period=None, **kwargs):
 
         super().__init__(player_names=player_names, parallel=parallel, **kwargs)
 
@@ -106,7 +106,13 @@ class ModeratedConversation(Conversation):
 
         self.moderator = moderator
         self.moderator_visibility = moderator_visibility
-        self.moderator_period = moderator_period
+        if moderator_period is None:
+            if parallel:
+                self.moderator_period = "round"
+            else:
+                self.moderator_period = "turn"
+        else:
+            self.moderator_period = moderator_period
 
     def to_config(self) -> EnvironmentConfig:
         # This environment contains some speical config arguments that needs to be handle specially
