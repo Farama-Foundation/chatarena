@@ -47,6 +47,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         character_limit: int | None = 4000,
         render_mode: str | None = None,
         save_json: bool | None = False,
+        disable_judging: bool | None = True
     ):
         """Wrapper to convert a ChatArena environment into a PettingZoo environment.
 
@@ -98,7 +99,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             if env_name == "debate":
                 assert topic is not None, "topic must be specified for debate env"
                 self._env = create_debate_env(
-                    topic=topic, player_names=player_names, round_length=round_length
+                    topic=topic, player_names=player_names, round_length=round_length, disable_judging=disable_judging
                 )
                 self.topic = topic
                 self.max_turns = round_length
@@ -381,9 +382,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             return_info (Optional[bool]): flag to return info as well as observation
             options (Optional[Dict]): options
         """
-        if seed is not None:
-            print("WARNING: seeding is not supported for LLMs.")
-
         # reset our custom attributes
         self.current_turn = 0
         self.total_rewards = {agent: 0.0 for agent in self.possible_agents}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import random
 from typing import List, Tuple
 import os
 
@@ -34,20 +35,27 @@ The judge will not interrupt.""",
     type_name = "debate"
 
     def __init__(
-        self, player_names: list[str], topic: str, round_length: int = 10, **kwargs
+        self, player_names: list[str], topic: str, round_length: int = 10, disable_judging = False, **kwargs
     ):
         super().__init__(
             player_names=player_names,
             moderator_prompt_template=self.moderator_prompt,
             moderator_prompt_input=topic,
             round_length=round_length,
+            disable_judging=disable_judging,
             **kwargs,
         )
+        self.disable_judging = disable_judging
         self.topic = topic
 
     def get_rewards(self) -> dict[str, float]:
         """Uses langchain to analyze the conversation, pick a winner, and set the reward."""
-        winner, winner_text = judge_debate(self.player_names, self.message_pool)
+        if self.disable_judging:
+            # Local API testing
+            winner = random.randint(0, 1)
+            winner_text = f"WINNER: {winner}"
+        else:
+            winner, winner_text = judge_debate(self.player_names, self.message_pool)
         self._moderator_speak(winner_text)
         if winner == 0:
             return {self.player_names[0]: 1, self.player_names[1]: 0}
@@ -82,7 +90,7 @@ The judge will not interrupt.""",
 
 
 def create_debate_env(
-    topic: str, round_length: int | None = None, player_names: list[str] | None = None
+    topic: str, round_length: int | None = None, player_names: list[str] | None = None, disable_judging: bool | None = False
 ):
     if player_names is None:
         player_names = ["Opponent", "Proponent"]
@@ -90,6 +98,7 @@ def create_debate_env(
         player_names=player_names,
         topic=topic,
         round_length=round_length,
+        disable_judging=disable_judging
     )
     return env
 
