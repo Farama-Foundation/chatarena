@@ -45,8 +45,8 @@ The judge will not interrupt.""",
             disable_judging=disable_judging,
             **kwargs,
         )
-        self.topic = topic
         self.disable_judging = disable_judging
+        self.topic = topic
 
     def get_rewards(self) -> dict[str, float]:
         """Uses langchain to analyze the conversation, pick a winner, and set the reward."""
