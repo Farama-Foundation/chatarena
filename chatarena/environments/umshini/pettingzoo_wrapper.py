@@ -111,6 +111,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     moderation_policy=moderation_policy,
                     player_names=player_names,
                     round_length=round_length,
+                    disable_judging=disable_judging,
                 )
                 self.moderation_policy = moderation_policy
                 self.max_turns = round_length * 2
@@ -122,6 +123,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     restricted_action=restricted_action,
                     player_names=player_names,
                     round_length=round_length,
+                    disable_judging=disable_judging,
                 )
                 self.restricted_action = restricted_action
                 self.max_turns = round_length * 2
