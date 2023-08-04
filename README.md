@@ -134,7 +134,7 @@ CLI: [![cli demo video](https://img.shields.io/badge/CLI%20Demo%20Video-Vimeo-bl
 A more detailed guide about how to run the main interaction loop with finer-grained control can be
 found [here](docs/devdoc/mainloop.md)
 
-### General Custimization Advice
+### General Customization Advice
 
 1. **Arena**: Overriding Arena basically means one is going to write their own main loop. This can allow different
    interaction interfaces or drive games in a more automated manner, for example, running an online RL training loop
