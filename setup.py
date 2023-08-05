@@ -16,7 +16,7 @@ base_requirements = [
     "prompt_toolkit==3.0.38",
 
 ]
-anthropic_requirements = ["anthropic>=0.2.8"]
+anthropic_requirements = ["litellm>=0.1.2291"]
 cohere_requirements = ["cohere>=4.3.1"]
 hf_requirements = ["transformers>=4.27.4"]
 bard_requirements = ["bardapi==0.1.11"]

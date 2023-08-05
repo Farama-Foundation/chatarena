@@ -2,10 +2,12 @@ from typing import List
 import os
 import re
 import logging
+import litellm 
+from litellm import completion 
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .base import IntelligenceBackend
-from ..message import Message, SYSTEM_NAME as SYSTEM
+from ..message import Message, SYSTEM_NAME, MODERATOR_NAME
 
 try:
     import anthropic
@@ -41,15 +43,16 @@ class Claude(IntelligenceBackend):
         self.client = anthropic.Client(os.environ['ANTHROPIC_API_KEY'])
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
-    def _get_response(self, prompt: str):
-        response = self.client.completion(
-            prompt=prompt,
-            stop_sequences=[anthropic.HUMAN_PROMPT],
+    def _get_response(self, messages):
+        response = completion(
+            messages=messages,
+            stop=anthropic.HUMAN_PROMPT,
             model=self.model,
-            max_tokens_to_sample=self.max_tokens,
+            max_tokens=self.max_tokens,
         )
 
-        response = response['completion'].strip()
+        response = completion.choices[0]['message']['content']
+        response = response.strip()
         return response
 
     def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
@@ -63,36 +66,34 @@ class Claude(IntelligenceBackend):
             history_messages: the history of the conversation, or the observation for the agent
             request_msg: the request from the system to guide the agent's next response
         """
-        all_messages = [(SYSTEM, global_prompt), (SYSTEM, role_desc)] if global_prompt else [(SYSTEM, role_desc)]
-
+        all_messages = [(SYSTEM_NAME, global_prompt), (SYSTEM_NAME, role_desc)] if global_prompt else [(SYSTEM_NAME, role_desc)]
         for message in history_messages:
             all_messages.append((message.agent_name, message.content))
         if request_msg:
-            all_messages.append((SYSTEM, request_msg.content))
-
-        prompt = ""
-        prev_is_human = False  # Whether the previous message is from human (in anthropic, the human is the user)
-        for i, message in enumerate(all_messages):
+            all_messages.append((SYSTEM_NAME, request_msg.content))
+        messages = []
+        for i, msg in enumerate(all_messages):
             if i == 0:
-                assert message[0] == SYSTEM  # The first message should be from the system
-
-            if message[0] == agent_name:
-                if prev_is_human:
-                    prompt = f"{prompt}{anthropic.AI_PROMPT} {message[1]}"
-                else:
-                    prompt = f"{prompt}\n\n{message[1]}"
-                prev_is_human = False
+                assert msg[0] == SYSTEM_NAME  # The first message should be from the system
+                messages.append({"role": "system", "content": msg[1]})
             else:
-                if prev_is_human:
-                    prompt = f"{prompt}\n\n[{message[0]}]: {message[1]}"
+                if msg[0] == agent_name:
+                    messages.append({"role": "assistant", "content": msg[1]})
                 else:
-                    prompt = f"{prompt}{anthropic.HUMAN_PROMPT}\n[{message[0]}]: {message[1]}"
-                prev_is_human = True
-        assert prev_is_human  # The last message should be from the human
-        # Add the AI prompt for Claude to generate the response
-        prompt = f"{prompt}{anthropic.AI_PROMPT}"
+                    if messages[-1]["role"] == "user":  # last message is from user
+                        if self.merge_other_agent_as_user:
+                            messages[-1]["content"] = f"{messages[-1]['content']}\n\n[{msg[0]}]: {msg[1]}"
+                        else:
+                            messages.append({"role": "user", "content": f"[{msg[0]}]: {msg[1]}"})
+                    elif messages[-1]["role"] == "assistant":  # consecutive assistant messages
+                        # Merge the assistant messages
+                        messages[-1]["content"] = f"{messages[-1]['content']}\n{msg[1]}"
+                    elif messages[-1]["role"] == "system":
+                        messages.append({"role": "user", "content": f"[{msg[0]}]: {msg[1]}"})
+                    else:
+                        raise ValueError(f"Invalid role: {messages[-1]['role']}")
 
-        response = self._get_response(prompt, *args, **kwargs)
+        response = self._get_response(messages, *args, **kwargs)
 
         # Remove the agent name if the response starts with it
         response = re.sub(rf"^\s*\[{agent_name}]:?", "", response).strip()
