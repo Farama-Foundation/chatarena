@@ -5,8 +5,11 @@ from __future__ import annotations
 import functools
 import string
 
+from typing import List
+
 from chatarena.environments import Environment
 from chatarena.environments.base import TimeStep
+from chatarena.message import Message
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
 from pettingzoo import AECEnv
@@ -297,20 +300,20 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
     def close(self):
         """close."""
+        msg_lst: List[Message] = self._env.message_pool.get_all_messages()
+        formatted_state = [{"name": m.agent_name, "turn": m.turn, "text": m.content} for m in msg_lst]
         if self.save_json:
+            import json
             import os
             from pathlib import Path
-            from chatarena.message import Message
-            import json
-            from typing import List
-            msg_lst: List[Message] = self._env.message_pool.get_all_messages()
             Path("env_logs").mkdir(exist_ok=True)
             os.chdir("env_logs")
             files = os.listdir()
             files = [f for f in files if f.startswith(self.metadata["name"]) and f.endswith(".json")]
-            formatted_state = [{"name": m.agent_name, "turn": m.turn, "text": m.content} for m in msg_lst]
             json.dump(formatted_state, open(self.metadata["name"] + str(len(files)) + ".json", "w"))
             print(f"Chatlog has been saved to disk: {self.metadata['name'] + str(len(files)) + '.json'}")
+        else:
+            return formatted_state
 
     def _unravel_timestep(self, timestep: TimeStep):
         # get observation
