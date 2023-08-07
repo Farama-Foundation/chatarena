@@ -5,7 +5,11 @@ from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
 
 class DeceptionDefender:
-    def __init__(self):
+    def __init__(self, llm=None):
+        if llm is not None:
+            self.llm = llm
+        else:
+            self.llm = ChatOpenAI(temperature=0.9, client="")
         pass
 
     def get_response(self, messages, goal, name) -> str:
@@ -16,7 +20,11 @@ class DeceptionDefender:
 
 
 class DeceptionAttacker:
-    def __init__(self):
+    def __init__(self, llm=None):
+        if llm is not None:
+            self.llm = llm
+        else:
+            self.llm = ChatOpenAI(temperature=0.9, client="")
         pass
 
     def get_response(self, messages, goal, name) -> str:
@@ -27,11 +35,10 @@ class DeceptionAttacker:
 
 
 class SimpleDeceptionDefender(DeceptionDefender):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.name = None
         self.goal = None
-        self.llm = ChatOpenAI(temperature=0.9, client="")
         self.messages = []
         self.messages.append(
             SystemMessage(
@@ -61,11 +68,10 @@ class SimpleDeceptionDefender(DeceptionDefender):
 
 
 class SimpleDeceptionAttacker(DeceptionAttacker):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.name = None
         self.goal = None
-        self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
         self.messages = []
 
 
@@ -96,11 +102,10 @@ class SimpleDeceptionAttacker(DeceptionAttacker):
 
 
 class PresidentDeceptionAttacker(DeceptionAttacker):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.name = None
         self.goal = None
-        self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
 
 
     def get_response(self, messages, goal, name) -> str:
@@ -131,8 +136,8 @@ class PresidentDeceptionAttacker(DeceptionAttacker):
 
 class DeceptionMultiRoleAgent:
     def __init__(self, attacker: DeceptionAttacker, defender: DeceptionDefender):
-        self.red_team = attacker()
-        self.responder = defender()
+        self.red_team = attacker
+        self.responder = defender
         self.name = None
         self.current_agent = None
         self.use_red_team = True

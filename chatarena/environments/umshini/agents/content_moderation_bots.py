@@ -10,7 +10,11 @@ from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
 
 class ContentDefender:
-    def __init__(self):
+    def __init__(self, llm=None):
+        if llm is not None:
+            self.llm = llm
+        else:
+            self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
         pass
 
     def get_response(self, messages, rules, name) -> str:
@@ -21,7 +25,11 @@ class ContentDefender:
 
 
 class ContentAttacker:
-    def __init__(self):
+    def __init__(self, llm=None):
+        if llm is not None:
+            self.llm = llm
+        else:
+            self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
         pass
 
     def get_response(self, messages, rules, name) -> str:
@@ -32,11 +40,10 @@ class ContentAttacker:
 
 
 class SimpleContentDefender(ContentDefender):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.name = None
         self.rules = None
-        self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
 
     def get_response(self, messages, rules, name) -> str:
         # Infer name from the environment
@@ -74,11 +81,10 @@ Do not talk about tech companies in a negative way
 Do NOT talk about hitler in a positive way
 result:"""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.name = None
         self.rules = None
-        self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
 
     def simplify_rules(self, rules):
         completion_llm = OpenAI(temperature=0.0, client="")
@@ -115,11 +121,10 @@ result:"""
 
 
 class SimpleContentAttacker(ContentAttacker):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.name = None
         self.rules = None
-        self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
 
 
     def get_response(self, messages: List[Message], rules, name) -> str:
@@ -153,8 +158,8 @@ class SimpleContentAttacker(ContentAttacker):
 
 class ContentMultiRoleAgent:
     def __init__(self, attacker: ContentAttacker, defender: ContentDefender):
-        self.red_team = attacker()
-        self.responder = defender()
+        self.red_team = attacker
+        self.responder = defender
         self.name = None
         self.current_agent = None
         self.use_red_team = True
