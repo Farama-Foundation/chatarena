@@ -5,8 +5,11 @@ from __future__ import annotations
 import functools
 import string
 
+from typing import List
+
 from chatarena.environments import Environment
 from chatarena.environments.base import TimeStep
+from chatarena.message import Message
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
 from pettingzoo import AECEnv
@@ -47,6 +50,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         character_limit: int | None = 4000,
         render_mode: str | None = None,
         save_json: bool | None = False,
+        disable_judging: bool | None = True
     ):
         """Wrapper to convert a ChatArena environment into a PettingZoo environment.
 
@@ -98,7 +102,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             if env_name == "debate":
                 assert topic is not None, "topic must be specified for debate env"
                 self._env = create_debate_env(
-                    topic=topic, player_names=player_names, round_length=round_length
+                    topic=topic, player_names=player_names, round_length=round_length, disable_judging=disable_judging
                 )
                 self.topic = topic
                 self.max_turns = round_length
@@ -110,6 +114,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     moderation_policy=moderation_policy,
                     player_names=player_names,
                     round_length=round_length,
+                    disable_judging=disable_judging,
                 )
                 self.moderation_policy = moderation_policy
                 self.max_turns = round_length * 2
@@ -121,6 +126,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     restricted_action=restricted_action,
                     player_names=player_names,
                     round_length=round_length,
+                    disable_judging=disable_judging,
                 )
                 self.restricted_action = restricted_action
                 self.max_turns = round_length * 2
@@ -294,20 +300,20 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
     def close(self):
         """close."""
+        msg_lst: List[Message] = self._env.message_pool.get_all_messages()
+        formatted_state = [{"name": m.agent_name, "turn": m.turn, "text": m.content} for m in msg_lst]
         if self.save_json:
+            import json
             import os
             from pathlib import Path
-            from chatarena.message import Message
-            import json
-            from typing import List
-            msg_lst: List[Message] = self._env.message_pool.get_all_messages()
             Path("env_logs").mkdir(exist_ok=True)
             os.chdir("env_logs")
             files = os.listdir()
             files = [f for f in files if f.startswith(self.metadata["name"]) and f.endswith(".json")]
-            formatted_state = [{"name": m.agent_name, "turn": m.turn, "text": m.content} for m in msg_lst]
             json.dump(formatted_state, open(self.metadata["name"] + str(len(files)) + ".json", "w"))
             print(f"Chatlog has been saved to disk: {self.metadata['name'] + str(len(files)) + '.json'}")
+        else:
+            return formatted_state
 
     def _unravel_timestep(self, timestep: TimeStep):
         # get observation
@@ -381,9 +387,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             return_info (Optional[bool]): flag to return info as well as observation
             options (Optional[Dict]): options
         """
-        if seed is not None:
-            print("WARNING: seeding is not supported for LLMs.")
-
         # reset our custom attributes
         self.current_turn = 0
         self.total_rewards = {agent: 0.0 for agent in self.possible_agents}
