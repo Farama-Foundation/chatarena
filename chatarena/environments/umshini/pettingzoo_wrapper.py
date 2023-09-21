@@ -281,6 +281,15 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             }
             self.infos[agent]["player_name"] = self.agent_selection
 
+            # Role in symmetric environments
+            if hasattr(self._env, "_current_phase"):
+                if self._env._current_phase == "player_2_attack" or self._env._current_phase == "end":
+                    self.infos[self.possible_agents[0]]["role"] = "defender"
+                    self.infos[self.possible_agents[1]]["role"] = "attacker"
+                else:
+                    self.infos[self.possible_agents[0]]["role"] = "attacker"
+                    self.infos[self.possible_agents[1]]["role"] = "defender"
+
             # info: generate string of full chat log
             if self.string_observation is True:
                 all_messages_string = ""
@@ -363,6 +372,15 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             for m in messages:
                 all_messages_string += f"[{m.agent_name}->all]: {m.content}\n"
             info["all_messages_string"] = all_messages_string
+
+        # Role in symmetric environments
+        if hasattr(self._env, "_current_phase"):
+            if self._env._current_phase == "player_2_attack" or self._env._current_phase == "end":
+                self.infos[self.possible_agents[0]]["role"] = "defender"
+                self.infos[self.possible_agents[1]]["role"] = "attacker"
+            else:
+                self.infos[self.possible_agents[0]]["role"] = "attacker"
+                self.infos[self.possible_agents[1]]["role"] = "defender"
 
         # info: environment specific information
         if hasattr(self, "restricted_action"):
