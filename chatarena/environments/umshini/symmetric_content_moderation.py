@@ -14,7 +14,7 @@ from langchain.schema import SystemMessage, HumanMessage, AIMessage
 
 from chatarena.environments import TimeStep
 from chatarena.message import Message, MessagePool
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 
 from chatarena.environments.umshini.base import UmshiniBaseEnv
 
