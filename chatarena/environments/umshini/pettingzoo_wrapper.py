@@ -246,8 +246,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         # Observations and infos are calculated in step(), but need to be calculated before the first step() call
         elif type(agent) != str:
             raise TypeError("AgentID must be a string")
-        elif self.observations[agent] != {}:
-            return self.observations[agent]
         else:
             # get only the messages that this agent can see
             messages = self._env.get_observation(agent)
