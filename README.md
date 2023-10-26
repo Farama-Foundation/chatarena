@@ -251,9 +251,7 @@ If you find ChatArena useful for your research, please cite our repository (our 
 ## Contact
 
 If you have any questions or suggestions, feel free to open an issue or submit a pull request.
-You can also follow us on [Twitter](https://twitter.com/_chatarena) or
-join [our Slack channel](https://join.slack.com/t/chatarena/shared_invite/zt-1t5fpbiep-CbKucEHdJ5YeDLEpKWxDOg)
-to get the latest updates.
+You can also contact us on the Farama discord server- https://discord.gg/Vrtdmu9Y8Q
 
 Happy chatting!
 
