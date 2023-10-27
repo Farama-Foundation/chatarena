@@ -100,7 +100,7 @@ The restricted action is: {moderator_prompt_input}
             Message(agent_name=player_name, content=action, turn=self._current_turn)
         )
         # Note: first turn is moderator message
-        if self._current_turn <= self._round_length + 1:
+        if self._current_turn <= self._round_length:
             self._current_phase = "player_1_attack"
             if self._current_turn % 2 == 1:
                 # it is player 1's turn to go first in attacking
@@ -124,14 +124,13 @@ The restricted action is: {moderator_prompt_input}
                     self._moderator_speak(f"Roles are being swapped. {self.player_names[0]} is defending, and {self.player_names[1]} is attacking.")
                     self.player_names.reverse()
                     self.agent_selector.reinit(self.player_names)
-                    self._current_phase = "player_2_attack"
                 timestep = TimeStep(
                     observation=self.get_observation(player_name=player_name),
                     reward=self.get_rewards(),
                     terminal=False,
                 )
                 return timestep
-        elif self._current_turn <= 2 * self._round_length + 1:
+        elif self._current_turn <= 2 * self._round_length:
             self._current_phase = "player_2_attack"
             if self._current_turn % 2 == 1:
                 # it is player 2's turn to go first in attacking
