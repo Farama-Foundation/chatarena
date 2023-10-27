@@ -241,7 +241,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                                 color = Fore.BLUE
                                 role = "(defender)"
                         print(
-                            color + f"[{message.agent_name} {role} -> {message.visible_to}]: {message.content}\n "
+                            color + f"[{message.agent_name} {role}-> {message.visible_to}]: {message.content}\n " + Fore.BLACK
                         )
 
     def observe(self, agent: AgentID) -> ObsType:

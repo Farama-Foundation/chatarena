@@ -125,7 +125,6 @@ The moderation policy is: {moderator_prompt_input}
                     self._moderator_speak(f"Roles are being swapped. {self.player_names[0]} is defending, and {self.player_names[1]} is attacking.")
                     self.player_names.reverse()
                     self.agent_selector.reinit(self.player_names)
-                    self._current_phase = "player_2_attack"
                 timestep = TimeStep(
                     observation=self.get_observation(player_name=player_name),
                     reward=self.get_rewards(),
@@ -134,6 +133,7 @@ The moderation policy is: {moderator_prompt_input}
                 return timestep
 
         elif self._current_turn <= 2 * self._round_length:
+            self._current_phase = "player_2_attack"
             if self._current_turn % 2 == 1:
                 # it is player 2's turn to go first in attacking
                 # add their message to the pool, return no reward
