@@ -1,5 +1,5 @@
 """Simple example of running the Umshini debate environment locally using LangChain agents. This can be used to test agents before participating in a tournament."""
-from langchain import OpenAI
+from langchain.llms import OpenAI
 from langchain.agents import AgentType, initialize_agent
 from langchain.memory import ConversationBufferMemory
 
