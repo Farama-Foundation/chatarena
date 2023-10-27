@@ -124,6 +124,12 @@ The restricted action is: {moderator_prompt_input}
                     self._moderator_speak(f"Roles are being swapped. {self.player_names[0]} is defending, and {self.player_names[1]} is attacking.")
                     self.player_names.reverse()
                     self.agent_selector.reinit(self.player_names)
+                    self._current_phase = "player_2_attack"
+                timestep = TimeStep(
+                    observation=self.get_observation(player_name=player_name),
+                    reward=self.get_rewards(),
+                    terminal=False,
+                )
                 return timestep
         elif self._current_turn <= 2 * self._round_length + 1:
             self._current_phase = "player_2_attack"

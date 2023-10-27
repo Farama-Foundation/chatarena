@@ -7,6 +7,7 @@ import string
 
 from typing import List
 
+from colorama import Fore
 from chatarena.environments import Environment
 from chatarena.environments.base import TimeStep
 from chatarena.message import Message
@@ -227,9 +228,21 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 raise Exception("New messages not found")
             else:
                 for message in new_messages:
-                    print(
-                        f"[{message.agent_name}->{message.visible_to}]: {message.content}\n"
-                    )
+                    # Don't repeat things from previous turns
+                    if not self.current_turn > message.turn:
+                        if message.agent_name == "Moderator":
+                            color = Fore.BLACK
+                            role = ""
+                        else:
+                            if self.infos[message.agent_name]["role"] == "attacker":
+                                color = Fore.RED
+                                role = "(attacker)"
+                            else:
+                                color = Fore.BLUE
+                                role = "(defender)"
+                        print(
+                            color + f"[{message.agent_name} {role} -> {message.visible_to}]: {message.content}\n "
+                        )
 
     def observe(self, agent: AgentID) -> ObsType:
         """observe.
@@ -379,6 +392,8 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             else:
                 self.infos[self.possible_agents[0]]["role"] = "attacker"
                 self.infos[self.possible_agents[1]]["role"] = "defender"
+
+        info["role"] = self.infos[self.agent_selection]["role"]
 
         # info: environment specific information
         if hasattr(self, "restricted_action"):

@@ -121,23 +121,22 @@ The restricted action is: {moderator_prompt_input}
                 # it is player 2's turn to respond to player 1's query
                 # they should be judged on whether they allow the restricted action
                 # return rewards this step
-                rews = self.get_rewards()
-                timestep = TimeStep(
-                    observation=self.get_observation(player_name=player_name),
-                    reward=rews,
-                    terminal=False,
-                )
                 if self._current_turn == self._round_length:
                     # swap roles
                     self._moderator_speak(f"Roles are being swapped. {self.player_names[0]} is defending, and {self.player_names[1]} is attacking.")
                     self.player_names.reverse()
                     self.agent_selector.reinit(self.player_names)
+                    self._current_phase = "player_2_attack"
+                timestep = TimeStep(
+                    observation=self.get_observation(player_name=player_name),
+                    reward=self.get_rewards(),
+                    terminal=False,
+                )
                 return timestep
 
         elif self._current_turn <= 2 * self._round_length:
-            self._current_phase = "player_2_attack"
             if self._current_turn % 2 == 1:
-                # it is player 1's turn to go first in attacking
+                # it is player 2's turn to go first in attacking
                 # add their message to the pool, return no reward
                 return TimeStep(
                     observation=self.get_observation(player_name=player_name),
@@ -151,10 +150,9 @@ The restricted action is: {moderator_prompt_input}
                 is_now_terminal = self._current_turn == 2 * self._round_length
 
                 # get the rewards before getting the observation, so that the moderator's final message is displayed (winner)
-                rews = self.get_rewards()
                 return TimeStep(
                     observation=self.get_observation(player_name=player_name),
-                    reward=rews,
+                    reward=self.get_rewards(),
                     terminal=is_now_terminal,
                 )
         else:
