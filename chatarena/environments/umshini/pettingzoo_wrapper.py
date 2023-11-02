@@ -51,7 +51,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         character_limit: int | None = 4000,
         render_mode: str | None = None,
         save_json: bool | None = False,
-        disable_judging: bool | None = True
+        disable_judging: bool | None = False
     ):
         """Wrapper to convert a ChatArena environment into a PettingZoo environment.
 
@@ -476,12 +476,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             if info["all_messages"][-1].agent_name == "Moderator":
                 info["new_messages"].append(info["all_messages"][-2])
 
-        # account for the moderator interjecting statements such as "roles are being swapped"
-        # first turn we already render the moderator's message, so we don't need to add the message here
-        if info["turn"] > 1:
-            if len(info["all_messages"]) > 1 and info["all_messages"][-2].agent_name == "Moderator":
-                info["new_messages"].append(info["all_messages"][-2])
-
         self.observations[agent] = observation
         self.rewards = reward
         self.terminations[agent] = termination
@@ -495,7 +489,8 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             self.truncations = {agent: True for agent in self.possible_agents}
 
         # Update total rewards for each agent (in one timestep both agents can get rewards/penalties)
-        self.total_rewards[agent] += self._cumulative_rewards[agent]
+        for agent in self.agents:
+            self.total_rewards[agent] += self.rewards[agent]
 
         # Reset PettingZoo cumulative_rewards attribute (tracks accumulated rewards for an agent since its previous action)
         self._cumulative_rewards[agent] = 0
