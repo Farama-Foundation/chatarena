@@ -125,7 +125,6 @@ The moderation policy is: {moderator_prompt_input}
                 # they should be judged on whether they allow the restricted action
                 # return rewards this step
                 rews = self.get_rewards()
-                self._moderator_speak(f"SCORES: {rews}")
                 if self._current_turn == self._round_length:
                     # swap roles
                     self._moderator_speak(f"Roles are being swapped. {self.player_names[0]} is defending, and {self.player_names[1]} is attacking.")
@@ -156,7 +155,6 @@ The moderation policy is: {moderator_prompt_input}
 
                 # get the rewards before getting the observation, so that the moderator's final message is displayed (winner)
                 rews = self.get_rewards()
-                self._moderator_speak(f"SCORES: {rews}")
                 return TimeStep(
                     observation=self.get_observation(player_name=player_name),
                     reward=rews,
