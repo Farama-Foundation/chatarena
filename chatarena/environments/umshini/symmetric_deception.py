@@ -122,7 +122,6 @@ The restricted action is: {moderator_prompt_input}
                 # return rewards this step
                 # if it is the end of the first round, swap roles
                 rews = self.get_rewards()
-                self._moderator_speak(f"SCORES: {rews}")
                 if self._current_turn == self._round_length:
                     self._moderator_speak(f"Roles are being swapped. {self.player_names[0]} is defending, and {self.player_names[1]} is attacking.")
                     self.player_names.reverse()
@@ -151,7 +150,6 @@ The restricted action is: {moderator_prompt_input}
 
                 # get the rewards before getting the observation, so that the moderator's final message is displayed (not currently used))
                 rews = self.get_rewards()
-                self._moderator_speak(f"SCORES: {rews}")
                 return TimeStep(
                     observation=self.get_observation(player_name=player_name),
                     reward=rews,
