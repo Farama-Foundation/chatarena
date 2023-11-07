@@ -1,11 +1,11 @@
 from chatarena.agent import Player
 from chatarena.backends import OpenAIChat
-environment_description = "You are in an empty house."
-player1 = Player(name="Dick", backend=OpenAIChat(),
-                 role_desc="You are Dick, an intelligent, witty, sexually attractive man with a dark side: a short temper, a control freak, maybe even a paranoid one. You're married to Jane and have a three-year-old daughter, Nell, and verbally abuse and mistreat Jane because you suspect Jane of cheating on you. Jane gets a divorce because she can't take it anymore and gets custody of her daughter. After a horrific incident, you are arrested and sent to jail.",
+environment_description = "You are in a house in the winter countryside with no people around."
+player1 = Player(name="Sheldon", backend=OpenAIChat(),
+                 role_desc="You are a writer who has published many famous books and has many fans. You are thoughtful and friendly, and you love to read and write in general. You were saved by Annie and brought to her house after a car accident. Your leg was broken in a car accident and you need to be in a wheelchair.",
                  global_prompt=environment_description)
-player2 = Player(name="Jane", backend=OpenAIChat(),
-                 role_desc="You are Jane and you notice a faint, faded odor of Vitamin Conditioner in the house, it is Dick's Conditioner. You sit in a chair, your muscles too flaccid with fear to stand up. As you hear Dick's footsteps begin to descend the stairs, you think: Even in prison, only Dick would have made sure he had conditioner. You have to get up, you have to run, but you can't move.",
+player2 = Player(name="Annie", backend=OpenAIChat(),
+                 role_desc="You're a nurse with a penchant for murder and you are also an avid fan of Sheldon's books. When you learn that Sheldon has written the death of your favorite fictional character, Bitter, you imprison Sheldon in your own home and push him to write a book to keep Bitter alive.",
                  global_prompt=environment_description)
 from chatarena.environments.conversation import Conversation
 env = Conversation(player_names=[p.name for p in [player1, player2]])

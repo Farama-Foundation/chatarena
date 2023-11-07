@@ -23,7 +23,7 @@ else:
 
 # Default config follows the OpenAI playground
 DEFAULT_TEMPERATURE = 1.1
-DEFAULT_MAX_TOKENS = 50
+DEFAULT_MAX_TOKENS = 500
 # DEFAULT_MODEL = "gpt-3.5-turbo"
 DEFAULT_MODEL = "gpt-4-0613"
 
