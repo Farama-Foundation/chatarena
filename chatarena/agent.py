@@ -87,6 +87,7 @@ class Player(Agent):
         Returns:
             str: The action (response) of the player.
         """
+        
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,

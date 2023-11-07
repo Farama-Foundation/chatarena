@@ -8,7 +8,7 @@ from .agent import Player
 from .environments import Environment, TimeStep, load_environment
 from .backends import Human
 from .config import ArenaConfig
-
+import pdb
 
 class TooManyInvalidActions(Exception):
     pass
@@ -51,6 +51,7 @@ class Arena:
         """
         Take a step in the game: one player takes an action and the environment updates
         """
+        # pdb.set_trace()
         player_name = self.environment.get_next_player()
         player = self.name_to_player[player_name]  # get the player object
         observation = self.environment.get_observation(player_name)  # get the observation for the player

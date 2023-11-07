@@ -3,10 +3,11 @@ import os
 import re
 import logging
 from tenacity import retry, stop_after_attempt, wait_random_exponential
-
+import pdb
 from .base import IntelligenceBackend
 from ..message import Message, SYSTEM_NAME, MODERATOR_NAME
-
+import requests
+import json
 try:
     import openai
 except ImportError:
@@ -21,14 +22,14 @@ else:
         is_openai_available = True
 
 # Default config follows the OpenAI playground
-DEFAULT_TEMPERATURE = 0.7
-DEFAULT_MAX_TOKENS = 256
-DEFAULT_MODEL = "gpt-3.5-turbo"
-# DEFAULT_MODEL = "gpt-4-0613"
+DEFAULT_TEMPERATURE = 1.1
+DEFAULT_MAX_TOKENS = 50
+# DEFAULT_MODEL = "gpt-3.5-turbo"
+DEFAULT_MODEL = "gpt-4-0613"
 
 END_OF_MESSAGE = "<EOS>"  # End of message token specified by us not OpenAI
 STOP = ("<|endoftext|>", END_OF_MESSAGE)  # End of sentence token
-BASE_PROMPT = f"The messages always end with the token {END_OF_MESSAGE}."
+BASE_PROMPT = f"The messages should always end with the token {END_OF_MESSAGE}."
 
 
 class OpenAIChat(IntelligenceBackend):
@@ -57,7 +58,7 @@ class OpenAIChat(IntelligenceBackend):
         self.model = model
         self.merge_other_agent_as_user = merge_other_agents_as_one_user
 
-    @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
+    @retry(stop=stop_after_attempt(1), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, messages):
         completion = openai.ChatCompletion.create(
             model=self.model,
@@ -82,13 +83,16 @@ class OpenAIChat(IntelligenceBackend):
             history_messages: the history of the conversation, or the observation for the agent
             request_msg: the request from the system to guide the agent's next response
         """
-
+        is_agent_message = True
         # Merge the role description and the global prompt as the system prompt for the agent
         if global_prompt:  # Prepend the global prompt if it exists
-            system_prompt = f"You are a helpful assistant.\n{global_prompt.strip()}\n{BASE_PROMPT}\n\nYour name is {agent_name}.\n\nYour role:{role_desc}"
+            # system_prompt = f"You are a helpful assistant.\n{global_prompt.strip()}\n{BASE_PROMPT}\n\nYour name is {agent_name}.\n\nYour role:{role_desc}"
+            system_prompt = f"{global_prompt.strip()}\n{BASE_PROMPT}\n\nYour name is {agent_name}.\n\nYour role:{role_desc}"
         else:
-            system_prompt = f"You are a helpful assistant. Your name is {agent_name}.\n\nYour role:{role_desc}\n\n{BASE_PROMPT}"
-
+            # system_prompt = f"You are a helpful assistant. Your name is {agent_name}.\n\nYour role:{role_desc}\n\n{BASE_PROMPT}"
+            system_prompt = f"Your name is {agent_name}.\n\nYour role:{role_desc}\n\n{BASE_PROMPT}"
+        # 'You are a helpful assistant.\nYou are in a university classroom and it is Natural Language Processing module. You start by introducing themselves.\nThe messages always end with the token <EOS>.\n\nYour name is Professor.\n\nYour role:You are Prof. Alpha, a knowledgeable professor in NLP. Your answer will concise and accurate. The answers should be less than 100 words.'
+        
         all_messages = [(SYSTEM_NAME, system_prompt)]
         for msg in history_messages:
             if msg.agent_name == SYSTEM_NAME:
@@ -99,7 +103,7 @@ class OpenAIChat(IntelligenceBackend):
         if request_msg:
             all_messages.append((SYSTEM_NAME, request_msg.content))
         else:  # The default request message that reminds the agent its role and instruct it to speak
-            all_messages.append((SYSTEM_NAME, f"Now you speak, {agent_name}.{END_OF_MESSAGE}"))
+            all_messages.append((SYSTEM_NAME, f"Now you speak and act, {agent_name}.{END_OF_MESSAGE}"))
 
         messages = []
         for i, msg in enumerate(all_messages):
@@ -122,7 +126,8 @@ class OpenAIChat(IntelligenceBackend):
                         messages.append({"role": "user", "content": f"[{msg[0]}]: {msg[1]}"})
                     else:
                         raise ValueError(f"Invalid role: {messages[-1]['role']}")
-
+        # pdb.set_trace()
+        # print("[MESSAGES]: ", messages)
         response = self._get_response(messages, *args, **kwargs)
 
         # Remove the agent name if the response starts with it
@@ -131,5 +136,5 @@ class OpenAIChat(IntelligenceBackend):
 
         # Remove the tailing end of message token
         response = re.sub(rf"{END_OF_MESSAGE}$", "", response).strip()
-
+        print("[{}]: {}".format(agent_name, response))
         return response

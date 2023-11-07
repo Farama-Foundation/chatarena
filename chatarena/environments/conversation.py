@@ -82,7 +82,20 @@ class Conversation(Environment):
                             reward=self.get_zero_rewards(),
                             terminal=self.is_terminal())  # Return all the messages
         return timestep
+    def check_action(self, action: str, player_name: str) -> bool:
+        """
+        Check whether a given action is valid for a player.
 
+        Parameters:
+            action (str): The action to be checked.
+            player_name (str): The name of the player.
+
+        Returns:
+            bool: True if the action is valid, False otherwise.
+        """
+        if "As an AI language model" in action:   #GPT not act as the agent
+            return False
+        return True
 
 class ModeratedConversation(Conversation):
     """
