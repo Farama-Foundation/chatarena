@@ -470,11 +470,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         observation, reward, termination, truncation, info = self._unravel_timestep(
             timestep
         )
-        # add moderator messages to info so they are rendered
-        # some environments (e.g., debate) have the moderator announce the winner as the last message
-        if termination or truncation:
-            if info["all_messages"][-1].agent_name == "Moderator":
-                info["new_messages"].append(info["all_messages"][-2])
 
         self.observations[agent] = observation
         self.rewards = reward
