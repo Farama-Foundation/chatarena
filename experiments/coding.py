@@ -55,9 +55,7 @@ class IterativeCoding(Environment):
             return "verifier"
 
     def _moderator_speak(self, text: str, visible_to: Union[str, List[str]] = "all"):
-        """
-        moderator say something
-        """
+        """Moderator say something."""
         message = Message(
             agent_name="Moderator", content=text, turn=self.turn, visible_to=visible_to
         )

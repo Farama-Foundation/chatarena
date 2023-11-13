@@ -84,18 +84,14 @@ class Chameleon(Environment):
         self.reset()  # To initialize the game (select topic, code, chameleon)
 
     def get_next_player(self) -> str:
-        """
-        get the next player
-        """
+        """Get the next player."""
         if self._current_phase != "guess":
             return self.player_names[self._next_player_idx]
         else:
             return self.chameleon_name
 
     def reset(self):
-        """
-        sample topic, code and chameleon code
-        """
+        """Sample topic, code and chameleon code."""
         self.topic = random.choice(list(self.topic_codes.keys()))
         self.code = random.choice(self.topic_codes[self.topic])
         self.chameleon_name = random.choice(self.player_names)
@@ -136,9 +132,7 @@ class Chameleon(Environment):
         self.message_pool.print()
 
     def get_observation(self, player_name=None) -> List[Message]:
-        """
-        get observation for the player
-        """
+        """Get observation for the player."""
         if player_name is None:
             return self.message_pool.get_all_messages()
         else:
@@ -147,9 +141,7 @@ class Chameleon(Environment):
             )
 
     def _text2vote(self, text) -> str:
-        """
-        convert text to vote, return a player's name
-        """
+        """Convert text to vote, return a player's name."""
         # lower = text.lower().replace("[", "").replace("]", "").replace(".", "")
         text = text.lower()
         for name in self.player_names:
@@ -163,9 +155,7 @@ class Chameleon(Environment):
         return ""
 
     def _is_true_code(self, text) -> bool:
-        """
-        Check whether the text is the true code
-        """
+        """Check whether the text is the true code."""
         # Get the word enclosed by quote marks with regex
         pattern = r"\"(.+?)\""
         match = re.search(pattern, text)
@@ -187,9 +177,7 @@ class Chameleon(Environment):
                 return False
 
     def _moderator_speak(self, text: str, visible_to: Union[str, List[str]] = "all"):
-        """
-        moderator say something
-        """
+        """Moderator say something."""
         message = Message(
             agent_name="Moderator",
             content=text,
@@ -199,9 +187,7 @@ class Chameleon(Environment):
         self.message_pool.append_message(message)
 
     def get_rewards(self, chameleon_win: bool) -> Dict[str, float]:
-        """
-        get rewards for each player
-        """
+        """Get rewards for each player."""
         rewards = {}
         for name in self.player_names:
             # The winner gets 1, the loser gets 0
@@ -210,9 +196,7 @@ class Chameleon(Environment):
         return rewards
 
     def is_terminal(self) -> bool:
-        """
-        check if the conversation is over
-        """
+        """Check if the conversation is over."""
         # If the last message is the signal, then the conversation is over
         if self.message_pool.last_message.content.startswith(
             SIGNAL_END_OF_CONVERSATION
@@ -221,7 +205,8 @@ class Chameleon(Environment):
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """
-        step function that is called by the arena
+        Step function that is called by the arena.
+
         Args:
             player_name: the name of the player that takes the action
             action: the action that the agents wants to take

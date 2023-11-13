@@ -7,6 +7,7 @@ from .utils import AttributedDict
 class Config(AttributedDict):
     """
     Config class to manage the configuration of the games.
+
     The class has a few useful methods to load and save the config.
     """
 
@@ -43,9 +44,7 @@ class Config(AttributedDict):
 
 
 class Configurable:
-    """
-    Configurable is an interface for classes that can be initialized with a config.
-    """
+    """Configurable is an interface for classes that can be initialized with a config."""
 
     def __init__(self, **kwargs):
         self._config_dict = kwargs
@@ -63,9 +62,7 @@ class Configurable:
 
 
 class EnvironmentConfig(Config):
-    """
-    EnvironmentConfig contains a env_type field to indicate the name of the environment.
-    """
+    """EnvironmentConfig contains a env_type field to indicate the name of the environment."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -75,9 +72,7 @@ class EnvironmentConfig(Config):
 
 
 class BackendConfig(Config):
-    """
-    BackendConfig contains a backend_type field to indicate the name of the backend.
-    """
+    """BackendConfig contains a backend_type field to indicate the name of the backend."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -87,9 +82,7 @@ class BackendConfig(Config):
 
 
 class AgentConfig(Config):
-    """
-    AgentConfig contains role_desc and backend fields.
-    """
+    """AgentConfig contains role_desc and backend fields."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -105,9 +98,7 @@ class AgentConfig(Config):
 
 
 class ArenaConfig(Config):
-    """
-    ArenaConfig contains a list of AgentConfig.
-    """
+    """ArenaConfig contains a list of AgentConfig."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

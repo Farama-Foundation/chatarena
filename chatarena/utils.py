@@ -79,7 +79,9 @@ def extract_code(text):
 
 class AttributedDict(dict):
     """
-    A dictionary class whose keys are automatically set as attributes of the class. The dictionary is serializable to JSON.
+    A dictionary class whose keys are automatically set as attributes of the class.
+
+    The dictionary is serializable to JSON.
 
     Inherits from:
         dict: Built-in dictionary class in Python.

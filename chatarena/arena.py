@@ -15,9 +15,7 @@ class TooManyInvalidActions(Exception):
 
 
 class Arena:
-    """
-    Utility class that manages the game environment and players
-    """
+    """Utility class that manages the game environment and players."""
 
     def __init__(
         self, players: List[Player], environment: Environment, global_prompt: str = None
@@ -50,9 +48,7 @@ class Arena:
         return self.current_timestep
 
     def step(self) -> TimeStep:
-        """
-        Take a step in the game: one player takes an action and the environment updates
-        """
+        """Take a step in the game: one player takes an action and the environment updates."""
         player_name = self.environment.get_next_player()
         player = self.name_to_player[player_name]  # get the player object
         observation = self.environment.get_observation(
@@ -83,17 +79,13 @@ class Arena:
         return timestep
 
     def next_is_human(self):
-        """
-        check if the next player is human
-        """
+        """Check if the next player is human."""
         player_name = self.environment.get_next_player()
         player = self.name_to_player[player_name]
         return isinstance(player.backend, Human)
 
     def run(self, num_steps: int = 1):
-        """
-        run the game for num_turns
-        """
+        """Run the game for num_turns."""
         for i in range(num_steps):
             timestep = self.step()
             if timestep.terminal:
@@ -101,9 +93,7 @@ class Arena:
 
     @classmethod
     def from_config(cls, config: Union[str, ArenaConfig]):
-        """
-        create an arena from a config
-        """
+        """Create an arena from a config."""
         # If config is a path, load the config
         if isinstance(config, str):
             config = ArenaConfig.load(config)
@@ -135,9 +125,7 @@ class Arena:
         return cls(players, env, global_prompt=global_prompt)
 
     def to_config(self) -> ArenaConfig:
-        """
-        convert the arena to a config
-        """
+        """Convert the arena to a config."""
         # return {
         #     "players": [player.to_config() for player in self.players],
         #     "environment": self.environment.to_config(),
@@ -150,24 +138,21 @@ class Arena:
         )
 
     def launch_cli(self, max_steps: int = None, interactive: bool = True):
-        """
-        launch the command line interface
-        """
+        """Launch the command line interface."""
         from chatarena.ui.cli import ArenaCLI
 
         cli = ArenaCLI(self)
         cli.launch(max_steps=max_steps, interactive=interactive)
 
     def save_config(self, path: str):
-        """
-        save the config to a file
-        """
+        """Save the config to a file."""
         config = self.to_config()
         config.save(path)
 
     def save_history(self, path: str):
         """
-        save the history of the game to a file
+        Save the history of the game to a file.
+
         Supports csv and json formats.
         """
         messages = self.environment.get_observation()

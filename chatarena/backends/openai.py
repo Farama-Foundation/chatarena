@@ -32,9 +32,7 @@ BASE_PROMPT = f"The messages always end with the token {END_OF_MESSAGE}."
 
 
 class OpenAIChat(IntelligenceBackend):
-    """
-    Interface to the ChatGPT style model with system, user, assistant roles separation
-    """
+    """Interface to the ChatGPT style model with system, user, assistant roles separation."""
 
     stateful = False
     type_name = "openai-chat"
@@ -48,7 +46,8 @@ class OpenAIChat(IntelligenceBackend):
         **kwargs,
     ):
         """
-        instantiate the OpenAIChat backend
+        Instantiate the OpenAIChat backend.
+
         args:
             temperature: the temperature of the sampling
             max_tokens: the maximum number of tokens to sample
@@ -96,7 +95,8 @@ class OpenAIChat(IntelligenceBackend):
         **kwargs,
     ) -> str:
         """
-        format the input and call the ChatGPT/GPT-4 API
+        Format the input and call the ChatGPT/GPT-4 API.
+
         args:
             agent_name: the name of the agent
             role_desc: the description of the role of the agent

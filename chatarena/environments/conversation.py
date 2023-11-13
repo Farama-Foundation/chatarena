@@ -9,6 +9,7 @@ from .base import Environment, TimeStep
 class Conversation(Environment):
     """
     Turn-based fully observable conversation environment.
+
     Next speaker order is either parallel or round-robin.
     """
 
@@ -46,15 +47,11 @@ class Conversation(Environment):
         self.message_pool.print()
 
     def get_next_player(self) -> str:
-        """
-        get the next player
-        """
+        """Get the next player."""
         return self.player_names[self._next_player_idx]
 
     def get_observation(self, player_name=None) -> List[Message]:
-        """
-        get observation for the player
-        """
+        """Get observation for the player."""
         if player_name is None:
             return self.message_pool.get_all_messages()
         else:
@@ -63,9 +60,7 @@ class Conversation(Environment):
             )
 
     def is_terminal(self) -> bool:
-        """
-        check if the conversation is over
-        """
+        """Check if the conversation is over."""
         # If the last message is the signal, then the conversation is over
         if self.message_pool.last_message.content.startswith(
             SIGNAL_END_OF_CONVERSATION
@@ -74,7 +69,8 @@ class Conversation(Environment):
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """
-        step function that is called by the arena
+        Step function that is called by the arena.
+
         Args:
             player_name: the name of the player that takes the action
             action: the action that the agents wants to take
@@ -100,6 +96,7 @@ class Conversation(Environment):
 class ModeratedConversation(Conversation):
     """
     Turn-based fully observable conversation environment.
+
     Next speaker order is either parallel or round-robin.
     Moderator is a special agent that can see all messages and can decide whether the conversation is over.
     """
@@ -148,7 +145,8 @@ class ModeratedConversation(Conversation):
 
     def step(self, player_name: str, action: str) -> TimeStep:
         """
-        step function that is called by the arena
+        Step function that is called by the arena.
+
         Args:
             player_name: the name of the player that takes the action
             action: the action that the agents wants to take

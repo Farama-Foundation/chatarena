@@ -1,5 +1,6 @@
 """
 Datastore module for chat_arena.
+
 This module provides utilities for storing the messages and the game results into database.
 Currently, it supports Supabase.
 """

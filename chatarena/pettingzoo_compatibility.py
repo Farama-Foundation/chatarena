@@ -69,7 +69,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent: AgentID):
-        """observation_space.
+        """Observation_space.
 
         We get the observation space from the underlying environment.
         Args:
@@ -86,7 +86,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
 
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent: AgentID):
-        """action_space.
+        """Action_space.
 
         Get the action space from the underlying environment.
 
@@ -106,7 +106,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         return action_space
 
     def render(self):
-        """render.
+        """Render.
 
         Print the current game state.
         """
@@ -119,7 +119,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         pass
 
     def observe(self, agent: AgentID) -> ObsType:
-        """observe.
+        """Observe.
 
         Args:
             agent (AgentID): agent (e.g., "Player 1")
@@ -153,7 +153,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         return observation
 
     def close(self):
-        """close."""
+        """Close."""
         pass
 
     def _unravel_timestep(self, timestep: chatarena.arena.TimeStep):
@@ -203,7 +203,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         seed: int | None = None,
         options: dict | None = None,
     ):
-        """reset.
+        """Reset.
 
         Args:
             seed (Optional[int]): seed

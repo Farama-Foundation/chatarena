@@ -21,9 +21,7 @@ else:
 
 
 class TransformersConversational(IntelligenceBackend):
-    """
-    Interface to the Transformers ConversationalPipeline
-    """
+    """Interface to the Transformers ConversationalPipeline."""
 
     stateful = False
     type_name = "transformers:conversational"

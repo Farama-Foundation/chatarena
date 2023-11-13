@@ -24,9 +24,7 @@ DEFAULT_MODEL = "command-xlarge"
 
 
 class CohereAIChat(IntelligenceBackend):
-    """
-    Interface to the Cohere API
-    """
+    """Interface to the Cohere API."""
 
     stateful = True
     type_name = "cohere-chat"
@@ -85,7 +83,8 @@ class CohereAIChat(IntelligenceBackend):
         **kwargs,
     ) -> str:
         """
-        format the input and call the Cohere API
+        Format the input and call the Cohere API.
+
         args:
             agent_name: the name of the agent
             role_desc: the description of the role of the agent

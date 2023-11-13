@@ -64,9 +64,7 @@ class MessagePool:
     """
 
     def __init__(self):
-        """
-        Initialize the MessagePool with a unique conversation ID.
-        """
+        """Initialize the MessagePool with a unique conversation ID."""
         self.conversation_id = str(uuid1())
         self._messages: List[
             Message
@@ -74,9 +72,7 @@ class MessagePool:
         self._last_message_idx = 0
 
     def reset(self):
-        """
-        Clear the message pool.
-        """
+        """Clear the message pool."""
         self._messages = []
 
     def append_message(self, message: Message):
@@ -89,9 +85,7 @@ class MessagePool:
         self._messages.append(message)
 
     def print(self):
-        """
-        Print all the messages in the pool.
-        """
+        """Print all the messages in the pool."""
         for message in self._messages:
             print(f"[{message.agent_name}->{message.visible_to}]: {message.content}")
 

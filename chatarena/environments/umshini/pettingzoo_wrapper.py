@@ -177,7 +177,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent: AgentID):
-        """observation_space.
+        """Observation_space.
 
         We get the observation space from the underlying environment.
         Supports both string and dict observations spaces.
@@ -202,7 +202,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent: AgentID):
-        """action_space.
+        """Action_space.
 
         Get the action space from the underlying environment.
         Action space currently only supports messages to all players, but could be extended to support private messages.
@@ -218,7 +218,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         )
 
     def render(self):
-        """render.
+        """Render.
 
         Print the current game state.
         """
@@ -258,7 +258,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                         )
 
     def observe(self, agent: AgentID) -> ObsType:
-        """observe.
+        """Observe.
 
         Args:
             agent (AgentID): agent (e.g., "Player 1")
@@ -335,7 +335,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             return observation
 
     def close(self):
-        """close."""
+        """Close."""
         msg_lst: list[Message] = self._env.message_pool.get_all_messages()
         formatted_state = [
             {"name": m.agent_name, "turn": m.turn, "text": m.content} for m in msg_lst
@@ -442,7 +442,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         seed: int | None = None,
         options: dict | None = None,
     ):
-        """reset.
+        """Reset.
 
         Args:
             seed (Optional[int]): seed

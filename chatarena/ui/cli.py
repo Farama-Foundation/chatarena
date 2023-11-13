@@ -34,17 +34,13 @@ logging.getLogger().setLevel(logging.ERROR)
 
 
 class ArenaCLI:
-    """
-    The CLI user interface for ChatArena.
-    """
+    """The CLI user interface for ChatArena."""
 
     def __init__(self, arena: Arena):
         self.arena = arena
 
     def launch(self, max_steps: int = None, interactive: bool = True):
-        """
-        Run the CLI
-        """
+        """Run the CLI."""
         if not interactive and max_steps is None:
             max_steps = MAX_STEPS
 

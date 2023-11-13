@@ -26,9 +26,7 @@ DEFAULT_MODEL = "claude-v1"
 
 
 class Claude(IntelligenceBackend):
-    """
-    Interface to the Claude offered by Anthropic.
-    """
+    """Interface to the Claude offered by Anthropic."""
 
     stateful = False
     type_name = "claude"
@@ -69,7 +67,8 @@ class Claude(IntelligenceBackend):
         **kwargs,
     ) -> str:
         """
-        format the input and call the Claude API
+        Format the input and call the Claude API.
+
         args:
             agent_name: the name of the agent
             role_desc: the description of the role of the agent

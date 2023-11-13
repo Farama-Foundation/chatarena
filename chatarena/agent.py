@@ -16,9 +16,7 @@ SIGNAL_END_OF_CONVERSATION = f"<<<<<<END_OF_CONVERSATION>>>>>>{uuid.uuid4()}"
 
 
 class Agent(Configurable):
-    """
-    An abstract base class for all the agents in the chatArena environment.
-    """
+    """An abstract base class for all the agents in the chatArena environment."""
 
     @abstractmethod
     def __init__(
@@ -42,7 +40,9 @@ class Agent(Configurable):
 
 class Player(Agent):
     """
-    The Player class represents a player in the chatArena environment. A player can observe the environment
+    The Player class represents a player in the chatArena environment.
+
+    A player can observe the environment
     and perform an action (generate a response) based on the observation.
     """
 
@@ -127,7 +127,9 @@ class Player(Agent):
 
     async def async_act(self, observation: List[Message]) -> str:
         """
-        Async version of act(). This is used when you want to generate a response asynchronously.
+        Async version of act().
+
+        This is used when you want to generate a response asynchronously.
 
         Parameters:
             observation (List[Message]): The messages that the player has observed from the environment.
@@ -153,6 +155,7 @@ class Player(Agent):
     def reset(self):
         """
         Reset the player's backend in case they are not stateless.
+
         This is usually called at the end of each episode.
         """
         self.backend.reset()
@@ -161,6 +164,7 @@ class Player(Agent):
 class Moderator(Player):
     """
     The Moderator class represents a special type of player that moderates the conversation.
+
     It is usually used as a component of the environment when the transition dynamics is conditioned on natural language that are not easy to parse programmatically.
     """
 

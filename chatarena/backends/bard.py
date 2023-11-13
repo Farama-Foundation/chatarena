@@ -26,9 +26,7 @@ DEFAULT_MAX_TOKENS = 4096
 
 
 class Bard(IntelligenceBackend):
-    """
-    Interface to the Bard offered by Google.
-    """
+    """Interface to the Bard offered by Google."""
 
     stateful = False
     type_name = "bard"
@@ -63,7 +61,8 @@ class Bard(IntelligenceBackend):
         **kwargs,
     ) -> str:
         """
-        format the input and call the Bard API
+        Format the input and call the Bard API.
+
         args:
             agent_name: the name of the agent
             role_desc: the description of the role of the agent

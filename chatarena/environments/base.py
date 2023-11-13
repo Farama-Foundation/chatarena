@@ -10,7 +10,9 @@ from ..utils import AttributedDict
 @dataclass
 class TimeStep(AttributedDict):
     """
-    Represents a single step in time within the simulation. It includes observation, reward, and terminal state.
+    Represents a single step in time within the simulation.
+
+    It includes observation, reward, and terminal state.
 
     Attributes:
         observation (List[Message]): A list of messages (observations) for the current timestep.
@@ -25,7 +27,9 @@ class TimeStep(AttributedDict):
 
 class Environment(Configurable):
     """
-    Abstract class representing an environment. It defines the necessary methods any environment must implement.
+    Abstract class representing an environment.
+
+    It defines the necessary methods any environment must implement.
 
     Inherits from:
         Configurable: A custom class that provides methods to handle configuration settings.
@@ -54,7 +58,9 @@ class Environment(Configurable):
 
     def __init_subclass__(cls, **kwargs):
         """
-        Automatically called when a subclass is being initialized. Here it's used to check if the subclass has the required attributes.
+        Automatically called when a subclass is being initialized.
+
+        Here it's used to check if the subclass has the required attributes.
         """
         for required in ("type_name",):
             if getattr(cls, required) is None:
@@ -78,9 +84,7 @@ class Environment(Configurable):
 
     @property
     def num_players(self) -> int:
-        """
-        get the number of players
-        """
+        """Get the number of players."""
         return len(self.player_names)
 
     @abstractmethod
@@ -114,9 +118,7 @@ class Environment(Configurable):
 
     @abstractmethod
     def print(self):
-        """
-        print the environment state
-        """
+        """Print the environment state."""
         pass
 
     @abstractmethod

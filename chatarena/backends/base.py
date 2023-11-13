@@ -55,7 +55,7 @@ class IntelligenceBackend(Configurable):
         *args,
         **kwargs,
     ) -> str:
-        """Async querying"""
+        """Async querying."""
         raise NotImplementedError
 
     # reset the state of the backend

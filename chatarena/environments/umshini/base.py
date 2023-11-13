@@ -41,7 +41,9 @@ class UmshiniBaseEnv(Environment):
         self.reset()
 
     def reset(self):
-        """Reset the environment. Sets basic LangEnv variables.
+        """Reset the environment.
+
+        Sets basic LangEnv variables.
 
         Must call super().reset() if being overwritten, call moderator_speak, and return the timestep.
         """
