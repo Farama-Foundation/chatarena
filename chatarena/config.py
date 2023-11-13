@@ -1,6 +1,5 @@
-import json
 import copy
-from abc import abstractmethod
+import json
 
 from .utils import AttributedDict
 
@@ -19,7 +18,10 @@ class Config(AttributedDict):
                 self[key] = init_config(value)  # convert dict to Config recursively
             # convert list of dict to list of Config recursively
             elif isinstance(value, list) and len(value) > 0:
-                self[key] = [init_config(item) if isinstance(item, dict) else item for item in value]
+                self[key] = [
+                    init_config(item) if isinstance(item, dict) else item
+                    for item in value
+                ]
 
     def save(self, path: str):
         # save config to file
@@ -29,7 +31,7 @@ class Config(AttributedDict):
     @classmethod
     def load(cls, path: str):
         # load config from file
-        with open(path, "r") as f:
+        with open(path) as f:
             config = json.load(f)
         return cls(config)
 

@@ -1,5 +1,5 @@
-from .base import IntelligenceBackend
 from ..config import BackendConfig
+from .base import IntelligenceBackend
 
 
 # An Error class for the human backend

@@ -1,8 +1,8 @@
-from typing import List, Union
-from dataclasses import dataclass
-import time
-from uuid import uuid1
 import hashlib
+import time
+from dataclasses import dataclass
+from typing import List, Union
+from uuid import uuid1
 
 # Preserved roles
 SYSTEM_NAME = "System"
@@ -37,11 +37,12 @@ class Message:
         msg_type (str): Type of the message, e.g., 'text'. Defaults to 'text'.
         logged (bool): Whether the message is logged in the database. Defaults to False.
     """
+
     agent_name: str
     content: str
     turn: int
     timestamp: int = time.time_ns()
-    visible_to: Union[str, List[str]] = 'all'
+    visible_to: Union[str, List[str]] = "all"
     msg_type: str = "text"
     logged: bool = False  # Whether the message is logged in the database
 
@@ -49,10 +50,11 @@ class Message:
     def msg_hash(self):
         # Generate a unique message id given the content, timestamp and role
         return _hash(
-            f"agent: {self.agent_name}\ncontent: {self.content}\ntimestamp: {str(self.timestamp)}\nturn: {self.turn}\nmsg_type: {self.msg_type}")
+            f"agent: {self.agent_name}\ncontent: {self.content}\ntimestamp: {str(self.timestamp)}\nturn: {self.turn}\nmsg_type: {self.msg_type}"
+        )
 
 
-class MessagePool():
+class MessagePool:
     """
     A pool to manage the messages in the chatArena environment.
 
@@ -66,7 +68,9 @@ class MessagePool():
         Initialize the MessagePool with a unique conversation ID.
         """
         self.conversation_id = str(uuid1())
-        self._messages: List[Message] = []  # TODO: for the sake of thread safety, use a queue instead
+        self._messages: List[
+            Message
+        ] = []  # TODO: for the sake of thread safety, use a queue instead
         self._last_message_idx = 0
 
     def reset(self):
@@ -143,6 +147,10 @@ class MessagePool():
 
         visible_messages = []
         for message in prev_messages:
-            if message.visible_to == "all" or agent_name in message.visible_to or agent_name == "Moderator":
+            if (
+                message.visible_to == "all"
+                or agent_name in message.visible_to
+                or agent_name == "Moderator"
+            ):
                 visible_messages.append(message)
         return visible_messages

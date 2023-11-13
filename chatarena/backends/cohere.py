@@ -1,9 +1,10 @@
-from typing import List
 import os
+from typing import List
+
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
-from .base import IntelligenceBackend
 from ..message import Message
+from .base import IntelligenceBackend
 
 # Try to import the cohere package and check whether the API key is set
 try:
@@ -11,7 +12,7 @@ try:
 except ImportError:
     is_cohere_available = False
 else:
-    if os.environ.get('COHEREAI_API_KEY') is None:
+    if os.environ.get("COHEREAI_API_KEY") is None:
         is_cohere_available = False
     else:
         is_cohere_available = True
@@ -26,23 +27,35 @@ class CohereAIChat(IntelligenceBackend):
     """
     Interface to the Cohere API
     """
+
     stateful = True
     type_name = "cohere-chat"
 
-    def __init__(self, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int = DEFAULT_MAX_TOKENS,
-                 model: str = DEFAULT_MODEL, **kwargs):
-        super().__init__(temperature=temperature, max_tokens=max_tokens, model=model, **kwargs)
+    def __init__(
+        self,
+        temperature: float = DEFAULT_TEMPERATURE,
+        max_tokens: int = DEFAULT_MAX_TOKENS,
+        model: str = DEFAULT_MODEL,
+        **kwargs,
+    ):
+        super().__init__(
+            temperature=temperature, max_tokens=max_tokens, model=model, **kwargs
+        )
 
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.model = model
 
-        assert is_cohere_available, "Cohere package is not installed or the API key is not set"
-        self.client = cohere.Client(os.environ.get('COHEREAI_API_KEY'))
+        assert (
+            is_cohere_available
+        ), "Cohere package is not installed or the API key is not set"
+        self.client = cohere.Client(os.environ.get("COHEREAI_API_KEY"))
 
         # Stateful variables
         self.session_id = None  # The session id for the last conversation
-        self.last_msg_hash = None  # The hash of the last message of the last conversation
+        self.last_msg_hash = (
+            None  # The hash of the last message of the last conversation
+        )
 
     def reset(self):
         self.session_id = None
@@ -55,14 +68,22 @@ class CohereAIChat(IntelligenceBackend):
             persona_prompt=persona_prompt,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
-            session_id=self.session_id
+            session_id=self.session_id,
         )
 
         self.session_id = response.session_id  # Update the session id
         return response.reply
 
-    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
-              request_msg: Message = None, *args, **kwargs) -> str:
+    def query(
+        self,
+        agent_name: str,
+        role_desc: str,
+        history_messages: List[Message],
+        global_prompt: str = None,
+        request_msg: Message = None,
+        *args,
+        **kwargs,
+    ) -> str:
         """
         format the input and call the Cohere API
         args:
@@ -90,7 +111,9 @@ class CohereAIChat(IntelligenceBackend):
                 new_conversations.append(f"[{message.agent_name}]: {message.content}")
 
         if request_msg:
-            new_conversations.append(f"[{request_msg.agent_name}]: {request_msg.content}")
+            new_conversations.append(
+                f"[{request_msg.agent_name}]: {request_msg.content}"
+            )
 
         # Concatenate all new messages into one message because the Cohere API only accepts one message
         new_message = "\n".join(new_conversations)

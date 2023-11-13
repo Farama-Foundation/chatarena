@@ -1,11 +1,12 @@
-from typing import List
 import os
 import re
-import logging
+from typing import List
+
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
+from ..message import SYSTEM_NAME as SYSTEM
+from ..message import Message
 from .base import IntelligenceBackend
-from ..message import Message, SYSTEM_NAME as SYSTEM
 
 try:
     import anthropic
@@ -13,7 +14,7 @@ except ImportError:
     is_anthropic_available = False
     # logging.warning("anthropic package is not installed")
 else:
-    anthropic_api_key = os.environ.get('ANTHROPIC_API_KEY')
+    anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
     if anthropic_api_key is None:
         # logging.warning("Anthropic API key is not set. Please set the environment variable ANTHROPIC_API_KEY")
         is_anthropic_available = False
@@ -28,17 +29,22 @@ class Claude(IntelligenceBackend):
     """
     Interface to the Claude offered by Anthropic.
     """
+
     stateful = False
     type_name = "claude"
 
-    def __init__(self, max_tokens: int = DEFAULT_MAX_TOKENS, model: str = DEFAULT_MODEL, **kwargs):
-        assert is_anthropic_available, "anthropic package is not installed or the API key is not set"
+    def __init__(
+        self, max_tokens: int = DEFAULT_MAX_TOKENS, model: str = DEFAULT_MODEL, **kwargs
+    ):
+        assert (
+            is_anthropic_available
+        ), "anthropic package is not installed or the API key is not set"
         super().__init__(max_tokens=max_tokens, model=model, **kwargs)
 
         self.max_tokens = max_tokens
         self.model = model
 
-        self.client = anthropic.Client(os.environ['ANTHROPIC_API_KEY'])
+        self.client = anthropic.Client(os.environ["ANTHROPIC_API_KEY"])
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, prompt: str):
@@ -49,11 +55,19 @@ class Claude(IntelligenceBackend):
             max_tokens_to_sample=self.max_tokens,
         )
 
-        response = response['completion'].strip()
+        response = response["completion"].strip()
         return response
 
-    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
-              request_msg: Message = None, *args, **kwargs) -> str:
+    def query(
+        self,
+        agent_name: str,
+        role_desc: str,
+        history_messages: List[Message],
+        global_prompt: str = None,
+        request_msg: Message = None,
+        *args,
+        **kwargs,
+    ) -> str:
         """
         format the input and call the Claude API
         args:
@@ -63,7 +77,11 @@ class Claude(IntelligenceBackend):
             history_messages: the history of the conversation, or the observation for the agent
             request_msg: the request from the system to guide the agent's next response
         """
-        all_messages = [(SYSTEM, global_prompt), (SYSTEM, role_desc)] if global_prompt else [(SYSTEM, role_desc)]
+        all_messages = (
+            [(SYSTEM, global_prompt), (SYSTEM, role_desc)]
+            if global_prompt
+            else [(SYSTEM, role_desc)]
+        )
 
         for message in history_messages:
             all_messages.append((message.agent_name, message.content))
@@ -74,7 +92,9 @@ class Claude(IntelligenceBackend):
         prev_is_human = False  # Whether the previous message is from human (in anthropic, the human is the user)
         for i, message in enumerate(all_messages):
             if i == 0:
-                assert message[0] == SYSTEM  # The first message should be from the system
+                assert (
+                    message[0] == SYSTEM
+                )  # The first message should be from the system
 
             if message[0] == agent_name:
                 if prev_is_human:

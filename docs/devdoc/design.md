@@ -3,13 +3,13 @@ In this document, we will discuss the key concepts and design choices of ChatAre
 We expect this will be helpful particularly for developers who want to contribute to ChatArena or build their own environments.
 
 ## Agent Environment Cycle
-ChatArena in general follows the design principle of openAI gym [1] and pettingzoo [2]. Any agent will interact with the environment and other agents through the agent environment cycle. 
-For every single cycle, 
+ChatArena in general follows the design principle of openAI gym [1] and pettingzoo [2]. Any agent will interact with the environment and other agents through the agent environment cycle.
+For every single cycle,
 1. the agent observes the environment
 2. the agent output an action
 3. the environment makes a state transition given the action
 
-As an optional feature, in each cycle, the environment can also compute a scalar reward for every single agent, along with a terminal signal for the environment. 
+As an optional feature, in each cycle, the environment can also compute a scalar reward for every single agent, along with a terminal signal for the environment.
 
 [1] Greg Brockman, Vicki Cheung, Ludwig Pettersson, Jonas Schneider, John Schulman, Jie Tang, Wojciech Zaremba: OpenAI Gym. CoRR abs/1606.01540 (2016)
 

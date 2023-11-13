@@ -1,13 +1,12 @@
-import numpy as np
-from typing import List, Dict, Union
-from chatarena.agent import Player
-from chatarena.backends import OpenAIChat, Claude
+from typing import List, Union
+
 from langchain.document_loaders import OnlinePDFLoader
 
+from chatarena.agent import Player
+from chatarena.arena import Arena
+from chatarena.backends import Claude, OpenAIChat
 from chatarena.environments.base import Environment, TimeStep
 from chatarena.message import Message, MessagePool
-from chatarena.agent import SIGNAL_END_OF_CONVERSATION
-from chatarena.arena import Arena
 from chatarena.utils import is_json_inside
 
 DEFAULT_ORDER_BOOK = {
@@ -20,7 +19,7 @@ DEFAULT_ORDER_BOOK = {
         {"price": 4.02, "amount": 12},
         {"price": 4.03, "amount": 285},
         {"price": 4.04, "amount": 210},
-    ]
+    ],
 }
 
 
@@ -42,14 +41,18 @@ class Trading(Environment):
         self.turn = 0
         self.message_pool.reset()
 
-        self._moderator_speak(f"Here's the whitepaper of a new cryptocurrency. Please read it carefully:\n {self.doc}",
-                              visible_to="researcher")
+        self._moderator_speak(
+            f"Here's the whitepaper of a new cryptocurrency. Please read it carefully:\n {self.doc}",
+            visible_to="researcher",
+        )
         observation = self.get_observation(self.get_next_player())
         self._terminal = False
         self.phase = "discussion"
-        return TimeStep(observation=observation,
-                        reward=self.get_zero_rewards(),
-                        terminal=self._terminal)
+        return TimeStep(
+            observation=observation,
+            reward=self.get_zero_rewards(),
+            terminal=self._terminal,
+        )
 
     def get_next_player(self) -> str:
         if self.phase == "research":
@@ -68,41 +71,55 @@ class Trading(Environment):
         if player_name is None:
             return self.message_pool.get_all_messages()
         else:
-            return self.message_pool.get_visible_messages(player_name, turn=self.turn + 1)
+            return self.message_pool.get_visible_messages(
+                player_name, turn=self.turn + 1
+            )
 
     def _moderator_speak(self, text: str, visible_to: Union[str, List[str]] = "all"):
         """
         moderator say something
         """
-        message = Message(agent_name="Moderator", content=text, turn=self.turn, visible_to=visible_to)
+        message = Message(
+            agent_name="Moderator", content=text, turn=self.turn, visible_to=visible_to
+        )
         self.message_pool.append_message(message)
 
     def is_terminal(self) -> bool:
         return self._terminal
 
     def step(self, player_name: str, action: str) -> TimeStep:
-        assert player_name == self.get_next_player(), f"Wrong player! It is {self.get_next_player()} turn."
+        assert (
+            player_name == self.get_next_player()
+        ), f"Wrong player! It is {self.get_next_player()} turn."
         message = Message(agent_name=player_name, content=action, turn=self.turn)
         self.message_pool.append_message(message)
         if self.phase == "trading":
             self._terminal = True
-        if is_json_inside(action) and self.phase == "discussion" and player_name == "manager":
+        if (
+            is_json_inside(action)
+            and self.phase == "discussion"
+            and player_name == "manager"
+        ):
             self.phase = "trading"
-            self._moderator_speak(f"Here's the order book please put orders \n{DEFAULT_ORDER_BOOK}",
-                                  visible_to="trader")
+            self._moderator_speak(
+                f"Here's the order book please put orders \n{DEFAULT_ORDER_BOOK}",
+                visible_to="trader",
+            )
 
         self.turn += 1
         self.current_player = self.get_next_player()
-        return TimeStep(observation=self.get_observation(self.get_next_player()),
-                        reward=self.get_zero_rewards(),
-                        terminal=self._terminal)
+        return TimeStep(
+            observation=self.get_observation(self.get_next_player()),
+            reward=self.get_zero_rewards(),
+            terminal=self._terminal,
+        )
 
 
 if __name__ == "__main__":
     researcher_role_description = """
     You are a researcher for crypto-trading.
     You are going to analyse the whitepaper of a new cryptocurrency.
-    After finishing the reading, you'll dicuss with a trader, helping him to make a decision.
+    After finishing the reading, you'll discuss with a trader, helping him to make a decision.
     """
 
     manager_role_description = """
@@ -111,7 +128,7 @@ if __name__ == "__main__":
     Try to figure out all the information you need to make a decision.
     Try to ask at least 3 round of questions before you make the decision.
     When you are ready to make the decision, output a json with the following format:
-    { 
+    {
     "reasong": the reason for your decision,
     "decision": "long" or "short"",
     }
@@ -128,18 +145,30 @@ if __name__ == "__main__":
     "orders": [
         {"price": price of the order, "amount": amount to buy or sell. positive means buy, negative means sell},
     ]
-    }   
+    }
     """
 
     loader = OnlinePDFLoader("https://impt.io/assets/documents/whitepaper/en.pdf")
     doc = loader.load()
 
-    researcher = Player(name="researcher", role_desc=researcher_role_description,
-                        global_prompt="", backend=Claude(max_tokens=1024, model="claude-v1.3-100k"))
-    manager = Player(name="manager", role_desc=manager_role_description,
-                     global_prompt="", backend=OpenAIChat(max_tokens=1024, model="gpt-4"))
-    trader = Player(name="trader", role_desc=trader_role_description,
-                    global_prompt="", backend=OpenAIChat(max_tokens=1024))
+    researcher = Player(
+        name="researcher",
+        role_desc=researcher_role_description,
+        global_prompt="",
+        backend=Claude(max_tokens=1024, model="claude-v1.3-100k"),
+    )
+    manager = Player(
+        name="manager",
+        role_desc=manager_role_description,
+        global_prompt="",
+        backend=OpenAIChat(max_tokens=1024, model="gpt-4"),
+    )
+    trader = Player(
+        name="trader",
+        role_desc=trader_role_description,
+        global_prompt="",
+        backend=OpenAIChat(max_tokens=1024),
+    )
     env = Trading(doc=str(doc))
     arena = Arena([researcher, manager, trader], env)
     arena.launch_cli()

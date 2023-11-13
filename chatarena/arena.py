@@ -1,13 +1,13 @@
-from typing import List, Dict, Union
-import uuid
-import json
 import csv
+import json
 import logging
+import uuid
+from typing import Dict, List, Union
 
 from .agent import Player
-from .environments import Environment, TimeStep, load_environment
 from .backends import Human
 from .config import ArenaConfig
+from .environments import Environment, TimeStep, load_environment
 
 
 class TooManyInvalidActions(Exception):
@@ -19,7 +19,9 @@ class Arena:
     Utility class that manages the game environment and players
     """
 
-    def __init__(self, players: List[Player], environment: Environment, global_prompt: str = None):
+    def __init__(
+        self, players: List[Player], environment: Environment, global_prompt: str = None
+    ):
         # Create a container for the players and environment and reset the game
         self.players = players
         self.environment = environment
@@ -53,19 +55,27 @@ class Arena:
         """
         player_name = self.environment.get_next_player()
         player = self.name_to_player[player_name]  # get the player object
-        observation = self.environment.get_observation(player_name)  # get the observation for the player
+        observation = self.environment.get_observation(
+            player_name
+        )  # get the observation for the player
 
         timestep = None
-        for i in range(self.invalid_actions_retry):  # try to take an action for a few times
+        for i in range(
+            self.invalid_actions_retry
+        ):  # try to take an action for a few times
             action = player(observation)  # take an action
             if self.environment.check_action(action, player_name):  # action is valid
-                timestep = self.environment.step(player_name, action)  # update the environment
+                timestep = self.environment.step(
+                    player_name, action
+                )  # update the environment
                 break
             else:  # action is invalid
                 logging.warning(f"{player_name} made an invalid action {action}")
                 continue
 
-        if timestep is None:  # if the player made invalid actions for too many times, terminate the game
+        if (
+            timestep is None
+        ):  # if the player made invalid actions for too many times, terminate the game
             warning_msg = f"{player_name} has made invalid actions for {self.invalid_actions_retry} times. Terminating the game."
             logging.warning(warning_msg)
             raise TooManyInvalidActions(warning_msg)
@@ -112,10 +122,14 @@ class Arena:
 
         # Check that the player names are unique
         player_names = [player.name for player in players]
-        assert len(player_names) == len(set(player_names)), "Player names must be unique"
+        assert len(player_names) == len(
+            set(player_names)
+        ), "Player names must be unique"
 
         # Create the environment
-        config.environment["player_names"] = player_names  # add the player names to the environment config
+        config.environment[
+            "player_names"
+        ] = player_names  # add the player names to the environment config
         env = load_environment(config.environment)
 
         return cls(players, env, global_prompt=global_prompt)
@@ -132,7 +146,7 @@ class Arena:
         return ArenaConfig(
             players=[player.to_config() for player in self.players],
             environment=self.environment.to_config(),
-            global_prompt=self.global_prompt
+            global_prompt=self.global_prompt,
         )
 
     def launch_cli(self, max_steps: int = None, interactive: bool = True):
@@ -140,6 +154,7 @@ class Arena:
         launch the command line interface
         """
         from chatarena.ui.cli import ArenaCLI
+
         cli = ArenaCLI(self)
         cli.launch(max_steps=max_steps, interactive=interactive)
 
@@ -159,7 +174,14 @@ class Arena:
         message_rows = []
 
         if path.endswith(".csv"):
-            header = ["agent_name", "content", "turn", "timestamp", "visible_to", "msg_type"]
+            header = [
+                "agent_name",
+                "content",
+                "turn",
+                "timestamp",
+                "visible_to",
+                "msg_type",
+            ]
             for message in messages:
                 message_row = [
                     message.agent_name,

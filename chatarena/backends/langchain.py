@@ -1,11 +1,11 @@
-from typing import List
 import os
 import re
-import logging
+from typing import List
+
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
+from ..message import SYSTEM_NAME, Message
 from .base import IntelligenceBackend
-from ..message import Message, SYSTEM_NAME, MODERATOR_NAME
 
 try:
     from langchain.llms import OpenAI
@@ -34,11 +34,18 @@ class LangChainOpenAIChat(IntelligenceBackend):
     """
     Interface to the ChatGPT style model with system, user, assistant roles separation
     """
+
     stateful = False
     type_name = "openai-chat"
 
-    def __init__(self, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int = DEFAULT_MAX_TOKENS,
-                 model: str = DEFAULT_MODEL, merge_other_agents_as_one_user: bool = True, **kwargs):
+    def __init__(
+        self,
+        temperature: float = DEFAULT_TEMPERATURE,
+        max_tokens: int = DEFAULT_MAX_TOKENS,
+        model: str = DEFAULT_MODEL,
+        merge_other_agents_as_one_user: bool = True,
+        **kwargs,
+    ):
         """
         instantiate the OpenAIChat backend
         args:
@@ -47,23 +54,43 @@ class LangChainOpenAIChat(IntelligenceBackend):
             model: the model to use
             merge_other_agents_as_one_user: whether to merge messages from other agents as one user message
         """
-        assert is_langchain_openai_available, "langchain package is not installed or the API key is not set"
-        super().__init__(temperature=temperature, max_tokens=max_tokens, model=model,
-                         merge_other_agents_as_one_user=merge_other_agents_as_one_user, **kwargs)
+        assert (
+            is_langchain_openai_available
+        ), "langchain package is not installed or the API key is not set"
+        super().__init__(
+            temperature=temperature,
+            max_tokens=max_tokens,
+            model=model,
+            merge_other_agents_as_one_user=merge_other_agents_as_one_user,
+            **kwargs,
+        )
 
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.model = model
         self.merge_other_agent_as_user = merge_other_agents_as_one_user
-        self.llm = OpenAI(model_name=model, temperature=temperature, max_tokens=max_tokens, openai_api_key=api_key)
+        self.llm = OpenAI(
+            model_name=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            openai_api_key=api_key,
+        )
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, messages):
         response = self.llm(prompt=messages, stop=STOP)
         return response
 
-    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
-              request_msg: Message = None, *args, **kwargs) -> str:
+    def query(
+        self,
+        agent_name: str,
+        role_desc: str,
+        history_messages: List[Message],
+        global_prompt: str = None,
+        request_msg: Message = None,
+        *args,
+        **kwargs,
+    ) -> str:
         """
         format the input and call the ChatGPT/GPT-4 API
         args:
@@ -78,7 +105,9 @@ class LangChainOpenAIChat(IntelligenceBackend):
         if global_prompt:  # Prepend the global prompt if it exists
             system_prompt = f"{global_prompt.strip()}\n{BASE_PROMPT}\n\nYour name: {agent_name}\n\nYour role:{role_desc}"
         else:
-            system_prompt = f"You are {agent_name}.\n\nYour role:{role_desc}\n\n{BASE_PROMPT}"
+            system_prompt = (
+                f"You are {agent_name}.\n\nYour role:{role_desc}\n\n{BASE_PROMPT}"
+            )
 
         all_messages = [(SYSTEM_NAME, system_prompt)]
         for msg in history_messages:
@@ -90,12 +119,16 @@ class LangChainOpenAIChat(IntelligenceBackend):
         if request_msg:
             all_messages.append((SYSTEM_NAME, request_msg.content))
         else:  # The default request message that reminds the agent its role and instruct it to speak
-            all_messages.append((SYSTEM_NAME, f"Now you speak, {agent_name}.{END_OF_MESSAGE}"))
+            all_messages.append(
+                (SYSTEM_NAME, f"Now you speak, {agent_name}.{END_OF_MESSAGE}")
+            )
 
         messages = []
         for i, msg in enumerate(all_messages):
             if i == 0:
-                assert msg[0] == SYSTEM_NAME  # The first message should be from the system
+                assert (
+                    msg[0] == SYSTEM_NAME
+                )  # The first message should be from the system
                 messages.append({"role": "system", "content": msg[1]})
             else:
                 if msg[0] == agent_name:
@@ -103,22 +136,32 @@ class LangChainOpenAIChat(IntelligenceBackend):
                 else:
                     if messages[-1]["role"] == "user":  # last message is from user
                         if self.merge_other_agent_as_user:
-                            messages[-1]["content"] = f"{messages[-1]['content']}\n\n[{msg[0]}]: {msg[1]}"
+                            messages[-1][
+                                "content"
+                            ] = f"{messages[-1]['content']}\n\n[{msg[0]}]: {msg[1]}"
                         else:
-                            messages.append({"role": "user", "content": f"[{msg[0]}]: {msg[1]}"})
-                    elif messages[-1]["role"] == "assistant":  # consecutive assistant messages
+                            messages.append(
+                                {"role": "user", "content": f"[{msg[0]}]: {msg[1]}"}
+                            )
+                    elif (
+                        messages[-1]["role"] == "assistant"
+                    ):  # consecutive assistant messages
                         # Merge the assistant messages
                         messages[-1]["content"] = f"{messages[-1]['content']}\n{msg[1]}"
                     elif messages[-1]["role"] == "system":
-                        messages.append({"role": "user", "content": f"[{msg[0]}]: {msg[1]}"})
+                        messages.append(
+                            {"role": "user", "content": f"[{msg[0]}]: {msg[1]}"}
+                        )
                     else:
                         raise ValueError(f"Invalid role: {messages[-1]['role']}")
 
         response = self._get_response(messages, *args, **kwargs)
 
         # Remove the agent name if the response starts with it
-        response = re.sub(rf"^\s*\[.*]:", "", response).strip()
-        response = re.sub(rf"^\s*{re.escape(agent_name)}\s*:", "", response).strip()
+        response = re.sub(rf"^\s*\[.*]:", "", response).strip()  # noqa: F541
+        response = re.sub(
+            rf"^\s*{re.escape(agent_name)}\s*:", "", response
+        ).strip()  # noqa: F541
 
         # Remove the tailing end of message token
         response = re.sub(rf"{END_OF_MESSAGE}$", "", response).strip()

@@ -1,14 +1,19 @@
 from typing import List
+
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
+from ..message import SYSTEM_NAME as SYSTEM
+from ..message import Message
 from .base import IntelligenceBackend
-from ..message import Message, SYSTEM_NAME as SYSTEM
 
 # Try to import the transformers package
 try:
     import transformers
     from transformers import pipeline
-    from transformers.pipelines.conversational import Conversation, ConversationalPipeline
+    from transformers.pipelines.conversational import (
+        Conversation,
+        ConversationalPipeline,
+    )
 except ImportError:
     is_transformers_available = False
 else:
@@ -19,6 +24,7 @@ class TransformersConversational(IntelligenceBackend):
     """
     Interface to the Transformers ConversationalPipeline
     """
+
     stateful = False
     type_name = "transformers:conversational"
 
@@ -28,7 +34,9 @@ class TransformersConversational(IntelligenceBackend):
         self.device = device
 
         assert is_transformers_available, "Transformers package is not installed"
-        self.chatbot = pipeline(task="conversational", model=self.model, device=self.device)
+        self.chatbot = pipeline(
+            task="conversational", model=self.model, device=self.device
+        )
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, conversation):
@@ -40,10 +48,22 @@ class TransformersConversational(IntelligenceBackend):
     def _msg_template(agent_name, content):
         return f"[{agent_name}]: {content}"
 
-    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
-              request_msg: Message = None, *args, **kwargs) -> str:
+    def query(
+        self,
+        agent_name: str,
+        role_desc: str,
+        history_messages: List[Message],
+        global_prompt: str = None,
+        request_msg: Message = None,
+        *args,
+        **kwargs,
+    ) -> str:
         user_inputs, generated_responses = [], []
-        all_messages = [(SYSTEM, global_prompt), (SYSTEM, role_desc)] if global_prompt else [(SYSTEM, role_desc)]
+        all_messages = (
+            [(SYSTEM, global_prompt), (SYSTEM, role_desc)]
+            if global_prompt
+            else [(SYSTEM, role_desc)]
+        )
 
         for msg in history_messages:
             all_messages.append((msg.agent_name, msg.content))
@@ -53,7 +73,9 @@ class TransformersConversational(IntelligenceBackend):
         prev_is_user = False  # Whether the previous message is from the user
         for i, message in enumerate(all_messages):
             if i == 0:
-                assert message[0] == SYSTEM  # The first message should be from the system
+                assert (
+                    message[0] == SYSTEM
+                )  # The first message should be from the system
 
             if message[0] != agent_name:
                 if not prev_is_user:
@@ -73,12 +95,16 @@ class TransformersConversational(IntelligenceBackend):
         new_user_input = user_inputs[-1]
 
         # Recreate a conversation object from the history messages
-        conversation = Conversation(text=new_user_input, past_user_inputs=past_user_inputs,
-                                    generated_responses=generated_responses)
+        conversation = Conversation(
+            text=new_user_input,
+            past_user_inputs=past_user_inputs,
+            generated_responses=generated_responses,
+        )
 
         # Get the response
         response = self._get_response(conversation)
         return response
+
 
 # conversation = Conversation("Going to the movies tonight - any suggestions?")
 #

@@ -1,3 +1,13 @@
+from .content_moderation_bots import (
+    ContentMultiRoleAgent,
+    RuleSimplificationContentAttacker,
+    SimpleContentAttacker,
+    SimpleContentDefender,
+)
 from .debate_bots import BasicDebater, StructuredDebater
-from .content_moderation_bots import SimpleContentDefender, SimpleContentAttacker, RuleSimplificationContentAttacker, ContentMultiRoleAgent
-from .deception_bots import SimpleDeceptionDefender, SimpleDeceptionAttacker, PresidentDeceptionAttacker, DeceptionMultiRoleAgent
+from .deception_bots import (
+    DeceptionMultiRoleAgent,
+    PresidentDeceptionAttacker,
+    SimpleDeceptionAttacker,
+    SimpleDeceptionDefender,
+)
