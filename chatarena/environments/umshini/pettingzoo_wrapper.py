@@ -7,6 +7,7 @@ import string
 
 from typing import List
 
+from colorama import Fore
 from chatarena.environments import Environment
 from chatarena.environments.base import TimeStep
 from chatarena.message import Message
@@ -50,7 +51,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         character_limit: int | None = 4000,
         render_mode: str | None = None,
         save_json: bool | None = False,
-        disable_judging: bool | None = True
+        disable_judging: bool | None = False
     ):
         """Wrapper to convert a ChatArena environment into a PettingZoo environment.
 
@@ -90,15 +91,19 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         elif env is not None:
             self._env = env
             if hasattr(env, "topic"):
+                self.env_name = "debate"
                 self.topic = topic
                 self.max_turns = round_length
             elif hasattr(env, "moderation_policy"):
+                self.env_name = "content_moderation"
                 self.moderation_policy = env.moderation_policy
                 self.max_turns = round_length * 2
             elif hasattr(env, "restricted_action"):
+                self.env_name = "deception"
                 self.restricted_action = env.restricted_action
                 self.max_turns = round_length * 2
         elif env_name is not None:
+            self.env_name = env_name
             if env_name == "debate":
                 assert topic is not None, "topic must be specified for debate env"
                 self._env = create_debate_env(
@@ -227,9 +232,27 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 raise Exception("New messages not found")
             else:
                 for message in new_messages:
-                    print(
-                        f"[{message.agent_name}->{message.visible_to}]: {message.content}\n"
-                    )
+                    # Don't repeat things from previous turns
+                    if not self.current_turn > message.turn:
+                        if message.agent_name == "Moderator":
+                            color = Fore.BLACK
+                            role = ""
+                        elif message.agent_name == "Proponent":
+                            color = Fore.BLUE
+                            role = ""
+                        elif message.agent_name == "Opponent":
+                            color = Fore.RED
+                            role = ""
+                        else:
+                            if self.infos[message.agent_name]["role"] == "attacker":
+                                color = Fore.RED
+                                role = "(attacker)"
+                            else:
+                                color = Fore.BLUE
+                                role = "(defender)"
+                        print(
+                            color + f"[{message.agent_name} {role}-> {message.visible_to}]: {message.content}\n " + Fore.BLACK
+                        )
 
     def observe(self, agent: AgentID) -> ObsType:
         """observe.
@@ -246,8 +269,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         # Observations and infos are calculated in step(), but need to be calculated before the first step() call
         elif type(agent) != str:
             raise TypeError("AgentID must be a string")
-        elif self.observations[agent] != {}:
-            return self.observations[agent]
         else:
             # get only the messages that this agent can see
             messages = self._env.get_observation(agent)
@@ -280,6 +301,16 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 m.agent_name: m.content for m in new_messages
             }
             self.infos[agent]["player_name"] = self.agent_selection
+
+            # Role in symmetric environments (not applicable if env has terminated)
+            if self.env_name != "debate":
+                if hasattr(self._env, "_current_phase") and not any(self.terminations.values()):
+                    if self._env._current_phase == "player_2_attack":
+                        self.infos[self.possible_agents[0]]["role"] = "defender"
+                        self.infos[self.possible_agents[1]]["role"] = "attacker"
+                    else:
+                        self.infos[self.possible_agents[0]]["role"] = "attacker"
+                        self.infos[self.possible_agents[1]]["role"] = "defender"
 
             # info: generate string of full chat log
             if self.string_observation is True:
@@ -364,6 +395,17 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 all_messages_string += f"[{m.agent_name}->all]: {m.content}\n"
             info["all_messages_string"] = all_messages_string
 
+        # Role in symmetric environments
+        if hasattr(self._env, "_current_phase"):
+            if self._env._current_phase == "player_2_attack" or self._env._current_phase == "end":
+                self.infos[self.possible_agents[0]]["role"] = "defender"
+                self.infos[self.possible_agents[1]]["role"] = "attacker"
+            else:
+                self.infos[self.possible_agents[0]]["role"] = "attacker"
+                self.infos[self.possible_agents[1]]["role"] = "defender"
+
+        info["role"] = self.infos[self.agent_selection]["role"]
+
         # info: environment specific information
         if hasattr(self, "restricted_action"):
             info["restricted_action"] = self.restricted_action
@@ -439,17 +481,6 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         observation, reward, termination, truncation, info = self._unravel_timestep(
             timestep
         )
-        # add moderator messages to info so they are rendered
-        # some environments (e.g., debate) have the moderator announce the winner as the last message
-        if termination or truncation:
-            if info["all_messages"][-1].agent_name == "Moderator":
-                info["new_messages"].append(info["all_messages"][-2])
-
-        # account for the moderator interjecting statements such as "roles are being swapped"
-        # first turn we already render the moderator's message, so we don't need to add the message here
-        if info["turn"] > 1:
-            if len(info["all_messages"]) > 1 and info["all_messages"][-2].agent_name == "Moderator":
-                info["new_messages"].append(info["all_messages"][-2])
 
         self.observations[agent] = observation
         self.rewards = reward
@@ -464,7 +495,8 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             self.truncations = {agent: True for agent in self.possible_agents}
 
         # Update total rewards for each agent (in one timestep both agents can get rewards/penalties)
-        self.total_rewards[agent] += self._cumulative_rewards[agent]
+        for agent in self.agents:
+            self.total_rewards[agent] += self.rewards[agent]
 
         # Reset PettingZoo cumulative_rewards attribute (tracks accumulated rewards for an agent since its previous action)
         self._cumulative_rewards[agent] = 0

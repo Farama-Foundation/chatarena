@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chatarena"
-version = "0.1.12.10"
+version = "0.1.12.12"
 authors = [
     { name = "Yuxiang Wu", email = "yuxiang.cs@gmail.com" },
 ]
@@ -29,7 +29,7 @@ bard = ["bardapi==0.1.11"]
 langchain = ["langchain>=0.0.135"]
 gradio = ["gradio>=3.34.0"]
 pettingzoo = ["pettingzoo[classic]>=1.23.1"]
-umshini = ["pettingzoo>=1.23.1", "langchain>=0.0.135"]
+umshini = ["pettingzoo>=1.23.1", "langchain>=0.0.135", "colorama>=0.4.6"]
 all_backends = ["anthropic>=0.2.8", "cohere>=4.3.1", "transformers>=4.27.4", "bardapi==0.1.11", "langchain>=0.0.135"]
 all_envs = ["pettingzoo[classic]>=1.23.1", "langchain>=0.0.135"]
 all = ["anthropic>=0.2.8", "cohere>=4.3.1", "transformers>=4.27.4", "gradio>=3.34.0", "pettingzoo>=1.23.1",
