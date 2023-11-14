@@ -1,7 +1,7 @@
 import re
 from typing import List, Union
 
-from pettingzoo.classic import chess_v5
+from pettingzoo.classic import chess_v6
 from pettingzoo.classic.chess.chess_utils import chess, get_move_plane
 
 from chatarena.environments.base import Environment, TimeStep
@@ -32,7 +32,7 @@ class PettingzooChess(Environment):
 
     def __init__(self, player_names: List[str], **kwargs):
         super().__init__(player_names=player_names, **kwargs)
-        self.env = chess_v5.env(render_mode="ansi")
+        self.env = chess_v6.env(render_mode="ansi")
 
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
@@ -138,7 +138,7 @@ def test_chess_environment():
 
 
 if __name__ == "__main__":
-    env = chess_v5.env()
+    env = chess_v6.env()
 
     # Test the conversion function with an example action string
     action = "Move (0, 1) to (0, 3)"

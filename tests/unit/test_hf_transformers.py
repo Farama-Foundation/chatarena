@@ -5,6 +5,15 @@ from unittest import TestCase
 from chatarena.backends.hf_transformers import TransformersConversational
 from chatarena.message import Message
 
+import pytest
+try:
+    torch = pytest.importorskip("torch")
+except ImportError:
+    try:
+        tensorflow = pytest.importorskip("tensorflow")
+    except ImportError:
+        pytest.skip("Either pytest or tensorflow is required.")
+
 # set logger level to info
 logging.basicConfig(level=logging.INFO)
 
@@ -33,7 +42,6 @@ class TestHFTransformers(TestCase):
         logging.info(response)
         self.assertTrue(True)
 
-    @unittest.skip("TODO: fix failing test")
     def test_transformers_conv_2(self):
         backend = TransformersConversational(
             model="facebook/blenderbot-400M-distill", device=-1

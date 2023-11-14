@@ -31,7 +31,7 @@ class TestCLI(TestCase):
         arena = Arena.from_config("examples/pettingzoo_chess.json")
         arena.launch_cli(max_steps=10, interactive=False)
 
-    @unittest.skip("TODO: fix failing test")
+    @unittest.skip("Disabled because it requires an anthropic API key to test")
     def test_cli_7(self):
         # Suppress ResourceWarning
         warnings.filterwarnings(
