@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest import TestCase
 
@@ -6,6 +7,10 @@ from chatarena.arena import Arena
 
 class TestArena(TestCase):
     def test_arena_1(self):
+        unittest.skipIf(
+            not os.getenv("OPENAI_API_KEY"),
+            "OpenAI API key must be set to run this test.",
+        )
         arena = Arena.from_config("examples/nlp-classroom.json")
 
         print("=== Step 1 ===")
@@ -23,6 +28,10 @@ class TestArena(TestCase):
         self.assertTrue(True)
 
     def test_arena_2(self):
+        unittest.skipIf(
+            not os.getenv("OPENAI_API_KEY"),
+            "OpenAI API key must be set to run this test.",
+        )
         arena = Arena.from_config("examples/nlp-classroom.json")
 
         arena.run(num_steps=10)
@@ -31,6 +40,10 @@ class TestArena(TestCase):
         self.assertTrue(True)
 
     def test_arena_3(self):
+        unittest.skipIf(
+            not os.getenv("OPENAI_API_KEY"),
+            "OpenAI API key must be set to run this test.",
+        )
         arena = Arena.from_config("examples/tic-tac-toe.json")
 
         for i in range(1, 10):

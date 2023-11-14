@@ -87,6 +87,10 @@ class TestCLI(TestCase):
         arena.launch_cli(max_steps=3, interactive=False)
 
     def test_cli_11(self):
+        unittest.skipIf(
+            not os.getenv("OPENAI_API_KEY"),
+            "OpenAI API key must be set to run this test.",
+        )
         arena = Arena.from_config("examples/pettingzoo_tictactoe.json")
         arena.launch_cli(max_steps=9, interactive=False)
 
