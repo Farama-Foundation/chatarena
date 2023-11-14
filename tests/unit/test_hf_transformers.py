@@ -2,10 +2,11 @@ import logging
 import unittest
 from unittest import TestCase
 
+import pytest
+
 from chatarena.backends.hf_transformers import TransformersConversational
 from chatarena.message import Message
 
-import pytest
 try:
     torch = pytest.importorskip("torch")
 except ImportError:
