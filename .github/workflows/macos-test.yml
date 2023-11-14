@@ -33,4 +33,4 @@ jobs:
           pip install dist/*.tar.gz
       - name: Release Test
         run: |
-          pytest -v -n auto --cov=chatarena--cov-report term
+          pytest -v -n auto tests/ --cov=chatarena--cov-report term
