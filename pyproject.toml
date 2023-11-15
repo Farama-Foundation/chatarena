@@ -8,7 +8,6 @@ exclude = ["experiments*", "tests*"]
 
 [project]
 name = "chatarena"
-version = "0.1.12.12"
 authors = [
     { name = "Yuxiang Wu", email = "yuxiang.cs@gmail.com" },
 ]
@@ -26,6 +25,10 @@ dependencies = [
     "rich==13.3.3",
     "prompt_toolkit==3.0.38",
 ]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "chatarena.__version__"}
 
 [project.urls]
 "Homepage" = "https://github.com/chatarena/chatarena"
