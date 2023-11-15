@@ -2,10 +2,11 @@
 
 from typing import Dict, List, Union
 
-from chatarena.environments.base import Environment, TimeStep
-from chatarena.message import Message, MessagePool
 from langchain.prompts import PromptTemplate
 from pettingzoo.utils import agent_selector
+
+from chatarena.environments.base import Environment, TimeStep
+from chatarena.message import Message, MessagePool
 
 
 class UmshiniBaseEnv(Environment):
@@ -25,7 +26,7 @@ class UmshiniBaseEnv(Environment):
         moderator_prompt_template: PromptTemplate,
         moderator_prompt_input: str,
         round_length: int = 10,
-        **kwargs
+        **kwargs,
     ):
         """Base environment for all Umshini game environments.
 
@@ -40,7 +41,9 @@ class UmshiniBaseEnv(Environment):
         self.reset()
 
     def reset(self):
-        """Reset the environment. Sets basic LangEnv variables.
+        """Reset the environment.
+
+        Sets basic LangEnv variables.
 
         Must call super().reset() if being overwritten, call moderator_speak, and return the timestep.
         """

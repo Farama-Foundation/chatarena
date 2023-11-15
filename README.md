@@ -181,7 +181,7 @@ conversation.
 
 ### [Moderator Conversation](chatarena/environments/conversation.py)
 
-Based on converstion, but with a moderator that controls the game dynamics.
+Based on conversation, but with a moderator that controls the game dynamics.
 
 * [Rock-paper-scissors](examples/rock-paper-scissors.json): a 2-player language game environment that simulates a
   rock-paper-scissors game with moderator conversation.
@@ -260,5 +260,4 @@ Happy chatting!
 We would like to thank our sponsors for supporting this project:
 
 - [SEQUOIA](https://www.sequoiacap.com/)
-- [Shixiang Capital](https://sx.shixiangcap.com/home) 
-
+- [Shixiang Capital](https://sx.shixiangcap.com/home)

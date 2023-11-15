@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import functools
-from typing import Any, Dict, Optional
+import string
 
 import pettingzoo
 from gymnasium import spaces
@@ -10,8 +10,6 @@ from pettingzoo.utils.env import AgentID, ObsType
 
 import chatarena
 from chatarena.arena import Arena
-
-import string
 
 CHAR_SET = string.printable
 
@@ -29,12 +27,12 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
     }
 
     def __init__(
-            self,
-            env: chatarena.arena.Arena | None = None,
-            arena_name: str | None = None,
-            string_observation: bool | None = True,
-            max_turns: int | None = 25,
-            render_mode: str | None = None,
+        self,
+        env: chatarena.arena.Arena | None = None,
+        arena_name: str | None = None,
+        string_observation: bool | None = True,
+        max_turns: int | None = 25,
+        render_mode: str | None = None,
     ):
         """Wrapper to convert a ChatArena environment into a PettingZoo environment.
 
@@ -51,7 +49,9 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         elif arena_name is not None:
             self._env = Arena.from_config(arena_name)
         else:
-            raise ValueError("Arena not specified, please us env or arena_name arguments.")
+            raise ValueError(
+                "Arena not specified, please us env or arena_name arguments."
+            )
 
         self._env.reset()  # this resets the underlying arena as well as each player
 
@@ -69,7 +69,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent: AgentID):
-        """observation_space.
+        """Observation_space.
 
         We get the observation space from the underlying environment.
         Args:
@@ -86,7 +86,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
 
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent: AgentID):
-        """action_space.
+        """Action_space.
 
         Get the action space from the underlying environment.
 
@@ -106,7 +106,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         return action_space
 
     def render(self):
-        """render.
+        """Render.
 
         Print the current game state.
         """
@@ -119,7 +119,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         pass
 
     def observe(self, agent: AgentID) -> ObsType:
-        """observe.
+        """Observe.
 
         Args:
             agent (AgentID): agent (e.g., "Player 1")
@@ -127,16 +127,19 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         Returns:
             observation
         """
-        messages = self._env.environment.get_observation(agent)  # this will only return the messages this agent can see
+        messages = self._env.environment.get_observation(
+            agent
+        )  # this will only return the messages this agent can see
         if len(messages) > 0:
             self.current_turn = messages[-1].turn
         else:
             self.current_turn = 0
-        new_messages = [m for m in messages if
-                        m.turn == self.current_turn]  # we only send the current timestep messages
+        new_messages = [
+            m for m in messages if m.turn == self.current_turn
+        ]  # we only send the current timestep messages
 
         # string observation
-        if self.string_observation == True:
+        if self.string_observation:
             observation = ""
             for m in new_messages:
                 observation += f"{m.agent_name}: {m.content}"
@@ -150,7 +153,7 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         return observation
 
     def close(self):
-        """close."""
+        """Close."""
         pass
 
     def _unravel_timestep(self, timestep: chatarena.arena.TimeStep):
@@ -160,11 +163,12 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
             self.current_turn = messages[-1].turn
         else:
             self.current_turn = 0
-        new_messages = [m for m in messages if
-                        m.turn == self.current_turn]  # we only send the current timestep messages
+        new_messages = [
+            m for m in messages if m.turn == self.current_turn
+        ]  # we only send the current timestep messages
 
         # string observation
-        if self.string_observation == True:
+        if self.string_observation:
             observation = ""
             for m in new_messages:
                 observation += f"{m.agent_name}: {m.content}"
@@ -185,18 +189,21 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         # get info
         player_idx = self.possible_agents.index(self.agent_selection)
         player_obj = self._env.players[player_idx]
-        info = {"turn": self.current_turn, "global_prompt": player_obj.global_prompt,
-                "agent_desc": player_obj.role_desc}
+        info = {
+            "turn": self.current_turn,
+            "global_prompt": player_obj.global_prompt,
+            "agent_desc": player_obj.role_desc,
+        }
 
         return observation, rewards, termination, truncation, info
 
     def reset(
-            self,
-            return_info: bool | None = False,
-            seed: int | None = None,
-            options: dict | None = None,
+        self,
+        return_info: bool | None = False,
+        seed: int | None = None,
+        options: dict | None = None,
     ):
-        """reset.
+        """Reset.
 
         Args:
             seed (Optional[int]): seed
@@ -213,7 +220,9 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
         # get the first player
         self.agent_selection = self._env.environment.get_next_player()
 
-        observation, reward, termination, truncation, info = self._unravel_timestep(self.initial_timestep)
+        observation, reward, termination, truncation, info = self._unravel_timestep(
+            self.initial_timestep
+        )
 
         agent = self.agent_selection
         self.rewards = reward
@@ -239,15 +248,17 @@ class PettingZooCompatibilityV0(pettingzoo.AECEnv):
             action (str): action
         """
         if (
-                self.terminations[self.agent_selection]
-                or self.truncations[self.agent_selection]
+            self.terminations[self.agent_selection]
+            or self.truncations[self.agent_selection]
         ):
             return self._was_dead_step(action)
 
         agent = self.agent_selection
         timestep = self._env.environment.step(player_name=agent, action=action)
 
-        observation, reward, termination, truncation, info = self._unravel_timestep(timestep)
+        observation, reward, termination, truncation, info = self._unravel_timestep(
+            timestep
+        )
 
         self.rewards = reward
         self.terminations[agent] = termination

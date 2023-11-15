@@ -1,11 +1,12 @@
-from typing import List
 import os
 import re
-import logging
+from typing import List
+
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
+from ..message import SYSTEM_NAME as SYSTEM
+from ..message import Message
 from .base import IntelligenceBackend
-from ..message import Message, SYSTEM_NAME as SYSTEM
 
 try:
     import bardapi
@@ -13,7 +14,7 @@ except ImportError:
     is_bard_available = False
     # logging.warning("bard package is not installed")
 else:
-    bard_api_key = os.environ.get('_BARD_API_KEY')
+    bard_api_key = os.environ.get("_BARD_API_KEY")
     if bard_api_key is None:
         # logging.warning(
         #     "Bard API key is not set. Please set the environment variable _BARD_API_KEY")
@@ -25,14 +26,15 @@ DEFAULT_MAX_TOKENS = 4096
 
 
 class Bard(IntelligenceBackend):
-    """
-    Interface to the Bard offered by Google.
-    """
+    """Interface to the Bard offered by Google."""
+
     stateful = False
     type_name = "bard"
 
     def __init__(self, max_tokens: int = DEFAULT_MAX_TOKENS, **kwargs):
-        assert is_bard_available, "bard package is not installed or the API key is not set"
+        assert (
+            is_bard_available
+        ), "bard package is not installed or the API key is not set"
         super().__init__(max_tokens=max_tokens, **kwargs)
 
         self.max_tokens = max_tokens
@@ -45,13 +47,22 @@ class Bard(IntelligenceBackend):
             input_text=prompt,
         )
 
-        response = response['content'].strip()
+        response = response["content"].strip()
         return response
 
-    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
-              request_msg: Message = None, *args, **kwargs) -> str:
+    def query(
+        self,
+        agent_name: str,
+        role_desc: str,
+        history_messages: List[Message],
+        global_prompt: str = None,
+        request_msg: Message = None,
+        *args,
+        **kwargs,
+    ) -> str:
         """
-        format the input and call the Bard API
+        Format the input and call the Bard API.
+
         args:
             agent_name: the name of the agent
             role_desc: the description of the role of the agent
@@ -59,8 +70,11 @@ class Bard(IntelligenceBackend):
             history_messages: the history of the conversation, or the observation for the agent
             request_msg: the request from the system to guide the agent's next response
         """
-        all_messages = [(SYSTEM, global_prompt), (SYSTEM, role_desc)
-                        ] if global_prompt else [(SYSTEM, role_desc)]
+        all_messages = (
+            [(SYSTEM, global_prompt), (SYSTEM, role_desc)]
+            if global_prompt
+            else [(SYSTEM, role_desc)]
+        )
 
         for message in history_messages:
             all_messages.append((message.agent_name, message.content))

@@ -1,8 +1,9 @@
 import re
+from typing import List, Union
+
 from pettingzoo.classic import tictactoe_v3
 
 from chatarena.environments.base import Environment, TimeStep
-from typing import List, Union
 
 from ..message import Message, MessagePool
 
@@ -56,20 +57,24 @@ class PettingzooTicTacToe(Environment):
         if player_name is None:
             return self.message_pool.get_all_messages()
         else:
-            return self.message_pool.get_visible_messages(player_name, turn=self.turn + 1)
+            return self.message_pool.get_visible_messages(
+                player_name, turn=self.turn + 1
+            )
 
     def _moderator_speak(self, text: str, visible_to: Union[str, List[str]] = "all"):
-        """
-        moderator say something
-        """
-        message = Message(agent_name="Moderator", content=text, turn=self.turn, visible_to=visible_to)
+        """Moderator say something."""
+        message = Message(
+            agent_name="Moderator", content=text, turn=self.turn, visible_to=visible_to
+        )
         self.message_pool.append_message(message)
 
     def is_terminal(self) -> bool:
         return self._terminal
 
     def step(self, player_name: str, action: str) -> TimeStep:
-        assert player_name == self.get_next_player(), f"Wrong player! It is {self.get_next_player()} turn."
+        assert (
+            player_name == self.get_next_player()
+        ), f"Wrong player! It is {self.get_next_player()} turn."
 
         message = Message(agent_name=player_name, content=action, turn=self.turn)
         self.message_pool.append_message(message)
@@ -82,14 +87,18 @@ class PettingzooTicTacToe(Environment):
         obs_dict, reward, terminal, truncation, info = self.env.last()
 
         self._terminal = terminal  # Update the terminal state
-        reward = {self.player_names[self.current_player]: reward,
-                  self.player_names[1 - self.current_player]: 0}
+        reward = {
+            self.player_names[self.current_player]: reward,
+            self.player_names[1 - self.current_player]: 0,
+        }
 
         self.current_player = 1 - self.current_player
         self.turn += 1
         self._moderator_speak("\n" + self.render_ansi(obs_dict["observation"]))
 
-        return TimeStep(observation=self.get_observation(), reward=reward, terminal=terminal)
+        return TimeStep(
+            observation=self.get_observation(), reward=reward, terminal=terminal
+        )
 
     def check_action(self, action: str, agent_name: str) -> bool:
         # This can be implemented depending on how you want to validate actions for a given agent

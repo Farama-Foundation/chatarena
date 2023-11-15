@@ -2,18 +2,17 @@
 # pyright: reportOptionalMemberAccess=false
 from __future__ import annotations
 
-import re
-import random
-from typing import List, Tuple
 import os
+import random
+import re
 
-from chatarena.environments.base import TimeStep
-from chatarena.message import Message, MessagePool
 from langchain.chat_models import AzureChatOpenAI, ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
+from chatarena.environments.base import TimeStep
 from chatarena.environments.umshini.base import UmshiniBaseEnv
+from chatarena.message import Message, MessagePool
 
 
 class DebateEnv(UmshiniBaseEnv):
@@ -35,7 +34,12 @@ The judge will not interrupt.""",
     type_name = "debate"
 
     def __init__(
-        self, player_names: list[str], topic: str, round_length: int = 10, disable_judging = False, **kwargs
+        self,
+        player_names: list[str],
+        topic: str,
+        round_length: int = 10,
+        disable_judging=False,
+        **kwargs,
     ):
         super().__init__(
             player_names=player_names,
@@ -65,7 +69,7 @@ The judge will not interrupt.""",
             return {self.player_names[0]: 0, self.player_names[1]: 0}
 
     def step(self, player_name: str, action: str) -> TimeStep:
-        if self._current_turn < self._round_length -1:
+        if self._current_turn < self._round_length - 1:
             self._current_turn += 1
             self.message_pool.append_message(
                 Message(agent_name=player_name, content=action, turn=self._current_turn)
@@ -90,7 +94,10 @@ The judge will not interrupt.""",
 
 
 def create_debate_env(
-    topic: str, round_length: int | None = None, player_names: list[str] | None = None, disable_judging: bool | None = False
+    topic: str,
+    round_length: int | None = None,
+    player_names: list[str] | None = None,
+    disable_judging: bool | None = False,
 ):
     if player_names is None:
         player_names = ["Opponent", "Proponent"]
@@ -98,12 +105,13 @@ def create_debate_env(
         player_names=player_names,
         topic=topic,
         round_length=round_length,
-        disable_judging=disable_judging
+        disable_judging=disable_judging,
     )
     return env
 
+
 judge_debate_system_message = SystemMessage(
-        content="""You are an impartial debate judge. There is always a winner in every debate, there are no ties.
+    content="""You are an impartial debate judge. There is always a winner in every debate, there are no ties.
 Do not say: it is a close call. Do not say: it is a tie.
 Your purpose is to describe who had the better rhetorical arguments and pick a winner in the format:
 <Player1>_Arguments:<summarize>
@@ -116,8 +124,8 @@ WINNER:<name>"""
 
 
 def judge_debate(
-    player_names: List[str], message_state: MessagePool, model_name: str = "gpt-4"
-) -> Tuple[int, str]:
+    player_names: list[str], message_state: MessagePool, model_name: str = "gpt-4"
+) -> tuple[int, str]:
     langchain_messages = []
     langchain_messages.append(judge_debate_system_message)
 
@@ -137,7 +145,7 @@ def judge_debate(
             openai_api_version=os.getenv("OPENAI_API_VERSION"),
             deployment_name=os.getenv("DEPLOYMENT_NAME"),
             openai_api_key=os.getenv("OPENAI_API_KEY"),
-            openai_api_type="azure"
+            openai_api_type="azure",
         )
         try:
             response = llm(langchain_messages)
@@ -147,12 +155,11 @@ def judge_debate(
         llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
         try:
             response = llm(langchain_messages)
-        except Exception as e:
+        except Exception:
             backup_model = "gpt-3.5-turbo-16k"
             print(f"{model_name} not found, using {backup_model}")
             llm = ChatOpenAI(temperature=0, model_name=backup_model)
             response = llm(langchain_messages)
-
 
     match = re.search(r"WINNER:\s*(\w+)\s*$", response.content)
     if match is None:

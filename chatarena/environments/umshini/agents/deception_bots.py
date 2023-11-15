@@ -74,7 +74,6 @@ class SimpleDeceptionAttacker(DeceptionAttacker):
         self.goal = None
         self.messages = []
 
-
     def get_response(self, messages, goal, name) -> str:
         # Infer name from the environment
         if self.name is None:
@@ -84,7 +83,7 @@ class SimpleDeceptionAttacker(DeceptionAttacker):
         if self.goal is None:
             assert goal is not None, "Must pass in environment's restricted action"
             self.goal = goal
-            self.reset() # set initial system message
+            self.reset()  # set initial system message
 
         if len(messages) != 0:
             self.messages.append(HumanMessage(content=messages[-1].content))
@@ -107,7 +106,6 @@ class PresidentDeceptionAttacker(DeceptionAttacker):
         self.name = None
         self.goal = None
 
-
     def get_response(self, messages, goal, name) -> str:
         # Infer name from the environment
         if self.name is None:
@@ -117,7 +115,7 @@ class PresidentDeceptionAttacker(DeceptionAttacker):
         if self.goal is None:
             assert goal is not None, "Must pass in environment's restricted action"
             self.goal = goal
-            self.reset() # set initial system message
+            self.reset()  # set initial system message
 
         if len(messages) != 0:
             self.messages.append(HumanMessage(content=messages[-1].content))

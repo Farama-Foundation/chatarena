@@ -1,12 +1,12 @@
-from pettingzoo.classic.chess.chess_utils import *
 import re
-from pettingzoo.classic import chess_v5
+from typing import List, Union
+
+from pettingzoo.classic import chess_v6
+from pettingzoo.classic.chess.chess_utils import chess, get_move_plane
 
 from chatarena.environments.base import Environment, TimeStep
-from typing import List, Dict, Union
 
 from ..message import Message, MessagePool
-from ..config import EnvironmentConfig
 
 
 def action_string_to_alphazero_format(action: str, player_index: int) -> int:
@@ -32,7 +32,7 @@ class PettingzooChess(Environment):
 
     def __init__(self, player_names: List[str], **kwargs):
         super().__init__(player_names=player_names, **kwargs)
-        self.env = chess_v5.env(render_mode="ansi")
+        self.env = chess_v6.env(render_mode="ansi")
 
         # The "state" of the environment is maintained by the message pool
         self.message_pool = MessagePool()
@@ -57,20 +57,24 @@ class PettingzooChess(Environment):
         if player_name is None:
             return self.message_pool.get_all_messages()
         else:
-            return self.message_pool.get_visible_messages(player_name, turn=self.turn + 1)
+            return self.message_pool.get_visible_messages(
+                player_name, turn=self.turn + 1
+            )
 
     def _moderator_speak(self, text: str, visible_to: Union[str, List[str]] = "all"):
-        """
-        moderator say something
-        """
-        message = Message(agent_name="Moderator", content=text, turn=self.turn, visible_to=visible_to)
+        """Moderator say something."""
+        message = Message(
+            agent_name="Moderator", content=text, turn=self.turn, visible_to=visible_to
+        )
         self.message_pool.append_message(message)
 
     def is_terminal(self) -> bool:
         return self._terminal
 
     def step(self, player_name: str, action: str) -> TimeStep:
-        assert player_name == self.get_next_player(), f"Wrong player! It is {self.get_next_player()} turn."
+        assert (
+            player_name == self.get_next_player()
+        ), f"Wrong player! It is {self.get_next_player()} turn."
         self._moderator_speak("\n" + self.env.render())
 
         message = Message(agent_name=player_name, content=action, turn=self.turn)
@@ -83,13 +87,17 @@ class PettingzooChess(Environment):
         obs_dict, reward, terminal, truncation, info = self.env.last()
         self.env.step(alphazero_move)
         self._terminal = terminal  # Update the terminal state
-        reward = {self.player_names[self.current_player]: reward,
-                  self.player_names[1 - self.current_player]: 0}
+        reward = {
+            self.player_names[self.current_player]: reward,
+            self.player_names[1 - self.current_player]: 0,
+        }
 
         self.current_player = 1 - self.current_player
         self.turn += 1
 
-        return TimeStep(observation=self.get_observation(), reward=reward, terminal=terminal)
+        return TimeStep(
+            observation=self.get_observation(), reward=reward, terminal=terminal
+        )
 
     def check_action(self, action: str, agent_name: str) -> bool:
         # This can be implemented depending on how you want to validate actions for a given agent
@@ -114,8 +122,12 @@ def test_chess_environment():
     env.print()
 
     # Move sequence: 1. e4 e5 2. Nf3 Nc6
-    moves = ["Move (4, 1) to (4, 3)", "Move (4, 6) to (4, 4)",
-             "Move (6, 0) to (5, 2)", "Move (1, 7) to (2, 5)"]
+    moves = [
+        "Move (4, 1) to (4, 3)",
+        "Move (4, 6) to (4, 4)",
+        "Move (6, 0) to (5, 2)",
+        "Move (1, 7) to (2, 5)",
+    ]
 
     for i, move in enumerate(moves):
         assert env.check_action(move, env.get_next_player())
@@ -126,7 +138,7 @@ def test_chess_environment():
 
 
 if __name__ == "__main__":
-    env = chess_v5.env()
+    env = chess_v6.env()
 
     # Test the conversion function with an example action string
     action = "Move (0, 1) to (0, 3)"
