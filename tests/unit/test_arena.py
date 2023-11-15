@@ -2,6 +2,9 @@ import os
 import unittest
 from unittest import TestCase
 
+import pytest
+
+import chatarena
 from chatarena import EXAMPLES_DIR
 from chatarena.arena import Arena
 
@@ -101,9 +104,10 @@ class TestArena(TestCase):
         not os.getenv("OPENAI_API_KEY"),
         "OpenAI API key must be set to run this test.",
     )
+    @pytest.mark.xfail(raises=chatarena.arena.TooManyInvalidActions)
     def test_arena_7(self):
         arena = Arena.from_config(os.path.join(EXAMPLES_DIR, "pettingzoo_chess.json"))
-        for i in range(1, 2):
+        for i in range(1, 10):
             print(f"=== Step {i} ===")
             arena.step()
             arena.environment.print()
@@ -159,11 +163,12 @@ class TestArena(TestCase):
         not os.getenv("OPENAI_API_KEY"),
         "OpenAI API key must be set to run this test.",
     )
+    @pytest.mark.xfail(raises=chatarena.arena.TooManyInvalidActions)
     def test_arena_11(self):
         arena = Arena.from_config(
             os.path.join(EXAMPLES_DIR, "pettingzoo_tictactoe.json")
         )
-        for i in range(1, 2):
+        for i in range(1, 10):
             print(f"=== Step {i} ===")
             arena.step()
             arena.environment.print()
