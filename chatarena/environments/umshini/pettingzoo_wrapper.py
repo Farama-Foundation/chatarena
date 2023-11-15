@@ -270,7 +270,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         if agent not in self.agents:
             return None
         # Observations and infos are calculated in step(), but need to be calculated before the first step() call
-        elif isinstance(agent, str):
+        elif not isinstance(agent, str):
             raise TypeError("AgentID must be a string")
         else:
             # get only the messages that this agent can see
