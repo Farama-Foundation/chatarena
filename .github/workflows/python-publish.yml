@@ -32,6 +32,22 @@ jobs:
         - os: ubuntu-latest
           python: 311
           platform: manylinux_x86_64
+        - os: macos-latest
+          python: 38
+        - os: macos-latest
+          python: 39
+        - os: macos-latest
+          python: 310
+        - os: macos-latest
+          python: 311
+        - os: windows-latest
+          python: 38
+        - os: windows-latest
+          python: 39
+        - os: windows-latest
+          python: 310
+        - os: windows-latest
+          python: 311
 
     steps:
     - uses: actions/checkout@v4
