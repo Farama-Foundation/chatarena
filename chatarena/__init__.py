@@ -5,4 +5,4 @@ ROOT_DIR = (
 )
 EXAMPLES_DIR = os.path.join(ROOT_DIR, "examples")
 
-__version__ = "0.1.12.12"
+__version__ = "0.1.13"
