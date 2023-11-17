@@ -1,3 +1,4 @@
+import random
 from typing import List, Union
 
 from chatarena.config import EnvironmentConfig
@@ -6,7 +7,7 @@ from chatarena.environments.base import Environment
 from chatarena.message import MessagePool, Message
 from chatarena.agent import SIGNAL_END_OF_CONVERSATION
 
-PLAYER_TERMINAL = -1
+PLAYER_TERMINAL = 'END'
 
 
 class Story(Environment):
@@ -29,9 +30,9 @@ class Story(Environment):
         self.scene_message_pool.reset()
 
     def get_next_player(self) -> str:
-        if self._current_stage == "init":
+        if self._next_stage == "init":
             return "Designer"
-        elif self._current_stage == "pick":
+        elif self._next_stage == "pick":
             return "Controller"
         else:
             return self.player_names[self._next_player_idx]
@@ -56,16 +57,23 @@ class Story(Environment):
         check if the conversation is over
         """
         # If the last message is the signal, then the conversation is over
+        if self.scene_message_pool.last_message is None:
+            return False
         if self.scene_message_pool.last_message.content.startswith(SIGNAL_END_OF_CONVERSATION):
             return True
+        if self.global_message_pool.last_message is None:
+            return False
         if self.global_message_pool.last_message.content.startswith(SIGNAL_END_OF_CONVERSATION):
             return True
         return False
 
-    @staticmethod
-    def _parse_picked_player(text: str) -> str:
-        name = text.split('Next: ')[1].split('.')[0]
-        return name
+    def _parse_picked_player(self, text: str) -> str:
+        try:
+            name = text.split('Next: ')[1].split('.')[0]
+            return name
+        except IndexError:
+            print(f'WARNING using random player')
+            return random.choice(self.player_names)
 
     def step(self, player_name: str, action: str) -> TimeStep:
         self._current_stage = self._next_stage
@@ -75,10 +83,11 @@ class Story(Environment):
             self.global_message_pool.append_message(message)
             self._next_stage = "pick"
         elif self._current_stage == "pick":
-            self._next_player_idx = self.player_names.index(self._parse_picked_player(action))
-            if self._next_player_idx == PLAYER_TERMINAL:
+            next_player = self._parse_picked_player(action)
+            if next_player == PLAYER_TERMINAL:
                 self._next_stage = "end of scene"
             else:
+                self._next_player_idx = self.player_names.index(next_player)
                 self._next_stage = "act"
         elif self._current_stage == "act":
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
