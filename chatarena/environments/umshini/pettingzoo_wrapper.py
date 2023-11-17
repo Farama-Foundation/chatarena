@@ -474,8 +474,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         self.agent_selection = self._agent_selector.reset()
 
         # get the first observation (but don't return it, as AEC envs use last() for initial obs)
-        observation = self.observe(self.agent_selection)
-        info = self.infos[self.agent_selection]
+        self.observe(self.agent_selection)
 
         # render the environment (print the initial scenario text)
         if self.render_mode is not None:

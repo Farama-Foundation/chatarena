@@ -57,7 +57,10 @@ Your first response should be an opening statement.
         """Uses langchain to analyze the conversation, pick a winner, and set the reward."""
         if self.disable_judging:
             # Local API testing
-            scores = {"Opponent": random.randint(0, 10), "Proponent": random.randint(0, 10)}
+            scores = {
+                "Opponent": random.randint(0, 10),
+                "Proponent": random.randint(0, 10),
+            }
             scores_text = f"SCORES: {scores}"
         else:
             scores, scores_text = judge_debate(self.player_names, self.message_pool)
@@ -110,7 +113,7 @@ def create_debate_env(
 
 judge_debate_system_message = SystemMessage(
     content="""You are an impartial debate judge. Your job is to rate the performance of each debater, on a scale of 0-10.
-Your ratings should be based performance and persuasiveness, and not the morality of the position. 
+Your ratings should be based performance and persuasiveness, and not the morality of the position.
 
 If a player's responses are too short (e.g., less than 5 sentences for a given response, rather than a paragraph), penalize their score heavily.
 If a player argues for the wrong position (e.g., proponent arguing against the topic) or simply agrees with the other player, penalize their score heavily.
@@ -167,7 +170,7 @@ def judge_debate(
             llm = ChatOpenAI(temperature=0, model_name=backup_model)
             response = llm(langchain_messages)
 
-    start_index = response.content.find('SCORES:')
+    start_index = response.content.find("SCORES:")
     if start_index != -1:
         # Extract the substring starting from SCORES: to the end
         scores_substring = response.content[start_index:]

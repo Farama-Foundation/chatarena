@@ -60,7 +60,7 @@ class UmshiniBaseEnv(Environment):
         self._moderator_speak(
             self._moderator_prompt_template.format(
                 moderator_prompt_input=self._moderator_prompt_input,
-                character_limit=self.character_limit
+                character_limit=self.character_limit,
             )
         )
         return TimeStep(

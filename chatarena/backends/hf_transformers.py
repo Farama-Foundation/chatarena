@@ -1,3 +1,5 @@
+import os
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from typing import List
 
 from tenacity import retry, stop_after_attempt, wait_random_exponential
@@ -6,8 +8,7 @@ from ..message import SYSTEM_NAME as SYSTEM
 from ..message import Message
 from .base import IntelligenceBackend
 
-import os
-from contextlib import contextmanager, redirect_stderr, redirect_stdout
+
 @contextmanager
 def suppress_stdout_stderr():
     """A context manager that redirects stdout and stderr to devnull."""
