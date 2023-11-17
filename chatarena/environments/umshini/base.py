@@ -25,6 +25,7 @@ class UmshiniBaseEnv(Environment):
         player_names: List[str],
         moderator_prompt_template: PromptTemplate,
         moderator_prompt_input: str,
+        character_limit: int = 4000,
         round_length: int = 10,
         **kwargs,
     ):
@@ -37,6 +38,7 @@ class UmshiniBaseEnv(Environment):
         self._moderator_prompt_template = moderator_prompt_template
         self._moderator_prompt_input = moderator_prompt_input
         self._round_length = round_length
+        self.character_limit = character_limit
         self.agent_selector = agent_selector(self.player_names)
         self.reset()
 
@@ -57,7 +59,8 @@ class UmshiniBaseEnv(Environment):
         self.agent_selector = agent_selector(self.player_names)
         self._moderator_speak(
             self._moderator_prompt_template.format(
-                moderator_prompt_input=self._moderator_prompt_input
+                moderator_prompt_input=self._moderator_prompt_input,
+                character_limit=self.character_limit
             )
         )
         return TimeStep(
