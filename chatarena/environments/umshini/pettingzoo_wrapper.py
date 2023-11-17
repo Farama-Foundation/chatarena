@@ -108,6 +108,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     topic=topic,
                     player_names=player_names,
                     round_length=round_length,
+                    character_limit=character_limit,
                     disable_judging=disable_judging,
                 )
                 self.topic = topic
@@ -120,6 +121,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     moderation_policy=moderation_policy,
                     player_names=player_names,
                     round_length=round_length,
+                    character_limit=character_limit,
                     disable_judging=disable_judging,
                 )
                 self.moderation_policy = moderation_policy
@@ -132,6 +134,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     restricted_action=restricted_action,
                     player_names=player_names,
                     round_length=round_length,
+                    character_limit=character_limit,
                     disable_judging=disable_judging,
                 )
                 self.restricted_action = restricted_action
@@ -470,6 +473,9 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
         self._agent_selector = self._env.agent_selector
         self.agent_selection = self._agent_selector.reset()
 
+        # get the first observation (but don't return it, as AEC envs use last() for initial obs)
+        self.observe(self.agent_selection)
+
         # render the environment (print the initial scenario text)
         if self.render_mode is not None:
             self.render()
@@ -516,6 +522,10 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
         if self.render_mode is not None:
             self.render()
+
+        # Print final scores if the env has just terminated (debate moderator final message already shows scores)
+        if termination and self.env_name != "debate":
+            print(Fore.BLACK + f"SCORES: {self.total_rewards}")
 
         # Get the next agent in PettingZoo, and iterate the underlying environment (used for reward calculations)
         self.agent_selection = self._agent_selector.next()

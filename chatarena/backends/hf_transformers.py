@@ -1,3 +1,5 @@
+import os
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from typing import List
 
 from tenacity import retry, stop_after_attempt, wait_random_exponential
@@ -6,18 +8,28 @@ from ..message import SYSTEM_NAME as SYSTEM
 from ..message import Message
 from .base import IntelligenceBackend
 
-# Try to import the transformers package
-try:
-    import transformers
-    from transformers import pipeline
-    from transformers.pipelines.conversational import (
-        Conversation,
-        ConversationalPipeline,
-    )
-except ImportError:
-    is_transformers_available = False
-else:
-    is_transformers_available = True
+
+@contextmanager
+def suppress_stdout_stderr():
+    """A context manager that redirects stdout and stderr to devnull."""
+    with open(os.devnull, "w") as fnull:
+        with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
+            yield (err, out)
+
+
+with suppress_stdout_stderr():
+    # Try to import the transformers package
+    try:
+        import transformers
+        from transformers import pipeline
+        from transformers.pipelines.conversational import (
+            Conversation,
+            ConversationalPipeline,
+        )
+    except ImportError:
+        is_transformers_available = False
+    else:
+        is_transformers_available = True
 
 
 class TransformersConversational(IntelligenceBackend):

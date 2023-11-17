@@ -2,9 +2,9 @@
 # pyright: reportOptionalMemberAccess=false
 from __future__ import annotations
 
+import ast
 import os
 import random
-import re
 
 from langchain.chat_models import AzureChatOpenAI, ChatOpenAI
 from langchain.prompts import PromptTemplate
@@ -19,17 +19,15 @@ class DebateEnv(UmshiniBaseEnv):
     """Debate environment."""
 
     moderator_prompt = PromptTemplate(
-        template="""Welcome to the debate game! The topic for today's debate is:
-"{moderator_prompt_input}"
-Rules:
+        template="""Welcome to the debate game! The topic for today's debate is: "{moderator_prompt_input}"
 The Opponent argues against the topic, while the Proponent argues for it.
-Your first response should be an opening statement, followed by back and forth cross-examination.
-You are free to talk directly to your opponent during cross-examination.
-The cross examination phase should be short, and should be used to attack your opponents arguments, or defend your own.
-The winner of the debate will be decided by the judge, based the performance and persuasiveness of each debater, and not the morality of the position.
-Do not respond as any other character, only as yourself.
-The judge will not interrupt.""",
-        input_variables=["moderator_prompt_input"],
+The Moderator will report scores and decide a winner of the debate, based performance, persuasiveness, and response length.
+Talk directly to the other player, the Moderator will not interject until the debate has finished.
+
+The maximum number of characters for each response is {character_limit}.
+Your first response should be an opening statement.
+""",
+        input_variables=["moderator_prompt_input", "character_limit"],
     )
     type_name = "debate"
 
@@ -38,6 +36,7 @@ The judge will not interrupt.""",
         player_names: list[str],
         topic: str,
         round_length: int = 10,
+        character_limit: int = 4000,
         disable_judging=False,
         **kwargs,
     ):
@@ -46,9 +45,11 @@ The judge will not interrupt.""",
             moderator_prompt_template=self.moderator_prompt,
             moderator_prompt_input=topic,
             round_length=round_length,
+            character_limit=character_limit,
             disable_judging=disable_judging,
             **kwargs,
         )
+        self.character_limit = character_limit
         self.disable_judging = disable_judging
         self.topic = topic
 
@@ -56,17 +57,15 @@ The judge will not interrupt.""",
         """Uses langchain to analyze the conversation, pick a winner, and set the reward."""
         if self.disable_judging:
             # Local API testing
-            winner = random.randint(0, 1)
-            winner_text = f"WINNER: {winner}"
+            scores = {
+                "Opponent": random.randint(0, 10),
+                "Proponent": random.randint(0, 10),
+            }
+            scores_text = f"SCORES: {scores}"
         else:
-            winner, winner_text = judge_debate(self.player_names, self.message_pool)
-        self._moderator_speak(winner_text)
-        if winner == 0:
-            return {self.player_names[0]: 1, self.player_names[1]: 0}
-        elif winner == 1:
-            return {self.player_names[0]: 0, self.player_names[1]: 1}
-        else:
-            return {self.player_names[0]: 0, self.player_names[1]: 0}
+            scores, scores_text = judge_debate(self.player_names, self.message_pool)
+        self._moderator_speak(scores_text)
+        return scores
 
     def step(self, player_name: str, action: str) -> TimeStep:
         if self._current_turn < self._round_length - 1:
@@ -97,6 +96,7 @@ def create_debate_env(
     topic: str,
     round_length: int | None = None,
     player_names: list[str] | None = None,
+    character_limit: int | None = 4000,
     disable_judging: bool | None = False,
 ):
     if player_names is None:
@@ -105,21 +105,30 @@ def create_debate_env(
         player_names=player_names,
         topic=topic,
         round_length=round_length,
+        character_limit=character_limit,
         disable_judging=disable_judging,
     )
     return env
 
 
 judge_debate_system_message = SystemMessage(
-    content="""You are an impartial debate judge. There is always a winner in every debate, there are no ties.
-Do not say: it is a close call. Do not say: it is a tie.
-Your purpose is to describe who had the better rhetorical arguments and pick a winner in the format:
-<Player1>_Arguments:<summarize>
-<Player2>_Arguments:<summarize>
-<Player1>_Rhetoric:<rhetorical strength>
-<Player2>_Rhetoric:<rhetorical strength>
-EXPLANATION:<final explanation>
-WINNER:<name>"""
+    content="""You are an impartial debate judge. Your job is to rate the performance of each debater, on a scale of 0-10.
+Your ratings should be based performance and persuasiveness, and not the morality of the position.
+
+If a player's responses are too short (e.g., less than 5 sentences for a given response, rather than a paragraph), penalize their score heavily.
+If a player argues for the wrong position (e.g., proponent arguing against the topic) or simply agrees with the other player, penalize their score heavily.
+If a player hallucinates (e.g., pretending to be the moderator or the other player), penalize their score heavily.
+If a player asks questions and is confused about what it is supposed to do, penalize their score heavily.
+
+Use the following format:
+<Player1> Arguments:<summarize>
+<Player2> Arguments:<summarize>
+<Player1> Rhetoric:<rhetorical strength>
+<Player2> Rhetoric:<rhetorical strength>
+<Player1> Response Length:<penalize short responses (ideal length is 5+ sentences), and too long responses which get cut off>
+<Player2> Response Length:<penalize short responses (ideal length is 5+ sentences), and too long responses which get cut off>
+EXPLANATION:<final explanation> <note any penalties which lowered scores>
+SCORES: {"<Player1>": 0, "<Player2>": 10}"""
 )
 
 
@@ -161,10 +170,17 @@ def judge_debate(
             llm = ChatOpenAI(temperature=0, model_name=backup_model)
             response = llm(langchain_messages)
 
-    match = re.search(r"WINNER:\s*(\w+)\s*$", response.content)
-    if match is None:
-        return -1, response.content
-    winner = match.group(1)
-    if winner in player_names:
-        return player_names.index(winner), response.content
-    return -1, response.content
+    start_index = response.content.find("SCORES:")
+    if start_index != -1:
+        # Extract the substring starting from SCORES: to the end
+        scores_substring = response.content[start_index:]
+
+        # Extract the dictionary part from the substring
+        dictionary_string = scores_substring.split(":", 1)[1].strip()
+
+        # Safely evaluate the dictionary string using ast.literal_eval
+        scores_dict = ast.literal_eval(dictionary_string)
+    else:
+        print(f"ERROR: judge output does not contain 'SCORES:'. {response.content}")
+        scores_dict = {player_names[0]: 0, player_names[1]: 0}
+    return scores_dict, response.content
