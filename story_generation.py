@@ -1,6 +1,8 @@
-from chatarena.agent import Player
+from chatarena.agent import Player, Controller
 from chatarena.backends import OpenAIChat
 environment_description = "You are in a house in the winter countryside with no people around."
+controller = Controller(name="Controller", backend=OpenAIChat(),
+                        role_desc="You are the director of a popular play. Your job is to select the next actor that should go on stage.")
 player1 = Player(name="Sheldon", backend=OpenAIChat(),
                  role_desc="You are a writer who has published many famous books and has many fans. You are thoughtful and friendly, and you love to read and write in general. You were saved by Annie and brought to her house after a car accident. Your leg was broken in a car accident and you need to be in a wheelchair.",
                  global_prompt=environment_description)
