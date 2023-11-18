@@ -25,8 +25,7 @@ The Moderator will report scores and decide a winner of the debate, based perfor
 Talk directly to the other player, the Moderator will not interject until the debate has finished.
 
 The maximum number of characters for each response is {character_limit}.
-Your first response should be an opening statement.
-""",
+Your first response should be an opening statement.""",
         input_variables=["moderator_prompt_input", "character_limit"],
     )
     type_name = "debate"
