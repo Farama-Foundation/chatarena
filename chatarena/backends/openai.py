@@ -13,12 +13,12 @@ except ImportError:
     is_openai_available = False
     # logging.warning("openai package is not installed")
 else:
-    openai.api_key = os.environ.get("OPENAI_API_KEY")
-    if openai.api_key is None:
+    try:
+        client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        is_openai_available = True
+    except openai.OpenAIError:
         # logging.warning("OpenAI API key is not set. Please set the environment variable OPENAI_API_KEY")
         is_openai_available = False
-    else:
-        is_openai_available = True
 
 # Default config follows the OpenAI playground
 DEFAULT_TEMPERATURE = 0.7
@@ -72,7 +72,7 @@ class OpenAIChat(IntelligenceBackend):
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, messages):
-        completion = openai.ChatCompletion.create(
+        completion = client.chat.completions.create(
             model=self.model,
             messages=messages,
             temperature=self.temperature,
