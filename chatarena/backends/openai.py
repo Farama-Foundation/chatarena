@@ -13,12 +13,12 @@ except ImportError:
     is_openai_available = False
     # logging.warning("openai package is not installed")
 else:
-    client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-    if client.api_key is None:
+    try:
+        client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        is_openai_available = True
+    except openai.OpenAIError:
         # logging.warning("OpenAI API key is not set. Please set the environment variable OPENAI_API_KEY")
         is_openai_available = False
-    else:
-        is_openai_available = True
 
 # Default config follows the OpenAI playground
 DEFAULT_TEMPERATURE = 0.7
