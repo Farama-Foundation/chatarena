@@ -40,9 +40,9 @@ jobs:
         run: |
           sudo apt-get install python3-opengl xvfb
           pip install -e '.[all]'
-      - name: Umshini Environments Test
-        run: |
-          pytest -v tests/unit/test_umshini_environments.py
       - name: Regular Environments Test
         run: |
           pytest -v tests
+      - name: Umshini Environments Test
+        run: |
+          pytest -v tests/unit/test_umshini_environments.py
