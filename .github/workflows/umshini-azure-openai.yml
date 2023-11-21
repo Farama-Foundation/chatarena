@@ -12,9 +12,9 @@ permissions:
   contents: read
 
 env:
-  OPENAI_API_KEY: ${{ secrets.azure_openai_api_key }}
+  AZURE_OPENAI_API_KEY: ${{ secrets.azure_openai_api_key }}
   OPENAI_API_TYPE: azure
-  OPENAI_API_BASE: ${{ secrets.azure_openai_endpoint }}
+  AZURE_OPENAI_ENDPOINT: ${{ secrets.azure_openai_endpoint }}
   OPENAI_API_VERSION: 2023-05-15
   AZURE_DEPLOYMENT: gpt-4
 
