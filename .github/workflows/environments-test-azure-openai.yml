@@ -42,7 +42,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get install python3-opengl xvfb
-          pip install -e '.[umshini]'
+          pip install -e '.[umshini,testing]'
       - name: Umshini Environments Test
         run: |
           pytest -v tests/unit/test_umshini_environments.py
