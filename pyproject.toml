@@ -24,6 +24,7 @@ dependencies = [
     "tenacity==8.2.2",
     "rich==13.3.3",
     "prompt_toolkit==3.0.38",
+    "httpx==0.24.0"
 ]
 dynamic = ["version"]
 
@@ -51,7 +52,7 @@ all = ["anthropic>=0.2.8", "cohere>=4.3.1", "transformers>=4.27.4", "gradio==3.3
        "colorama>=0.4.6", "supabase==2.0.3", "bardapi==0.1.11", "langchain>=0.0.339", "deptry>=0.12.0", "pytest>=7.4.3", "pytest-cov>=4.1.0", "pytest-xdist>=3.4.0"]
 
 [tool.deptry.per_rule_ignores]
-DEP002 = [ "pytest", "pytest-cov", "deptry", "pytest-xdist", "chess", "rlcard", "pygame", "pydantic"]
+DEP002 = [ "pytest", "pytest-cov", "deptry", "pytest-xdist", "chess", "rlcard", "pygame", "pydantic", "httpx"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
