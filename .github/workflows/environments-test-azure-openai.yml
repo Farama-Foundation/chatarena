@@ -36,4 +36,4 @@ jobs:
           pip install -e '.[all]'
       - name: Umshini Environments Test
         run: |
-          xvfb-run -s "-screen 0 1024x768x24" pytest -v -n auto tests/test_umshini_environments.py --cov=chatarena --cov-report term
+          xvfb-run -s "-screen 0 1024x768x24" pytest -v -n auto tests/test_umshini_environments.py
