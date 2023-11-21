@@ -19,7 +19,7 @@ env:
   AZURE_DEPLOYMENT: gpt-4
 
 jobs:
-  linux-test:
+  environment-test-azure-openai:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,6 +30,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Check environment variables are set
+        run: |
+          if [ -z "$AZURE_OPENAI_API_KEY" ]; then
+            echo "AZURE_OPENAI_API_KEY environment variable is not set"
+            exit 1
+          fi
       - name: Install dependencies
         run: |
           sudo apt-get install python3-opengl xvfb
