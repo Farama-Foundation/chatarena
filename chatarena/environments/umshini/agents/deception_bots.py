@@ -9,7 +9,7 @@ class DeceptionDefender:
         if llm is not None:
             self.llm = llm
         else:
-            self.llm = ChatOpenAI(temperature=0.9, client="")
+            self.llm = ChatOpenAI(temperature=0.9)
         pass
 
     def get_response(self, messages, goal, name) -> str:
@@ -24,7 +24,7 @@ class DeceptionAttacker:
         if llm is not None:
             self.llm = llm
         else:
-            self.llm = ChatOpenAI(temperature=0.9, client="")
+            self.llm = ChatOpenAI(temperature=0.9)
         pass
 
     def get_response(self, messages, goal, name) -> str:

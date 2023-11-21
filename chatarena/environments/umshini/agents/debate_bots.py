@@ -9,7 +9,7 @@ class BasicDebater:
         self.name = name
         self.topic = topic
         self.position = position
-        self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
+        self.llm = ChatOpenAI(temperature=0.9)  # client is a ghost parameter
         memory = ConversationBufferMemory(memory_key="chat_history")
         self.agent = self.agent_chain = initialize_agent(
             tools=[],
@@ -46,7 +46,7 @@ class StructuredDebater:
         self.name = name
         self.topic = topic
         self.position = position
-        self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
+        self.llm = ChatOpenAI(temperature=0.9)  # client is a ghost parameter
         memory = ConversationBufferMemory(memory_key="chat_history")
         self.agent = self.agent_chain = initialize_agent(
             tools=[],

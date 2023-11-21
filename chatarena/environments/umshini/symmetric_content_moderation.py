@@ -226,7 +226,7 @@ VIOLATION:False"""
             )
             response = llm(langchain_messages)
         else:
-            llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
+            llm = ChatOpenAI(temperature=0, model_name=model_name)
             response = llm(langchain_messages)
         return response
 
