@@ -30,6 +30,8 @@ jobs:
       - name: Check environment variables are set
         run: |
           if [ -z "$OPENAI_API_KEY" ]; then
+            exit 0
+          else
             echo "AZURE_OPENAI_API_KEY environment variable is not set"
             exit 1
           fi
