@@ -48,7 +48,7 @@ all_envs = ["pettingzoo>=1.24.0", "chess==1.9.4", "rlcard==1.0.5", "pygame==2.3.
 database = ["supabase==2.0.3"]
 testing = ["deptry>=0.12.0", "pytest>=7.4.3", "pytest-cov>=4.1.0", "pytest-xdist>=3.4.0"]
 all = ["anthropic>=0.2.8", "cohere>=4.3.1", "transformers>=4.27.4", "gradio==3.34.0", "pydantic==1.10.13", "pettingzoo>=1.24.0", "chess==1.9.4", "rlcard==1.0.5", "pygame==2.3.0", "gymnasium>=0.28.1",
-       "supabase==2.0.3", "bardapi==0.1.11", "langchain>=0.0.135", "deptry>=0.12.0", "pytest>=7.4.3", "pytest-cov>=4.1.0", "pytest-xdist>=3.4.0"]
+       "colorama>=0.4.6", "supabase==2.0.3", "bardapi==0.1.11", "langchain>=0.0.339", "deptry>=0.12.0", "pytest>=7.4.3", "pytest-cov>=4.1.0", "pytest-xdist>=3.4.0"]
 
 [tool.deptry.per_rule_ignores]
 DEP002 = [ "pytest", "pytest-cov", "deptry", "pytest-xdist", "chess", "rlcard", "pygame", "pydantic"]
