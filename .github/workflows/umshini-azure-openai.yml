@@ -1,0 +1,39 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+---
+name:  Umshini Environments Test (AzureOpenAI)
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  OPENAI_API_KEY: ${{ secrets.azure_openai_api_key }}
+  OPENAI_API_TYPE: azure
+  OPENAI_API_BASE: ${{ secrets.azure_openai_endpoint }}
+  OPENAI_API_VERSION: 2023-05-15
+  AZURE_DEPLOYMENT: gpt-4
+
+jobs:
+  linux-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ '3.11' ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get install python3-opengl xvfb
+          pip install -e '.[all]'
+      - name: Release Test
+        run: |
+          xvfb-run -s "-screen 0 1024x768x24" pytest -v -n auto tests/test_umshini_environments.py --cov=chatarena --cov-report term
