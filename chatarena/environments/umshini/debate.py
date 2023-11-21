@@ -160,6 +160,7 @@ def judge_debate(
     else:
         llm = ChatOpenAI(
             temperature=0,
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
             model_name=model_name,
         )
         try:
@@ -167,7 +168,11 @@ def judge_debate(
         except Exception:
             backup_model = "gpt-3.5-turbo-16k"
             print(f"{model_name} not found, using {backup_model}")
-            llm = ChatOpenAI(temperature=0, model_name=backup_model)
+            llm = ChatOpenAI(
+                temperature=0,
+                openai_api_key=os.getenv("OPENAI_API_KEY"),
+                model_name=backup_model,
+            )
             response = llm(langchain_messages)
 
     start_index = response.content.find("SCORES:")
