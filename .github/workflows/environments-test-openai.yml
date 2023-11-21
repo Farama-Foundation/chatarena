@@ -43,7 +43,7 @@ jobs:
           pip install -e '.[all]'
       - name: Umshini Environments Test
         run: |
-          xvfb-run -s "-screen 0 1024x768x24" pytest -v -n auto tests/unit/test_umshini_environments.py
+          pytest -v -n auto tests/unit/test_umshini_environments.py
       - name: Regular Environments Test
         run: |
-          xvfb-run -s "-screen 0 1024x768x24" pytest -v -n auto tests
+          pytest -v -n auto tests
