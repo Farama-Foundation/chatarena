@@ -7,7 +7,7 @@ from chatarena.environments.umshini import PettingZooCompatibilityV0
 
 class TestUmshiniEnvironments(TestCase):
     @unittest.skipIf(
-        not os.getenv("OPENAI_API_KEY") or os.getenv("AZURE_OPENAI_API_KEY"),
+        not (os.getenv("OPENAI_API_KEY") or os.getenv("AZURE_OPENAI_API_KEY")),
         "OPENAI_API_KEY or AZURE_OPENAI_API_KEY must be set to run this test.",
     )
     def test_debate(self):
@@ -39,7 +39,7 @@ class TestUmshiniEnvironments(TestCase):
         }, "Scores should be 0-0, as both agents did not participate in the debate"
 
     @unittest.skipIf(
-        not os.getenv("OPENAI_API_KEY") or os.getenv("AZURE_OPENAI_API_KEY"),
+        not (os.getenv("OPENAI_API_KEY") or os.getenv("AZURE_OPENAI_API_KEY")),
         "OPENAI_API_KEY or AZURE_OPENAI_API_KEY must be set to run this test.",
     )
     def test_content_moderation(self):
@@ -74,7 +74,7 @@ class TestUmshiniEnvironments(TestCase):
         }, "Total rewards should be 2 for Agent1, -1 for Agent2. Successful Agent1 attack gives {+1, -1}, then unsuccessful attack from Agent2 gives {+1, 0}"
 
     @unittest.skipIf(
-        not os.getenv("OPENAI_API_KEY") or os.getenv("AZURE_OPENAI_API_KEY"),
+        not (os.getenv("OPENAI_API_KEY") or os.getenv("AZURE_OPENAI_API_KEY")),
         "OPENAI_API_KEY or AZURE_OPENAI_API_KEY must be set to run this test.",
     )
     def test_deception(self):

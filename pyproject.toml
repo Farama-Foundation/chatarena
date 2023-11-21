@@ -55,4 +55,4 @@ DEP002 = [ "pytest", "pytest-cov", "deptry", "pytest-xdist", "chess", "rlcard", 
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = [ "--ignore=tests/test_umshini_environments.py", ]
+addopts = [ "--ignore=tests/unit/test_umshini_environments.py", ]
