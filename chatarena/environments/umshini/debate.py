@@ -164,8 +164,11 @@ def judge_debate(
         )
         try:
             response = llm(langchain_messages)
-        except Exception as e:
-            print(e)
+        except Exception:
+            backup_model = "gpt-3.5-turbo-16k"
+            print(f"{model_name} not found, using {backup_model}")
+            llm = ChatOpenAI(temperature=0, model_name=backup_model)
+            response = llm(langchain_messages)
 
     start_index = response.content.find("SCORES:")
     if start_index != -1:

@@ -227,7 +227,13 @@ VIOLATION:False"""
             response = llm(langchain_messages)
         else:
             llm = ChatOpenAI(temperature=0, model_name=model_name)
-            response = llm(langchain_messages)
+            try:
+                response = llm(langchain_messages)
+            except Exception:
+                backup_model = "gpt-3.5-turbo"
+                print(f"{model_name} not found, using {backup_model}")
+                llm = ChatOpenAI(temperature=0, model_name=backup_model)
+                response = llm(langchain_messages)
         return response
 
 
