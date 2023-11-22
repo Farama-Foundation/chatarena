@@ -43,6 +43,8 @@ jobs:
         run: |
           echo "AZURE_OPENAI_API_KEY=$AZURE_OPENAI_API_KEY" >> "$GITHUB_ENV"
           echo "AZURE_OPENAI_ENDPOINT=$AZURE_OPENAI_ENDPOINT" >> "$GITHUB_ENV"
+          python -c 'import os; print("AZURE_OPENAI_API_KEY visible in os.environ:", os.getenv("AZURE_OPENAI_API_KEY") is not None)'
+          python -c 'import os; print("AZURE_DEPLOYMENT visible in os.environ:", os.getenv("AZURE_DEPLOYMENT") is not None)'
       - name: Install dependencies
         run: |
           sudo apt-get install python3-opengl xvfb
