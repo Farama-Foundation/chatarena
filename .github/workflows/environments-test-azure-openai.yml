@@ -17,6 +17,7 @@ env:
   AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
   OPENAI_API_VERSION: 2023-05-15
   AZURE_DEPLOYMENT: gpt-4
+  TEST_SECRET: ${{ secrets.TEST_SECRET }}
 
 jobs:
   environment-test-azure-openai:
@@ -30,6 +31,13 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      - name: TEST SECRET
+        env:
+          TEST_SECRET
+        run: |
+          echo $TEST_SECRET
+          grep env | TEST_SECRET
+          env
       - name: Install dependencies
         run: |
           sudo apt-get install python3-opengl xvfb
