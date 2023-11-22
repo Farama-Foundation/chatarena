@@ -35,4 +35,4 @@ jobs:
       - name: Umshini Environments Test
         run: |
           python -c 'import os; print("AZURE_OPENAI_API_KEY visible in os.environ:", os.getenv("AZURE_OPENAI_API_KEY"))'
-          pytest -v tests/unit/test_umshini_environments.py
+          pytest -v -n auto tests/unit/test_umshini_environments.py
