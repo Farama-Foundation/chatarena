@@ -60,4 +60,6 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_TYPE: openai
         run: |
+          python -c 'import os; print("AFTER: OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY") is not None)'
+          python -c 'import os; print(os.getenv("OPENAI_API_KEY"))'
           pytest -v tests/unit/test_umshini_environments.py
