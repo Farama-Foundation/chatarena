@@ -36,6 +36,13 @@ jobs:
             echo "OPENAI_API_KEY environment variable is not set"
             exit 1
           fi
+      - name: Set environment variables to be visible by python
+        run: |
+          python -c 'import os; print("BEFORE: OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY") is not None)'
+          echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> "$GITHUB_ENV"
+          echo "OPENAI_API_TYPE=$OPENAI_API_TYPE" >> "$GITHUB_ENV"
+          python -c 'import os; print("AFTER: OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY") is not None)'
+          python -c 'import os; print("AFTER: OPENAI_API_TYPE visible in os.environ:", os.getenv("OPENAI_API_TYPE") is not None)'
       - name: Install dependencies
         run: |
           sudo apt-get install python3-opengl xvfb
