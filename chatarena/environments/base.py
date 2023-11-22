@@ -1,22 +1,25 @@
-from dataclasses import dataclass
-from typing import List, Dict
 from abc import abstractmethod
+from dataclasses import dataclass
+from typing import Dict, List
 
+from ..config import Configurable, EnvironmentConfig
 from ..message import Message
 from ..utils import AttributedDict
-from ..config import Configurable, EnvironmentConfig
 
 
 @dataclass
 class TimeStep(AttributedDict):
     """
-    Represents a single step in time within the simulation. It includes observation, reward, and terminal state.
+    Represents a single step in time within the simulation.
+
+    It includes observation, reward, and terminal state.
 
     Attributes:
         observation (List[Message]): A list of messages (observations) for the current timestep.
         reward (Dict[str, float]): A dictionary with player names as keys and corresponding rewards as values.
         terminal (bool): A boolean indicating whether the current state is terminal (end of episode).
     """
+
     observation: List[Message]
     reward: Dict[str, float]
     terminal: bool
@@ -24,7 +27,9 @@ class TimeStep(AttributedDict):
 
 class Environment(Configurable):
     """
-    Abstract class representing an environment. It defines the necessary methods any environment must implement.
+    Abstract class representing an environment.
+
+    It defines the necessary methods any environment must implement.
 
     Inherits from:
         Configurable: A custom class that provides methods to handle configuration settings.
@@ -35,6 +40,7 @@ class Environment(Configurable):
     Note:
         Subclasses should override and implement the abstract methods defined here.
     """
+
     type_name = None
 
     @abstractmethod
@@ -45,14 +51,18 @@ class Environment(Configurable):
         Parameters:
             player_names (List[str]): Names of the players in the environment.
         """
-        super().__init__(player_names=player_names, **kwargs)  # registers the arguments with Configurable
+        super().__init__(
+            player_names=player_names, **kwargs
+        )  # registers the arguments with Configurable
         self.player_names = player_names
 
     def __init_subclass__(cls, **kwargs):
         """
-        Automatically called when a subclass is being initialized. Here it's used to check if the subclass has the required attributes.
+        Automatically called when a subclass is being initialized.
+
+        Here it's used to check if the subclass has the required attributes.
         """
-        for required in ('type_name',):
+        for required in ("type_name",):
             if getattr(cls, required) is None:
                 cls.type_name = cls.__name__.lower()
 
@@ -74,9 +84,7 @@ class Environment(Configurable):
 
     @property
     def num_players(self) -> int:
-        """
-        get the number of players
-        """
+        """Get the number of players."""
         return len(self.player_names)
 
     @abstractmethod
@@ -110,9 +118,7 @@ class Environment(Configurable):
 
     @abstractmethod
     def print(self):
-        """
-        print the environment state
-        """
+        """Print the environment state."""
         pass
 
     @abstractmethod
@@ -169,7 +175,7 @@ class Environment(Configurable):
         Returns:
             Dict[str, float]: A dictionary of players and their rewards (all zero).
         """
-        return {player_name: 0. for player_name in self.player_names}
+        return {player_name: 0.0 for player_name in self.player_names}
 
     def get_one_rewards(self) -> Dict[str, float]:
         """
@@ -178,4 +184,4 @@ class Environment(Configurable):
         Returns:
             Dict[str, float]: A dictionary of players and their rewards (all one).
         """
-        return {player_name: 1. for player_name in self.player_names}
+        return {player_name: 1.0 for player_name in self.player_names}

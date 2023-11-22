@@ -1,11 +1,10 @@
 from ..config import BackendConfig
-
-from .base import IntelligenceBackend
-from .openai import OpenAIChat
-from .cohere import CohereAIChat
-from .human import Human
-from .hf_transformers import TransformersConversational
 from .anthropic import Claude
+from .base import IntelligenceBackend
+from .cohere import CohereAIChat
+from .hf_transformers import TransformersConversational
+from .human import Human
+from .openai import OpenAIChat
 
 ALL_BACKENDS = [
     Human,

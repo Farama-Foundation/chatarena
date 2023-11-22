@@ -1,5 +1,6 @@
-import re
 import json
+import re
+
 
 def is_json(myjson):
     """
@@ -12,10 +13,11 @@ def is_json(myjson):
         bool: True if the string is a valid JSON, False otherwise.
     """
     try:
-        json_object = json.loads(myjson)
-    except ValueError as e:
+        _ = json.loads(myjson)
+    except ValueError:
         return False
     return True
+
 
 def is_json_inside(text):
     """
@@ -27,12 +29,13 @@ def is_json_inside(text):
     Returns:
         bool: True if the string contains valid JSON(s), False otherwise.
     """
-    text = re.sub('\s+', ' ', text)
-    matches = re.findall(r'\{.*?\}', text)
+    text = re.sub(r"\s+", " ", text)
+    matches = re.findall(r"\{.*?\}", text)
     for match in matches:
         if is_json(match):
             return True
     return False
+
 
 def extract_jsons(text):
     """
@@ -44,14 +47,14 @@ def extract_jsons(text):
     Returns:
         List[Dict]: A list of all extracted JSON objects.
     """
-    text = re.sub('\s+', ' ', text)
-    matches = re.findall(r'\{.*?\}', text)
+    text = re.sub(r"\s+", " ", text)
+    matches = re.findall(r"\{.*?\}", text)
     parsed_jsons = []
     for match in matches:
         try:
             json_object = json.loads(match)
             parsed_jsons.append(json_object)
-        except ValueError as e:
+        except ValueError:
             pass
     return parsed_jsons
 
@@ -66,8 +69,8 @@ def extract_code(text):
     Returns:
         List[str]: A list of all extracted Python code blocks.
     """
-    text = re.sub('```python', '```', text)
-    matches = re.findall(r'```(.*?)```', text, re.DOTALL)
+    text = re.sub("```python", "```", text)
+    matches = re.findall(r"```(.*?)```", text, re.DOTALL)
     parsed_codes = []
     for match in matches:
         parsed_codes.append(match)
@@ -76,7 +79,9 @@ def extract_code(text):
 
 class AttributedDict(dict):
     """
-    A dictionary class whose keys are automatically set as attributes of the class. The dictionary is serializable to JSON.
+    A dictionary class whose keys are automatically set as attributes of the class.
+
+    The dictionary is serializable to JSON.
 
     Inherits from:
         dict: Built-in dictionary class in Python.

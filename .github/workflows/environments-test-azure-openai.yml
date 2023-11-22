@@ -1,0 +1,38 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+---
+name:  Environments Test (AzureOpenAI)
+
+on:
+  push:
+    branches: [ main, dev ]
+
+permissions:
+  contents: read
+
+
+jobs:
+  environment-test-azure-openai:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ '3.11' ]
+    env:
+      OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+      OPENAI_API_TYPE: azure
+      AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+      OPENAI_API_VERSION: 2023-05-15
+      AZURE_DEPLOYMENT: gpt-4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pip install -e '.[all]'
+      - name: Umshini Environments Test
+        run: |
+          python -c 'import os; print("AZURE_OPENAI_API_KEY visible in os.environ:", os.getenv("AZURE_OPENAI_API_KEY"))'
+          pytest -v tests/unit/test_umshini_environments.py

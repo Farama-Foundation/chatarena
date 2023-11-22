@@ -1,9 +1,7 @@
 import unittest
 from unittest import TestCase
 
-from chatarena.environments import (
-    PettingzooTicTacToe
-)
+from chatarena.environments import PettingzooTicTacToe
 
 
 class TestEnvironments(TestCase):

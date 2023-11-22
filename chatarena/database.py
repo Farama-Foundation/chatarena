@@ -1,12 +1,13 @@
 """
 Datastore module for chat_arena.
+
 This module provides utilities for storing the messages and the game results into database.
 Currently, it supports Supabase.
 """
 import json
 import os
-from typing import List
 import uuid
+from typing import List
 
 from .arena import Arena
 from .message import Message
@@ -19,7 +20,7 @@ try:
     SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
     SUPABASE_SECRET_KEY = os.environ.get("SUPABASE_SECRET_KEY", "")
     assert SUPABASE_URL and SUPABASE_SECRET_KEY
-except:
+except Exception:
     supabase_available = False
 else:
     supabase_available = True
@@ -60,7 +61,9 @@ class SupabaseDB:
         # Get the moderator config
         if moderator_config:
             moderator_row = {
-                "moderator_id": str(uuid.uuid5(arena.uuid, json.dumps(moderator_config))),
+                "moderator_id": str(
+                    uuid.uuid5(arena.uuid, json.dumps(moderator_config))
+                ),
                 "arena_id": str(arena.uuid),
                 "role_desc": moderator_config["role_desc"],
                 "terminal_condition": moderator_config["terminal_condition"],

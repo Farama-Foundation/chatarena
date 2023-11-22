@@ -1,5 +1,5 @@
-from typing import List
 from abc import abstractmethod
+from typing import List
 
 from ..config import BackendConfig, Configurable
 from ..message import Message
@@ -7,6 +7,7 @@ from ..message import Message
 
 class IntelligenceBackend(Configurable):
     """An abstraction of the intelligence source of the agents."""
+
     stateful = None
     type_name = None
 
@@ -16,9 +17,14 @@ class IntelligenceBackend(Configurable):
 
     def __init_subclass__(cls, **kwargs):
         # check if the subclass has the required attributes
-        for required in ('stateful', 'type_name',):
+        for required in (
+            "stateful",
+            "type_name",
+        ):
             if getattr(cls, required) is None:
-                raise TypeError(f"Can't instantiate abstract class {cls.__name__} without {required} attribute defined")
+                raise TypeError(
+                    f"Can't instantiate abstract class {cls.__name__} without {required} attribute defined"
+                )
         return super().__init_subclass__(**kwargs)
 
     def to_config(self) -> BackendConfig:
@@ -26,14 +32,30 @@ class IntelligenceBackend(Configurable):
         return BackendConfig(**self._config_dict)
 
     @abstractmethod
-    def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
-              request_msg: Message = None, *args, **kwargs) -> str:
+    def query(
+        self,
+        agent_name: str,
+        role_desc: str,
+        history_messages: List[Message],
+        global_prompt: str = None,
+        request_msg: Message = None,
+        *args,
+        **kwargs,
+    ) -> str:
         raise NotImplementedError
 
     @abstractmethod
-    async def async_query(self, agent_name: str, role_desc: str, history_messages: List[Message],
-                          global_prompt: str = None, request_msg: Message = None, *args, **kwargs) -> str:
-        """Async querying"""
+    async def async_query(
+        self,
+        agent_name: str,
+        role_desc: str,
+        history_messages: List[Message],
+        global_prompt: str = None,
+        request_msg: Message = None,
+        *args,
+        **kwargs,
+    ) -> str:
+        """Async querying."""
         raise NotImplementedError
 
     # reset the state of the backend

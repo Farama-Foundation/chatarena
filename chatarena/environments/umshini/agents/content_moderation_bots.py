@@ -3,10 +3,11 @@
 # pyright: reportUnusedImport=false
 from typing import List
 
-from chatarena.message import Message
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
+
+from chatarena.message import Message
 
 
 class ContentDefender:
@@ -14,7 +15,7 @@ class ContentDefender:
         if llm is not None:
             self.llm = llm
         else:
-            self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
+            self.llm = ChatOpenAI(temperature=0.9)  # client is a ghost parameter
         pass
 
     def get_response(self, messages, rules, name) -> str:
@@ -29,7 +30,7 @@ class ContentAttacker:
         if llm is not None:
             self.llm = llm
         else:
-            self.llm = ChatOpenAI(temperature=0.9, client="")  # client is a ghost parameter
+            self.llm = ChatOpenAI(temperature=0.9)  # client is a ghost parameter
         pass
 
     def get_response(self, messages, rules, name) -> str:
@@ -87,7 +88,7 @@ result:"""
         self.rules = None
 
     def simplify_rules(self, rules):
-        completion_llm = OpenAI(temperature=0.0, client="")
+        completion_llm = OpenAI(temperature=0.0)
         response = completion_llm(self.simplify_rules_prompt + "\n" + rules)
         return response
 
@@ -125,7 +126,6 @@ class SimpleContentAttacker(ContentAttacker):
         super().__init__(**kwargs)
         self.name = None
         self.rules = None
-
 
     def get_response(self, messages: List[Message], rules, name) -> str:
         # Infer name from the environment

@@ -2,10 +2,11 @@
 
 from typing import Dict, List, Union
 
-from chatarena.environments.base import Environment, TimeStep
-from chatarena.message import Message, MessagePool
 from langchain.prompts import PromptTemplate
 from pettingzoo.utils import agent_selector
+
+from chatarena.environments.base import Environment, TimeStep
+from chatarena.message import Message, MessagePool
 
 
 class UmshiniBaseEnv(Environment):
@@ -24,8 +25,9 @@ class UmshiniBaseEnv(Environment):
         player_names: List[str],
         moderator_prompt_template: PromptTemplate,
         moderator_prompt_input: str,
+        character_limit: int = 4000,
         round_length: int = 10,
-        **kwargs
+        **kwargs,
     ):
         """Base environment for all Umshini game environments.
 
@@ -36,11 +38,14 @@ class UmshiniBaseEnv(Environment):
         self._moderator_prompt_template = moderator_prompt_template
         self._moderator_prompt_input = moderator_prompt_input
         self._round_length = round_length
+        self.character_limit = character_limit
         self.agent_selector = agent_selector(self.player_names)
         self.reset()
 
     def reset(self):
-        """Reset the environment. Sets basic LangEnv variables.
+        """Reset the environment.
+
+        Sets basic LangEnv variables.
 
         Must call super().reset() if being overwritten, call moderator_speak, and return the timestep.
         """
@@ -54,7 +59,8 @@ class UmshiniBaseEnv(Environment):
         self.agent_selector = agent_selector(self.player_names)
         self._moderator_speak(
             self._moderator_prompt_template.format(
-                moderator_prompt_input=self._moderator_prompt_input
+                moderator_prompt_input=self._moderator_prompt_input,
+                character_limit=self.character_limit,
             )
         )
         return TimeStep(

@@ -1,0 +1,84 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-symlinks
+      - id: destroyed-symlinks
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-ast
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: detect-private-key
+      - id: debug-statements
+      - id: mixed-line-ending
+        args: [ "--fix=lf" ]
+  - repo: https://github.com/python/black
+    rev: 23.11.0
+    hooks:
+      - id: black
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        args:
+          - --skip=*.css,*.js,*.map,*.scss,*.svg
+          - --ignore-words-list=magent
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        args:
+          - '--per-file-ignores=*/__init__.py:F401,experiments/ai_council.py:E501,chatarena/backends/hf_transformers.py:F401'
+          - --extend-ignore=E203
+          - --max-complexity=205
+          - --max-line-length=300
+          - --show-source
+          - --statistics
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.0
+    hooks:
+      - id: pyupgrade
+        args: ["--py38-plus"]
+#  - repo: https://github.com/pycqa/pydocstyle
+#    rev: 6.3.0
+#    hooks:
+#      - id: pydocstyle
+#        args:
+#          - --source
+#          - --explain
+#          - --convention=google
+#          - --count
+#          - --add-ignore=D100,D107,D101,D102,D103,D105,D212,D417,D403,D415,D200
+#        exclude: "__init__.py$"
+#        additional_dependencies: ["tomli"]
+  - repo: https://github.com/DanielNoord/pydocstringformatter
+    rev: v0.7.3
+    hooks:
+      - id: pydocstringformatter
+#  - repo: local
+#    hooks:
+#      - id: pyright
+#        name: pyright
+#        entry: pyright
+#        language: node
+#        pass_filenames: false
+#        types: [python]
+#        additional_dependencies: ["pyright"]
+#        args:
+#          - --project=pyproject.toml
+  - repo: https://github.com/fpgmaas/deptry.git
+    rev: "0.12.0"
+    hooks:
+      - id: deptry
