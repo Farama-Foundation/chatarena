@@ -4,8 +4,7 @@
 name: Environments Test (OpenAI)
 
 on:
-  push:
-    branches: [main]
+  pull_request_target
 
 permissions:
   contents: read
