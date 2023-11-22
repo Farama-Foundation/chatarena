@@ -12,9 +12,9 @@ permissions:
   contents: read
 
 env:
-  AZURE_OPENAI_API_KEY: ${{ secrets.azure_openai_api_key }}
+  AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
   OPENAI_API_TYPE: azure
-  AZURE_OPENAI_ENDPOINT: ${{ secrets.azure_openai_endpoint }}
+  AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
   OPENAI_API_VERSION: 2023-05-15
   AZURE_DEPLOYMENT: gpt-4
 
@@ -53,9 +53,9 @@ jobs:
           python -c 'import os; print("AFTER: AZURE_OPENAI_ENDPOINT visible in os.environ:", os.getenv("AZURE_OPENAI_ENDPOINT") is not None)'
       - name: Umshini Environments Test
         env:
-          AZURE_OPENAI_API_KEY: ${{ secrets.azure_openai_api_key }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           OPENAI_API_TYPE: azure
-          AZURE_OPENAI_ENDPOINT: ${{ secrets.azure_openai_endpoint }}
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
           OPENAI_API_VERSION: 2023-05-15
           AZURE_DEPLOYMENT: gpt-4
         run: |
