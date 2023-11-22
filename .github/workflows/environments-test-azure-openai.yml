@@ -11,13 +11,6 @@ on:
 permissions:
   contents: read
 
-env:
-  AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-  OPENAI_API_TYPE: azure
-  AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
-  OPENAI_API_VERSION: 2023-05-15
-  AZURE_DEPLOYMENT: gpt-4
-  TEST_SECRET: ${{ secrets.TEST_SECRET }}
 
 jobs:
   environment-test-azure-openai:
@@ -25,6 +18,12 @@ jobs:
     strategy:
       matrix:
         python-version: [ '3.11' ]
+    env:
+      OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+      OPENAI_API_TYPE: azure
+      AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+      OPENAI_API_VERSION: 2023-05-15
+      AZURE_DEPLOYMENT: gpt-4
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -60,12 +59,6 @@ jobs:
           python -c 'import os; print("AFTER: AZURE_DEPLOYMENT visible in os.environ:", os.getenv("AZURE_DEPLOYMENT") is not None)'
           python -c 'import os; print("AFTER: AZURE_OPENAI_ENDPOINT visible in os.environ:", os.getenv("AZURE_OPENAI_ENDPOINT") is not None)'
       - name: Umshini Environments Test
-        env:
-          OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-          OPENAI_API_TYPE: azure
-          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
-          OPENAI_API_VERSION: 2023-05-15
-          AZURE_DEPLOYMENT: gpt-4
         run: |
           echo "Setting environment variable"
           echo "AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}" >> $GITHUB_ENV
