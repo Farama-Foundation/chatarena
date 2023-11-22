@@ -17,7 +17,7 @@
 [![twitter](https://img.shields.io/twitter/follow/_chatarena?style=social&label=Follow%20ChatArena)](https://twitter.com/_chatarena)
 [![Discord](https://img.shields.io/discord/961771112864313344?logo=discord&logoColor=white&label=Discord&labelColor=gray&color=blue)](https://join.slack.com/t/chatarena/shared_invite/zt-1t5fpbiep-CbKucEHdJ5YeDLEpKWxDOg)
 [![Open In Colab](https://img.shields.io/badge/Colab-Open%20Notebook-blue?color=yellow&logo=google-colab)](https://colab.research.google.com/drive/1vKaskNMBtuGOVgn8fQxMgjCevn2wp1Ml?authuser=0#scrollTo=P5DCC0Y0Zbxi)
-[![HuggingFace Space](https://img.shields.io/badge/Demo-Huggingface%F0%9F%A4%97%20Space-orange?style=flat)](https://chatarena-chatarena-demo.hf.space)
+[![HuggingFace Space](https://img.shields.io/badge/Demo-Huggingface%F0%9F%A4%97%20-orange?style=flat)](https://chatarena-chatarena-demo.hf.space)
 
 ---
 
