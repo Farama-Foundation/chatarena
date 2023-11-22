@@ -4,7 +4,6 @@
 name:  Environments Test (AzureOpenAI)
 
 on:
-  pull_request:
   push:
     branches: [main]
 
@@ -32,29 +31,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          sudo apt-get install python3-opengl xvfb
           pip install -e '.[all]'
-      - name: Check environment variables are set
-        run: |
-          if [ -z "$AZURE_OPENAI_API_KEY" ]; then
-            echo "AZURE_OPENAI_API_KEY environment variable has been set"
-            exit 0
-          else
-            echo "AZURE_OPENAI_API_KEY environment variable is not set"
-            exit 1
-          fi
-      - name: Set environment variables to be visible by python
-        run: |
-          python -c 'import os; print("BEFORE: AZURE_OPENAI_API_KEY visible in os.environ:", os.getenv("AZURE_OPENAI_API_KEY") is not None)'
-          echo "AZURE_OPENAI_API_KEY=$AZURE_OPENAI_API_KEY" >> "$GITHUB_ENV"
-          echo "AZURE_OPENAI_ENDPOINT=$AZURE_OPENAI_ENDPOINT" >> "$GITHUB_ENV"
-          python -c 'import os; print("AFTER: AZURE_OPENAI_API_KEY visible in os.environ:", os.getenv("AZURE_OPENAI_API_KEY") is not None)'
-          python -c 'import os; print("AFTER: AZURE_DEPLOYMENT visible in os.environ:", os.getenv("AZURE_DEPLOYMENT") is not None)'
-          python -c 'import os; print("AFTER: AZURE_OPENAI_ENDPOINT visible in os.environ:", os.getenv("AZURE_OPENAI_ENDPOINT") is not None)'
       - name: Umshini Environments Test
         run: |
-          echo "Setting environment variable"
-          echo "AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}" >> $GITHUB_ENV
-          echo "AZURE_OPENAI_API_KEY set to $AZURE_OPENAI_API_KEY"
-          python -c 'import os; print("AZURE_OPENAI_API_KEY visible in os.environ:", os.getenv("AZURE_OPENAI_API_KEY") is not None)'
+          python -c 'import os; print("AZURE_OPENAI_API_KEY visible in os.environ:", os.getenv("AZURE_OPENAI_API_KEY"))'
           pytest -v tests/unit/test_umshini_environments.py
