@@ -24,8 +24,6 @@ jobs:
       AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
       OPENAI_API_VERSION: 2023-05-15
       AZURE_DEPLOYMENT: gpt-4
-      TEST_SECRET: ${{ secrets.TEST_SECRET }}
-      test_secret: ${{ secrets.test_secret }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
