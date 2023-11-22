@@ -33,10 +33,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: TEST SECRET
         env:
-          TEST_SECRET
+          TEST_SECRET: ${{ secrets.TEST_SECRET }}
         run: |
           echo $TEST_SECRET
           grep env | TEST_SECRET
+          env
       - name: Install dependencies
         run: |
           sudo apt-get install python3-opengl xvfb
