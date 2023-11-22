@@ -41,8 +41,8 @@ jobs:
           fi
       - name: Set environment variables to be visible by python
         run: |
-          echo "AZURE_OPENAI_API_KEY=${{ secrets.azure_openai_api_key }}" >> "$GITHUB_ENV"
-          echo "AZURE_OPENAI_ENDPOINT=${{ secrets.azure_openai_endpoint }}" >> "$GITHUB_ENV"
+          echo "AZURE_OPENAI_API_KEY=$AZURE_OPENAI_API_KEY" >> "$GITHUB_ENV"
+          echo "AZURE_OPENAI_ENDPOINT=$AZURE_OPENAI_ENDPOINT" >> "$GITHUB_ENV"
       - name: Install dependencies
         run: |
           sudo apt-get install python3-opengl xvfb
