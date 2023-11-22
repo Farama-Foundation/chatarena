@@ -222,24 +222,27 @@ You will be told when you are swapping roles.
         if os.getenv("OPENAI_API_TYPE") == "azure":
             llm = AzureChatOpenAI(
                 temperature=0,
-                openai_api_base=os.getenv("OPENAI_API_BASE"),
-                openai_api_version=os.getenv("OPENAI_API_VERSION"),
-                deployment_name=os.getenv("DEPLOYMENT_NAME"),
-                openai_api_key=os.getenv("OPENAI_API_KEY"),
-                openai_api_type="azure",
+                azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+                azure_deployment=os.getenv("AZURE_DEPLOYMENT") or "gpt-4",
+                openai_api_version=os.getenv("OPENAI_API_VERSION") or "2023-05-15",
             )
-            try:
-                response = llm(langchain_messages)
-            except Exception as e:
-                print(e)
+            response = llm(langchain_messages)
         else:
-            llm = ChatOpenAI(temperature=0, model_name=model_name, client="")
+            llm = ChatOpenAI(
+                temperature=0,
+                openai_api_key=os.getenv("OPENAI_API_KEY"),
+                model_name=model_name,
+            )
             try:
                 response = llm(langchain_messages)
             except Exception:
                 backup_model = "gpt-3.5-turbo"
                 print(f"{model_name} not found, using {backup_model}")
-                llm = ChatOpenAI(temperature=0, model_name=backup_model)
+                llm = ChatOpenAI(
+                    temperature=0,
+                    openai_api_key=os.getenv("OPENAI_API_KEY"),
+                    model_name=backup_model,
+                )
                 response = llm(langchain_messages)
         return response
 

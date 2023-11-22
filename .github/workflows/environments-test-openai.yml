@@ -1,22 +1,25 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 ---
-name: Linux tests
+name: Environments Test (OpenAI)
 
 on:
-  pull_request:
   push:
-    branches: [main]
+    branches: [ main, dev ]
 
 permissions:
   contents: read
 
+env:
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  OPENAI_API_TYPE: openai
+
 jobs:
-  linux-test:
+  environment-test-openai:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.8', '3.9', '3.10', '3.11' ]
+        python-version: [ '3.11' ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -25,13 +28,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          sudo apt-get install python3-opengl xvfb
           pip install -e '.[all]'
-      - name: Source distribution test
+      - name: Regular Environments Test
         run: |
-          python -m pip install --upgrade build
-          python -m build --sdist
-          pip install dist/*.tar.gz
-      - name: Release Test
+          python -c 'import os; print("OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY"))'
+          pytest -v -n auto tests
+      - name: Umshini Environments Test
         run: |
-          xvfb-run -s "-screen 0 1024x768x24" pytest -v -n auto tests/
+          python -c 'import os; print("OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY"))'
+          pytest -v -n auto tests/unit/test_umshini_environments.py
