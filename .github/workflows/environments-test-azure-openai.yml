@@ -30,6 +30,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get install python3-opengl xvfb
+          pip install -e '.[all]'
       - name: Check environment variables are set
         run: |
           if [ -z "$AZURE_OPENAI_API_KEY" ]; then
@@ -47,11 +51,6 @@ jobs:
           python -c 'import os; print("AFTER: AZURE_OPENAI_API_KEY visible in os.environ:", os.getenv("AZURE_OPENAI_API_KEY") is not None)'
           python -c 'import os; print("AFTER: AZURE_DEPLOYMENT visible in os.environ:", os.getenv("AZURE_DEPLOYMENT") is not None)'
           python -c 'import os; print("AFTER: AZURE_OPENAI_ENDPOINT visible in os.environ:", os.getenv("AZURE_OPENAI_ENDPOINT") is not None)'
-      - name: Install dependencies
-        run: |
-          sudo apt-get install python3-opengl xvfb
-          pip install -e '.[all]'
-          python -c 'import os; print("OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY") is not None)'
       - name: Umshini Environments Test
         run: |
           python -c 'import os; print("OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY") is not None)'

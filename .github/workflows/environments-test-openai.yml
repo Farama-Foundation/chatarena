@@ -27,6 +27,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get install python3-opengl xvfb
+          pip install -e '.[all]'
       - name: Check environment variables are set
         run: |
           if [ -z "$OPENAI_API_KEY" ]; then
@@ -43,12 +47,10 @@ jobs:
           echo "OPENAI_API_TYPE=$OPENAI_API_TYPE" >> "$GITHUB_ENV"
           python -c 'import os; print("AFTER: OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY") is not None)'
           python -c 'import os; print("AFTER: OPENAI_API_TYPE visible in os.environ:", os.getenv("OPENAI_API_TYPE") is not None)'
-      - name: Install dependencies
-        run: |
-          sudo apt-get install python3-opengl xvfb
-          pip install -e '.[all]'
       - name: Regular Environments Test
         run: |
+          python -c 'import os; print("AFTER: OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY") is not None)'
+          python -c 'import os; print("AFTER: OPENAI_API_TYPE visible in os.environ:", os.getenv("OPENAI_API_TYPE") is not None)'
           pytest -v tests
       - name: Umshini Environments Test
         run: |
