@@ -80,7 +80,7 @@ class OpenAIChat(IntelligenceBackend):
             stop=STOP,
         )
 
-        response = completion.choices[0]["message"]["content"]
+        response = completion.choices[0].message.content
         response = response.strip()
         return response
 
