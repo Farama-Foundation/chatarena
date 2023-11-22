@@ -48,10 +48,16 @@ jobs:
           python -c 'import os; print("AFTER: OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY") is not None)'
           python -c 'import os; print("AFTER: OPENAI_API_TYPE visible in os.environ:", os.getenv("OPENAI_API_TYPE") is not None)'
       - name: Regular Environments Test
+        env:
+          OPENAI_API_KEY: ${{ secrets.openai_api_key }}
+          OPENAI_API_TYPE: openai
         run: |
           python -c 'import os; print("AFTER: OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY") is not None)'
           python -c 'import os; print("AFTER: OPENAI_API_TYPE visible in os.environ:", os.getenv("OPENAI_API_TYPE") is not None)'
           pytest -v tests
       - name: Umshini Environments Test
+        env:
+          OPENAI_API_KEY: ${{ secrets.openai_api_key }}
+          OPENAI_API_TYPE: openai
         run: |
           pytest -v tests/unit/test_umshini_environments.py

@@ -52,6 +52,12 @@ jobs:
           python -c 'import os; print("AFTER: AZURE_DEPLOYMENT visible in os.environ:", os.getenv("AZURE_DEPLOYMENT") is not None)'
           python -c 'import os; print("AFTER: AZURE_OPENAI_ENDPOINT visible in os.environ:", os.getenv("AZURE_OPENAI_ENDPOINT") is not None)'
       - name: Umshini Environments Test
+        env:
+          AZURE_OPENAI_API_KEY: ${{ secrets.azure_openai_api_key }}
+          OPENAI_API_TYPE: azure
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.azure_openai_endpoint }}
+          OPENAI_API_VERSION: 2023-05-15
+          AZURE_DEPLOYMENT: gpt-4
         run: |
           python -c 'import os; print("OPENAI_API_KEY visible in os.environ:", os.getenv("OPENAI_API_KEY") is not None)'
           pytest -v tests/unit/test_umshini_environments.py
