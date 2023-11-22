@@ -13,10 +13,11 @@
 
 [![License: Apache2](https://img.shields.io/badge/License-Apache_2.0-green.svg)](https://github.com/chatarena/chatarena/blob/main/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/chatarena)](https://pypi.org/project/chatarena/)
-[![Python 3.9+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
 [![twitter](https://img.shields.io/twitter/follow/_chatarena?style=social&label=Follow%20ChatArena)](https://twitter.com/_chatarena)
-[![slack](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/chatarena/shared_invite/zt-1t5fpbiep-CbKucEHdJ5YeDLEpKWxDOg)
-[![Open In Colab](https://img.shields.io/badge/Colab-Open%20Notebook-blue?logo=google-colab)](https://colab.research.google.com/drive/1vKaskNMBtuGOVgn8fQxMgjCevn2wp1Ml?authuser=0#scrollTo=P5DCC0Y0Zbxi)
+[![Discord](https://img.shields.io/discord/961771112864313344?logo=discord&logoColor=white&label=Discord&labelColor=gray&color=blue)](https://join.slack.com/t/chatarena/shared_invite/zt-1t5fpbiep-CbKucEHdJ5YeDLEpKWxDOg)
+[![Open In Colab](https://img.shields.io/badge/Colab-Open%20Notebook-blue?color=yellow&logo=google-colab)](https://colab.research.google.com/drive/1vKaskNMBtuGOVgn8fQxMgjCevn2wp1Ml?authuser=0#scrollTo=P5DCC0Y0Zbxi)
+[![HuggingFace Space](https://img.shields.io/badge/Demo-Huggingface%F0%9F%A4%97%20Space-orange?style=flat)](https://chatarena-chatarena-demo.hf.space)
 
 ---
 
