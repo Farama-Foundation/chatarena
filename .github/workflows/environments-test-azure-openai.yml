@@ -5,8 +5,6 @@ name:  Environments Test (AzureOpenAI)
 
 on:
   pull_request_target:
-    branches:
-      - main
 
 permissions:
   contents: read
