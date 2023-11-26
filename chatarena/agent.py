@@ -190,3 +190,22 @@ class Moderator(Player):
             return True
         else:
             return False
+
+
+class Controller(Player):
+
+    def __init__(self, name: str, role_desc: str, backend: Union[BackendConfig, IntelligenceBackend],
+                 global_prompt: str = None, **kwargs):
+        super().__init__(name, role_desc, backend, global_prompt, **kwargs)
+
+    def act(self, observation: List[Message]) -> str:
+        return super().act(observation)
+
+    def __call__(self, observation: List[Message]) -> str:
+        return super().__call__(observation)
+
+    async def async_act(self, observation: List[Message]) -> str:
+        return await super().async_act(observation)
+
+    def reset(self):
+        super().reset()

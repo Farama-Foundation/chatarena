@@ -1,9 +1,10 @@
-openai>=0.27.2
+openai==0.28
 anthropic>=0.2.8
 cohere>=4.3.1
 transformers>=4.27.4
 tenacity==8.2.2
 gradio==3.34.0
+aiohttp==3.9.0b0
 ffmpy==0.3.0
 rich==13.3.3
 prompt_toolkit==3.0.38
