@@ -34,6 +34,8 @@ class Story(Environment):
             return "Designer"
         elif self._next_stage == "pick":
             return "Controller"
+        elif self._next_stage == "end of scene":
+            return "Writer"
         else:
             return self.player_names[self._next_player_idx]
 
@@ -75,7 +77,8 @@ class Story(Environment):
             print(f'WARNING using random player')
             return random.choice(self.player_names)
 
-    def step(self, player_name: str, action: str) -> TimeStep:
+    def step(self, player_name: str, action: str, is_final_step: bool) -> TimeStep:
+        
         self._current_stage = self._next_stage
         terminal = False
         if self._current_stage == "init":
@@ -84,7 +87,7 @@ class Story(Environment):
             self._next_stage = "pick"
         elif self._current_stage == "pick":
             next_player = self._parse_picked_player(action)
-            if next_player == PLAYER_TERMINAL:
+            if next_player == PLAYER_TERMINAL or is_final_step == True: # controller says PLAYER_TERMINAL or is the final step
                 self._next_stage = "end of scene"
             else:
                 self._next_player_idx = self.player_names.index(next_player)
@@ -93,10 +96,14 @@ class Story(Environment):
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             self.scene_message_pool.append_message(message)
             self._next_stage = "pick"
-        elif self._current_stage == "end of scene":
+        elif self._current_stage == "end of scene": 
+            assert player_name == "Writer", "Writer writes the story"
+            message = Message(agent_name=player_name, content=action, turn=self._current_turn)
+            self.scene_message_pool.append_message(message)
             terminal = True
         terminal = terminal or self.is_terminal()
         timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=terminal)
+        self._current_turn += 1 # update current_turn every step
         return timestep
 
     def check_action(self, action: str, player_name: str) -> bool:

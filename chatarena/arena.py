@@ -24,7 +24,7 @@ class Arena:
         self.players = players
         self.environment = environment
         self.global_prompt = global_prompt
-
+        self.is_final_step = False
         self.current_timestep = environment.reset()
         self.uuid = uuid.uuid4()  # Generate a unique id for the game
         self.invalid_actions_retry = 5
@@ -55,12 +55,11 @@ class Arena:
         player_name = self.environment.get_next_player()
         player = self.name_to_player[player_name]  # get the player object
         observation = self.environment.get_observation(player_name)  # get the observation for the player
-
         timestep = None
         for i in range(self.invalid_actions_retry):  # try to take an action for a few times
             action = player(observation)  # take an action
             if self.environment.check_action(action, player_name):  # action is valid
-                timestep = self.environment.step(player_name, action)  # update the environment
+                timestep = self.environment.step(player_name, action, is_final_step=self.is_final_step)  # update the environment
                 break
             else:  # action is invalid
                 logging.warning(f"{player_name} made an invalid action {action}")
@@ -86,9 +85,12 @@ class Arena:
         run the game for num_turns
         """
         for i in range(num_steps):
+            if i == num_steps - 2: # next step is the final step
+                self.is_final_step = True
             timestep = self.step()
             if timestep.terminal:
                 break
+            
 
     @classmethod
     def from_config(cls, config: Union[str, ArenaConfig]):

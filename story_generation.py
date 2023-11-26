@@ -17,11 +17,14 @@ player1 = Player(name="Sheldon", backend=OpenAIChat(),
 player2 = Player(name="Annie", backend=OpenAIChat(),
                  role_desc="You're a nurse with a penchant for murder and you are also an avid fan of Sheldon's books. When you learn that Sheldon has written the death of your favorite fictional character, Bitter, you imprison Sheldon in your own home and push him to write a book to keep Bitter alive.",
                  global_prompt=environment_description)
-players = [controller, designer, player1, player2]
+writer = Player(name="Writer", backend=OpenAIChat(),
+                 role_desc="You're the writer of a popular play. Your job is to write the play given several rounds of previous conversation between the characters.",
+                 global_prompt=environment_description)
+players = [controller, designer, player1, player2, writer]
 
 env = Story(player_names=[p.name for p in players])
 # arena = Arena.from_config('story_generation.json')
 arena = Arena(players=players,
               environment=env, global_prompt=environment_description)
 # json.dump(arena.to_config(), open('story_generation.json', 'w'))
-arena.run(num_steps=11)
+arena.run(num_steps=6)
