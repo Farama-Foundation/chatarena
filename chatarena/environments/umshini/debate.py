@@ -86,6 +86,7 @@ Your first response should be an opening statement.""",
                 terminal=False,
             )
         else:
+            self._current_turn += 1
             self._current_phase = "end"
             self.message_pool.append_message(
                 Message(agent_name=player_name, content=action, turn=self._current_turn)

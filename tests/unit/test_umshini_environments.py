@@ -36,9 +36,9 @@ class TestUmshiniEnvironments(TestCase):
             "turn": 1,
             "text": "I am the proponent. I win the debate!",
         }
-        assert messages[1] == {
+        assert messages[2] == {
             "name": "Agent2",
-            "turn": 1,
+            "turn": 2,
             "text": "I am the opponent. I win the debate!",
         }
 
