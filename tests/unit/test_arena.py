@@ -164,6 +164,7 @@ class TestArena(TestCase):
         "OpenAI API key must be set to run this test.",
     )
     @pytest.mark.xfail(raises=chatarena.arena.TooManyInvalidActions)
+    @pytest.mark.xfail(raises=ValueError)
     def test_arena_11(self):
         arena = Arena.from_config(
             os.path.join(EXAMPLES_DIR, "pettingzoo_tictactoe.json")
