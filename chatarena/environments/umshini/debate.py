@@ -18,7 +18,7 @@ from chatarena.message import Message, MessagePool
 class DebateEnv(UmshiniBaseEnv):
     """Debate environment."""
 
-    moderator_prompt = PromptTemplate(
+    _moderator_prompt_template = PromptTemplate(
         template="""Welcome to the debate game! The topic for today's debate is: "{moderator_prompt_input}"
 The Opponent argues against the topic, while the Proponent argues for it.
 The Moderator will report scores and decide a winner of the debate, based performance, persuasiveness, and response length.
@@ -39,9 +39,13 @@ Your first response should be an opening statement.""",
         disable_judging=False,
         **kwargs,
     ):
+        self._moderator_prompt_template.template = (
+            self._moderator_prompt_template.template
+            + f"{player_names[0]} is playing as the Proponent, and {player_names[1]} is playing as the Opponent."
+        )  # add the first player's name to the end of the prompt template
         super().__init__(
             player_names=player_names,
-            moderator_prompt_template=self.moderator_prompt,
+            moderator_prompt_template=self._moderator_prompt_template,
             moderator_prompt_input=topic,
             round_length=round_length,
             character_limit=character_limit,
@@ -51,14 +55,18 @@ Your first response should be an opening statement.""",
         self.character_limit = character_limit
         self.disable_judging = disable_judging
         self.topic = topic
+        self.roles = {
+            self.player_names[0]: "proponent",
+            self.player_names[1]: "opponent",
+        }
 
     def get_rewards(self) -> dict[str, float]:
         """Uses langchain to analyze the conversation, pick a winner, and set the reward."""
         if self.disable_judging:
             # Local API testing
             scores = {
-                "Opponent": random.randint(0, 10),
-                "Proponent": random.randint(0, 10),
+                self.player_names[0]: random.randint(0, 10),
+                self.player_names[1]: random.randint(0, 10),
             }
             scores_text = f"SCORES: {scores}"
         else:
@@ -98,10 +106,14 @@ def create_debate_env(
     character_limit: int | None = 4000,
     disable_judging: bool | None = False,
 ):
-    if player_names is None:
-        player_names = ["Opponent", "Proponent"]
+    if player_names is not None:
+        assert isinstance(player_names, list), "player_names must be a list"
+        assert len(player_names == 2), "number of players must be 2"
+        assert isinstance(player_names[0], str), "player names must be strings"
+        assert isinstance(player_names[1], str), "player names must be strings"
+
     env = DebateEnv(
-        player_names=player_names,
+        player_names=player_names if player_names is not None else ["Agent1", "Agent2"],
         topic=topic,
         round_length=round_length,
         character_limit=character_limit,
