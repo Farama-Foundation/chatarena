@@ -241,19 +241,21 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                         if message.agent_name == "Moderator":
                             color = Fore.BLACK
                             role = ""
-                        elif message.agent_name == "Proponent":
-                            color = Fore.BLUE
-                            role = ""
-                        elif message.agent_name == "Opponent":
-                            color = Fore.RED
-                            role = ""
                         else:
                             if self.infos[message.agent_name]["role"] == "attacker":
                                 color = Fore.RED
                                 role = "(attacker)"
-                            else:
+                            elif self.infos[message.agent_name]["role"] == "defender":
                                 color = Fore.BLUE
                                 role = "(defender)"
+                            elif self.infos[message.agent_name]["role"] == "proponent":
+                                color = Fore.BLUE
+                                role = "(proponent)"
+                            elif self.infos[message.agent_name]["role"] == "opponent":
+                                color = Fore.RED
+                                role = "(opponent)"
+                            else:
+                                raise Exception("Glitch in internal logic")
                         print(
                             color
                             + f"[{message.agent_name} {role}-> {message.visible_to}]: {message.content}\n "
@@ -309,11 +311,22 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             self.infos[agent]["player_name"] = self.agent_selection
 
             # Role in symmetric environments (not applicable if env has terminated)
-            if self.env_name != "debate":
+            if self.env_name == "debate":
+                if not any(self.terminations.values()):
+                    self.infos[self.possible_agents[0]]["role"] = self._env.roles[
+                        self.possible_agents[0]
+                    ]
+                    self.infos[self.possible_agents[1]]["role"] = self._env.roles[
+                        self.possible_agents[1]
+                    ]
+            elif self.env_name == "content_moderation" or self.env_name == "deception":
                 if hasattr(self._env, "_current_phase") and not any(
                     self.terminations.values()
                 ):
-                    if self._env._current_phase == "player_2_attack":
+                    if (
+                        self._env._current_phase == "player_2_attack"
+                        or "Roles are being swapped" in new_messages[-1].content
+                    ):
                         self.infos[self.possible_agents[0]]["role"] = "defender"
                         self.infos[self.possible_agents[1]]["role"] = "attacker"
                     else:
@@ -415,8 +428,16 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                 all_messages_string += f"[{m.agent_name}->all]: {m.content}\n"
             info["all_messages_string"] = all_messages_string
 
+        # Role in debate environment
+        if self.env_name == "debate":
+            self.infos[self.possible_agents[0]]["role"] = self._env.roles[
+                self.possible_agents[0]
+            ]
+            self.infos[self.possible_agents[1]]["role"] = self._env.roles[
+                self.possible_agents[1]
+            ]
         # Role in symmetric environments
-        if hasattr(self._env, "_current_phase"):
+        elif hasattr(self._env, "_current_phase"):
             if (
                 self._env._current_phase == "player_2_attack"
                 or self._env._current_phase == "end"
@@ -525,7 +546,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
 
         # Print final scores if the env has just terminated (debate moderator final message already shows scores)
         if termination and self.env_name != "debate":
-            print(Fore.BLACK + f"SCORES: {self.total_rewards}")
+            print(Fore.BLACK + f"TOTAL SCORES: {self.total_rewards}")
 
         # Get the next agent in PettingZoo, and iterate the underlying environment (used for reward calculations)
         self.agent_selection = self._agent_selector.next()
