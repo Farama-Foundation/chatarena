@@ -71,6 +71,7 @@ You will be told when you are swapping roles.
             return scores, "", ""
 
         violation = False
+        explanation = None
         if self.disable_judging:
             violation = True if random.randint(0, 1) else False
         else:
