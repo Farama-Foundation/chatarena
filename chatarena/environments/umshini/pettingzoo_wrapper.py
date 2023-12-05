@@ -13,11 +13,17 @@ from pettingzoo.utils.env import AgentID, ObsType
 
 from chatarena.environments import Environment
 from chatarena.environments.base import TimeStep
-from chatarena.environments.umshini.debate import create_debate_env
-from chatarena.environments.umshini.symmetric_content_moderation import (
+from chatarena.environments.umshini.content_moderation import (
     create_content_moderation_env,
 )
-from chatarena.environments.umshini.symmetric_deception import create_deception_env
+from chatarena.environments.umshini.debate import create_debate_env
+from chatarena.environments.umshini.deception import create_deception_env
+from chatarena.environments.umshini.symmetric_content_moderation import (
+    create_symmetric_content_moderation_env,
+)
+from chatarena.environments.umshini.symmetric_deception import (
+    create_symmetric_deception_env,
+)
 from chatarena.message import Message
 
 CHAR_SET = string.printable
@@ -88,16 +94,24 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             )
         elif env is not None:
             self._env = env
-            if hasattr(env, "topic"):
+            if self._env.type_name == "debate":
                 self.env_name = "debate"
                 self.topic = topic
                 self.max_turns = round_length
-            elif hasattr(env, "moderation_policy"):
+            elif self._env.type_name == "content_moderation":
                 self.env_name = "content_moderation"
                 self.moderation_policy = env.moderation_policy
+                self.max_turns = round_length
+            elif self._env.type_name == "symmetric_content_moderation":
+                self.env_name = "symmetric_content_moderation"
+                self.moderation_policy = env.moderation_policy
                 self.max_turns = round_length * 2
-            elif hasattr(env, "restricted_action"):
+            elif self._env.type_name == "deception":
                 self.env_name = "deception"
+                self.restricted_action = env.restricted_action
+                self.max_turns = round_length
+            elif self._env.type_name == "symmetric_deception":
+                self.env_name = "symmetric_deception"
                 self.restricted_action = env.restricted_action
                 self.max_turns = round_length * 2
         elif env_name is not None:
@@ -125,6 +139,19 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     disable_judging=disable_judging,
                 )
                 self.moderation_policy = moderation_policy
+                self.max_turns = round_length
+            elif env_name == "symmetric_content_moderation":
+                assert (
+                    moderation_policy is not None
+                ), "moderation policy must be specified for content moderation env"
+                self._env = create_symmetric_content_moderation_env(
+                    moderation_policy=moderation_policy,
+                    player_names=player_names,
+                    round_length=round_length,
+                    character_limit=character_limit,
+                    disable_judging=disable_judging,
+                )
+                self.moderation_policy = moderation_policy
                 self.max_turns = round_length * 2
             elif env_name == "deception":
                 assert (
@@ -138,10 +165,23 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     disable_judging=disable_judging,
                 )
                 self.restricted_action = restricted_action
+                self.max_turns = round_length
+            elif env_name == "symmetric_deception":
+                assert (
+                    restricted_action is not None
+                ), "restricted action must be specified for deception env"
+                self._env = create_symmetric_deception_env(
+                    restricted_action=restricted_action,
+                    player_names=player_names,
+                    round_length=round_length,
+                    character_limit=character_limit,
+                    disable_judging=disable_judging,
+                )
+                self.restricted_action = restricted_action
                 self.max_turns = round_length * 2
             else:
                 raise TypeError(
-                    f"Environment not found: {env_name}. Options: debate, content_moderation, deception"
+                    f"Environment not found: {env_name}. Options: debate, content_moderation, deception, symmetric_content_moderation, symmetric_deception"
                 )
         else:
             raise TypeError(
@@ -319,7 +359,12 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
                     self.infos[self.possible_agents[1]]["role"] = self._env.roles[
                         self.possible_agents[1]
                     ]
-            elif self.env_name == "content_moderation" or self.env_name == "deception":
+            elif self.env_name in [
+                "content_moderation",
+                "deception",
+                "symmetric_content_moderation",
+                "symmetric_deception",
+            ]:
                 if hasattr(self._env, "_current_phase") and not any(
                     self.terminations.values()
                 ):
