@@ -35,7 +35,7 @@ repos:
     hooks:
       - id: flake8
         args:
-          - '--per-file-ignores=*/__init__.py:F401,experiments/ai_council.py:E501,chatarena/backends/hf_transformers.py:F401'
+          - '--per-file-ignores=*/__init__.py:F401,experiments/ai_council.py:E501,chatarena/backends/hf_transformers.py:F401,chatarena/environments/umshini/content_moderation.py:E501,chatarena/environments/umshini/deception.py:E501'
           - --extend-ignore=E203
           - --max-complexity=205
           - --max-line-length=300
