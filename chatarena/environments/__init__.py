@@ -1,19 +1,10 @@
 from ..config import EnvironmentConfig
-from .base import Environment, TimeStep
+from .base import Environment, TimeStep, ENV_REGISTRY, register_env
 from .chameleon import Chameleon
 from .conversation import Conversation, ModeratedConversation
 from .pettingzoo_chess import PettingzooChess
 from .pettingzoo_tictactoe import PettingzooTicTacToe
 
-ALL_ENVIRONMENTS = [
-    Conversation,
-    ModeratedConversation,
-    Chameleon,
-    PettingzooChess,
-    PettingzooTicTacToe,
-]
-
-ENV_REGISTRY = {env.type_name: env for env in ALL_ENVIRONMENTS}
 
 
 # Load an environment from a config dictionary

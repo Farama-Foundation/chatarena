@@ -1,10 +1,24 @@
 import unittest
 from unittest import TestCase
 
-from chatarena.environments import PettingzooTicTacToe
+from chatarena.environments import PettingzooTicTacToe, load_environment, register_env
+from chatarena.config import EnvironmentConfig
 
 
 class TestEnvironments(TestCase):
+    def test_env_registration(self):
+        @register_env
+        class TestEnv:
+            type_name = "test"
+
+            @classmethod
+            def from_config(cls, config: EnvironmentConfig):
+                return cls()
+
+        env_config = EnvironmentConfig(env_type="test")
+        env = load_environment(env_config)
+        assert isinstance(env, TestEnv)
+
     def test_chess_environment(self):
         player_names = ["player1", "player2"]
         env = PettingzooTicTacToe(player_names)
@@ -21,6 +35,8 @@ class TestEnvironments(TestCase):
             print(timestep.reward)
             print(timestep.terminal)
             env.print()
+
+
 
 
 if __name__ == "__main__":

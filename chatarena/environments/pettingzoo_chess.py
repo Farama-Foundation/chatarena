@@ -4,7 +4,7 @@ from typing import List, Union
 from pettingzoo.classic import chess_v6
 from pettingzoo.classic.chess.chess_utils import chess, get_move_plane
 
-from chatarena.environments.base import Environment, TimeStep
+from chatarena.environments.base import Environment, TimeStep, register_env
 
 from ..message import Message, MessagePool
 
@@ -27,6 +27,7 @@ def action_string_to_alphazero_format(action: str, player_index: int) -> int:
     return x1 * 8 * 73 + y1 * 73 + move_plane
 
 
+@register_env
 class PettingzooChess(Environment):
     type_name = "pettingzoo:chess"
 

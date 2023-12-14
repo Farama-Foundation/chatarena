@@ -6,7 +6,7 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from ..message import SYSTEM_NAME as SYSTEM
 from ..message import Message
-from .base import IntelligenceBackend
+from .base import IntelligenceBackend, register_backend
 
 
 @contextmanager
@@ -32,6 +32,7 @@ with suppress_stdout_stderr():
         is_transformers_available = True
 
 
+@register_backend
 class TransformersConversational(IntelligenceBackend):
     """Interface to the Transformers ConversationalPipeline."""
 

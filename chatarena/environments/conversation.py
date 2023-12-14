@@ -3,9 +3,10 @@ from typing import List, Union
 from ..agent import SIGNAL_END_OF_CONVERSATION, Moderator
 from ..config import AgentConfig, EnvironmentConfig
 from ..message import Message, MessagePool
-from .base import Environment, TimeStep
+from .base import Environment, TimeStep, register_env
 
 
+@register_env
 class Conversation(Environment):
     """
     Turn-based fully observable conversation environment.
@@ -93,6 +94,7 @@ class Conversation(Environment):
         return timestep
 
 
+@register_env
 class ModeratedConversation(Conversation):
     """
     Turn-based fully observable conversation environment.

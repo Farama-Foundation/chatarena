@@ -4,7 +4,7 @@ from typing import Dict, List, Union
 
 from ..agent import SIGNAL_END_OF_CONVERSATION
 from ..message import Message, MessagePool
-from .base import Environment, TimeStep
+from .base import Environment, TimeStep, register_env
 
 DEFAULT_TOPIC_CODES = {
     "Fruits": [
@@ -50,6 +50,7 @@ DEFAULT_TOPIC_CODES = {
 }
 
 
+@register_env
 class Chameleon(Environment):
     type_name = "chameleon"
 

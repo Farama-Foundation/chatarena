@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Type
 
 from ..config import Configurable, EnvironmentConfig
 from ..message import Message
@@ -185,3 +185,19 @@ class Environment(Configurable):
             Dict[str, float]: A dictionary of players and their rewards (all one).
         """
         return {player_name: 1.0 for player_name in self.player_names}
+
+ENV_REGISTRY: Dict[str, Type[Environment]] = {}
+
+
+def register_env(cls: Type[Environment]) -> Type[Environment]:
+    """
+    Register an environment class.
+
+    Parameters:
+        cls (Type[Environment]): The class to register.
+
+    Returns:
+        Type[Environment]: The class that was registered.
+    """
+    ENV_REGISTRY[cls.type_name] = cls
+    return cls

@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List
+from typing import Dict, List, Type
 
 from ..config import BackendConfig, Configurable
 from ..message import Message
@@ -64,3 +64,10 @@ class IntelligenceBackend(Configurable):
             raise NotImplementedError
         else:
             pass
+
+BACKEND_REGISTRY: Dict[str, Type[IntelligenceBackend]] = {}
+
+def register_backend(cls: Type[IntelligenceBackend]) -> Type[IntelligenceBackend]:
+    """Register a new backend."""
+    BACKEND_REGISTRY[cls.type_name] = cls
+    return cls
