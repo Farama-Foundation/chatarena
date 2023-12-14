@@ -1,8 +1,8 @@
 import unittest
 from unittest import TestCase
 
-from chatarena.environments import PettingzooTicTacToe, load_environment, register_env
 from chatarena.config import EnvironmentConfig
+from chatarena.environments import PettingzooTicTacToe, load_environment, register_env
 
 
 class TestEnvironments(TestCase):
@@ -35,8 +35,6 @@ class TestEnvironments(TestCase):
             print(timestep.reward)
             print(timestep.terminal)
             env.print()
-
-
 
 
 if __name__ == "__main__":

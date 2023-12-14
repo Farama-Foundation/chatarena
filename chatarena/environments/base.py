@@ -186,6 +186,7 @@ class Environment(Configurable):
         """
         return {player_name: 1.0 for player_name in self.player_names}
 
+
 ENV_REGISTRY: Dict[str, Type[Environment]] = {}
 
 

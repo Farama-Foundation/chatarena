@@ -65,7 +65,9 @@ class IntelligenceBackend(Configurable):
         else:
             pass
 
+
 BACKEND_REGISTRY: Dict[str, Type[IntelligenceBackend]] = {}
+
 
 def register_backend(cls: Type[IntelligenceBackend]) -> Type[IntelligenceBackend]:
     """Register a new backend."""
