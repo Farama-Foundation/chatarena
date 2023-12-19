@@ -5,7 +5,7 @@ from typing import List
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from ..message import SYSTEM_NAME, Message
-from .base import IntelligenceBackend
+from .base import IntelligenceBackend, register_backend
 
 try:
     import openai
@@ -31,6 +31,7 @@ STOP = ("<|endoftext|>", END_OF_MESSAGE)  # End of sentence token
 BASE_PROMPT = f"The messages always end with the token {END_OF_MESSAGE}."
 
 
+@register_backend
 class OpenAIChat(IntelligenceBackend):
     """Interface to the ChatGPT style model with system, user, assistant roles separation."""
 

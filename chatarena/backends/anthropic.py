@@ -6,7 +6,7 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from ..message import SYSTEM_NAME as SYSTEM
 from ..message import Message
-from .base import IntelligenceBackend
+from .base import IntelligenceBackend, register_backend
 
 try:
     import anthropic
@@ -25,6 +25,7 @@ DEFAULT_MAX_TOKENS = 256
 DEFAULT_MODEL = "claude-v1"
 
 
+@register_backend
 class Claude(IntelligenceBackend):
     """Interface to the Claude offered by Anthropic."""
 

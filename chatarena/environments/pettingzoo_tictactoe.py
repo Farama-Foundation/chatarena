@@ -3,7 +3,7 @@ from typing import List, Union
 
 from pettingzoo.classic import tictactoe_v3
 
-from chatarena.environments.base import Environment, TimeStep
+from chatarena.environments.base import Environment, TimeStep, register_env
 
 from ..message import Message, MessagePool
 
@@ -27,6 +27,7 @@ def action_string_to_action(action: str) -> int:
     return row + column * 3
 
 
+@register_env
 class PettingzooTicTacToe(Environment):
     type_name = "pettingzoo:tictactoe"
 

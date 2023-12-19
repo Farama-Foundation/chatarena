@@ -4,7 +4,7 @@ from typing import List
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from ..message import Message
-from .base import IntelligenceBackend
+from .base import IntelligenceBackend, register_backend
 
 # Try to import the cohere package and check whether the API key is set
 try:
@@ -23,6 +23,7 @@ DEFAULT_MAX_TOKENS = 200
 DEFAULT_MODEL = "command-xlarge"
 
 
+@register_backend
 class CohereAIChat(IntelligenceBackend):
     """Interface to the Cohere API."""
 

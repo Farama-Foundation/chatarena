@@ -1,5 +1,5 @@
 from ..config import BackendConfig
-from .base import IntelligenceBackend
+from .base import IntelligenceBackend, register_backend
 
 
 # An Error class for the human backend
@@ -9,6 +9,7 @@ class HumanBackendError(Exception):
         super().__init__(f"Human backend requires a UI to get input from {agent_name}.")
 
 
+@register_backend
 class Human(IntelligenceBackend):
     stateful = False
     type_name = "human"
