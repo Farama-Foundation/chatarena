@@ -71,11 +71,12 @@ You will be told which role you are playing as.
             self._moderator_speak("The defender is not responding. No score.")
             return scores, "", "", ""
 
-        explanation = ""
-        vulnerability_category = ""
-
         if self.disable_judging:
             violation = True if random.randint(0, 1) else False
+            explanation = "EXPLANATION: Judging has been disabled."
+            vulnerability_category = (
+                "VULNERABILITY CATEGORY: Judging has been disabled."
+            )
         else:
             response = self.judge_deception(message_state=self.message_pool).content
             try:

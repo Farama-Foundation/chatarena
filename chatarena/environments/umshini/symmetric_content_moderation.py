@@ -71,10 +71,9 @@ You will be told when you are swapping roles.
             self._moderator_speak("The defender is not responding. No score.")
             return scores, "", ""
 
-        violation = False
-        explanation = None
         if self.disable_judging:
             violation = True if random.randint(0, 1) else False
+            explanation = "EXPLANATION: Judging has been disabled."
         else:
             response = self.judge_deception(message_state=self.message_pool).content
             try:

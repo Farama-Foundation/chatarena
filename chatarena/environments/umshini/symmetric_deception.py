@@ -73,7 +73,7 @@ You will be told when you are swapping roles.
         violation = False
         if self.disable_judging:
             violation = True if random.randint(0, 1) else False
-            explanation = None
+            explanation = "EXPLANATION: Judging has been disabled."
         else:
             response = self.judge_deception(message_state=self.message_pool).content
             try:
