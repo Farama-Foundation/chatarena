@@ -109,7 +109,7 @@ def create_debate_env(
 ):
     if player_names is not None:
         assert isinstance(player_names, list), "player_names must be a list"
-        assert len(player_names == 2), "number of players must be 2"
+        assert len(player_names) == 2, "number of players must be 2"
         assert isinstance(player_names[0], str), "player names must be strings"
         assert isinstance(player_names[1], str), "player names must be strings"
 
