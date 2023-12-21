@@ -71,10 +71,9 @@ You will be told when you are swapping roles.
             self._moderator_speak("The defender is not responding. No score.")
             return scores, "", ""
 
-        violation = False
-        explanation = None
         if self.disable_judging:
             violation = True if random.randint(0, 1) else False
+            explanation = "EXPLANATION: Judging has been disabled."
         else:
             response = self.judge_deception(message_state=self.message_pool).content
             try:
@@ -289,7 +288,7 @@ def create_symmetric_content_moderation_env(
 ):
     if player_names is not None:
         assert isinstance(player_names, list), "player_names must be a list"
-        assert len(player_names == 2), "number of players must be 2"
+        assert len(player_names) == 2, "number of players must be 2"
         assert isinstance(player_names[0], str), "player names must be strings"
         assert isinstance(player_names[1], str), "player names must be strings"
 
