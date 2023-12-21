@@ -590,7 +590,7 @@ class PettingZooCompatibilityV0(AECEnv, EzPickle):
             self.render()
 
         # Print final scores if the env has just terminated (debate moderator final message already shows scores)
-        if termination and self.env_name != "debate":
+        if termination and self.env_name != "debate" and self.render_mode is not None:
             print(Fore.BLACK + f"TOTAL SCORES: {self.total_rewards}")
 
         # Get the next agent in PettingZoo, and iterate the underlying environment (used for reward calculations)
