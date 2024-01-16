@@ -216,7 +216,7 @@ The objective in the game depends on the role of the player:
 
 A two-player chess game environment that uses the PettingZoo Chess environment.
 
-### [PettingZooTicTacTeo](chatarena/environments/pettingzoo_tictactoe.py)
+### [PettingZoo TicTacToe](chatarena/environments/pettingzoo_tictactoe.py)
 
 A two-player tic-tac-toe game environment that uses the PettingZoo TicTacToe environment. Differing from the
 `Moderator Conversation` environment, this environment is driven by hard-coded rules rather than a LLM moderator.
