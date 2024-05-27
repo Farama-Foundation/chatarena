@@ -4,7 +4,9 @@
   Author: Yuxiang Wu
   -->
 
-<h1 align="center"> 🏟 <span style="color:orange"><a href="https://www.chatarena.org/">ChatArena</a></span> </h1>
+<p align="center">
+    <img src="./chatarena-text.png" width="500px"/>
+</p>
 
 <h3 align="center">
     <p>Multi-Agent Language Game Environments for LLMs</p>
