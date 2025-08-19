@@ -20,10 +20,9 @@ logging.basicConfig(level=logging.INFO)
 
 
 class TestHFTransformers(TestCase):
-    @unittest.skip("TODO: fix failing test")
     def test_transformers_conv_1(self):
         backend = TransformersConversational(
-            model="facebook/blenderbot-400M-distill", device=-1
+            model="meta-llama/Meta-Llama-3.1-8B-Instruct"
         )
 
         history_messages = [
@@ -45,7 +44,7 @@ class TestHFTransformers(TestCase):
 
     def test_transformers_conv_2(self):
         backend = TransformersConversational(
-            model="facebook/blenderbot-400M-distill", device=-1
+            model="meta-llama/Meta-Llama-3.1-8B-Instruct"
         )
 
         history_messages = [
